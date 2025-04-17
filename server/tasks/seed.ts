@@ -7,20 +7,18 @@ export default defineTask({
     console.log('Running DB seed task...');
     const users = [
       {
-        name: 'John Doe',
         email: 'john@example.com',
         password: 'password123',
-        avatar: 'https://example.com/avatar/john.png',
-        createdAt: new Date(),
+        role: 'admin'
       },
       {
-        name: 'Jane Doe',
         email: 'jane@example.com',
         password: 'password123',
-        avatar: 'https://example.com/avatar/jane.png',
-        createdAt: new Date(),
+        role: 'technician'
       },
     ];
+    
+    // @ts-ignore
     await useDrizzle().insert(tables.users).values(users);
     return {result: 'success'};
   },
