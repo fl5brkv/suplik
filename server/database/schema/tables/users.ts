@@ -1,6 +1,7 @@
 import {sql} from 'drizzle-orm';
 import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
+import {z} from 'zod';
 
 export const users = sqliteTable('users', {
   userId: integer('user_id').primaryKey({
@@ -8,7 +9,7 @@ export const users = sqliteTable('users', {
   }),
   role: text('role', {
     enum: ['admin', 'technician'],
-  }),
+  }).default('technician'),
   email: text('email').unique().notNull(),
   password: text('password').notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
@@ -20,11 +21,14 @@ export const users = sqliteTable('users', {
     .notNull(),
 });
 
-export const signupSchema = createInsertSchema(users).pick({
-  role: true,
-  email: true,
-  password: true,
-});
+export const signupSchema = createInsertSchema(users)
+  .pick({
+    email: true,
+    password: true,
+  })
+  // .extend({
+  //   email: z.string().email({message: 'Invalid email address'}),
+  // });
 
 export const loginSchema = createSelectSchema(users).pick({
   email: true,

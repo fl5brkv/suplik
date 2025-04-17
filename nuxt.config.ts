@@ -1,13 +1,13 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from "@tailwindcss/vite";
+
 export default defineNuxtConfig({
-  compatibilityDate: '2024-11-01',
-  devtools: {enabled: false},
+  modules: ['@nuxthub/core', 'nuxt-auth-utils', '@nuxt/ui-pro'],
 
-  future: {
-    compatibilityVersion: 4,
+  css: ['~/assets/css/main.css'],
+
+  vite: {
+    plugins: [tailwindcss()],
   },
-
-  modules: ['@nuxthub/core', 'nuxt-auth-utils'],
 
   hub: {
     database: true,
@@ -17,5 +17,13 @@ export default defineNuxtConfig({
     experimental: {
       tasks: true, // for db seed to work
     },
+  },
+
+  compatibilityDate: '2024-11-01',
+
+  devtools: {enabled: false},
+
+  future: {
+    compatibilityVersion: 4,
   },
 });

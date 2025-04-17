@@ -1,6 +1,6 @@
 <template>
   <h1>page content</h1>
-  <div>table with data from get request /inquirys with clients name/id/email?</div>
+  <div>table with data from get request /inquiries with clients name/id/email?</div>
   <div>of course new inquiry button</div>
   <div>
     each inquiry will have button that would open the form and the form will be

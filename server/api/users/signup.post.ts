@@ -16,9 +16,9 @@ export default eventHandler(async (event) => {
   let role: 'admin' | 'technician' = 'admin';
 
   // @ts-ignore
-  if (role !== 'technician')
+  if (role !== 'admin')
     throw createError({
-      statusMessage: 'Unauthorized',
+      statusMessage: 'Only admins are allowed to perform this action',
       data: {message: 'Only admins are allowed to perform this action'},
     });
 
