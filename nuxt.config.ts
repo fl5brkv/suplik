@@ -1,4 +1,5 @@
-import tailwindcss from "@tailwindcss/vite";
+import tailwindcss from '@tailwindcss/vite';
+import type {NuxtPage} from 'nuxt/schema';
 
 export default defineNuxtConfig({
   modules: ['@nuxthub/core', 'nuxt-auth-utils', '@nuxt/ui-pro'],

@@ -16,6 +16,7 @@
 import * as z from 'zod';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {signupSchema} from '~~/server/database/schema/tables/users';
+import type {NuxtError} from '#app';
 
 const toast = useToast();
 
@@ -24,13 +25,13 @@ const fields = ref([
     name: 'email',
     type: 'text' as const,
     label: 'Email',
-    placeholder: 'me@matate.sk'
+    placeholder: 'me@matate.sk',
   },
   {
     name: 'password',
     type: 'password' as const,
     label: 'Password',
-    placeholder: 'password123'
+    placeholder: 'password123',
   },
 ]);
 
@@ -42,12 +43,13 @@ const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
       method: 'POST',
       body: payload.data,
     });
-  } catch (err: any) {
+  } catch (err) {
+    const error = err as NuxtError;
+    
     toast.add({
       title: 'Error',
       description:
-        err.data?.message ||
-        err.statusMessage ||
+        error.statusMessage ||
         'Oops! Something went wrong. Please try again later.',
       color: 'error',
     });

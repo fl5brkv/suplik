@@ -7,8 +7,8 @@ export default eventHandler(async (event) => {
 
   if (!result.success)
     throw createError({
+      statusCode: 400, 
       statusMessage: 'The provided data is invalid',
-      data: {message: 'The provided data is invalid'},
     });
 
   // const {userId, role} = await requireUserSession(event);
@@ -36,9 +36,9 @@ export default eventHandler(async (event) => {
 
   if (!inserted)
     throw createError({
+      statusCode: 409,
       statusMessage: 'The email is invalid or already taken',
-      data: {message: 'The email is invalid or already taken'},
     });
 
-  return 'Please check your email to verify your account!';
+  return sendNoContent(event);
 });
