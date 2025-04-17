@@ -21,6 +21,7 @@ export const users = sqliteTable('users', {
 });
 
 export const signupSchema = createInsertSchema(users).pick({
+  role: true,
   email: true,
   password: true,
 });

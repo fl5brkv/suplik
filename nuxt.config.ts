@@ -7,7 +7,7 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
-  modules: ['@nuxthub/core'],
+  modules: ['@nuxthub/core', 'nuxt-auth-utils'],
 
   hub: {
     database: true,
