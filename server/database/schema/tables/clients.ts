@@ -11,7 +11,7 @@ export const clients = sqliteTable('clients', {
   email: text('email').notNull(),
   phoneNumber: text('phone_number').notNull(),
   company: text('company'),
-  company_number: text('ico'),
+  companyNumber: text('ico'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -21,21 +21,33 @@ export const clients = sqliteTable('clients', {
     .notNull(),
 });
 
-export const clientSelectSchema = createSelectSchema(clients).omit({
-  updatedAt: true,
-  createdAt: true,
+export const clientSelectSchema = createSelectSchema(clients).pick({
+  clientId: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  company: true,
+  companyNumber: true,
 });
 
-export const clientInsertSchema = createInsertSchema(clients).omit({
-  clientId: true,
-  updatedAt: true,
-  createdAt: true,
+export const clientInsertSchema = createInsertSchema(clients).pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  company: true,
+  companyNumber: true,
 });
 
-export const clientUpdateSchema = createSelectSchema(clients).omit({
+export const clientUpdateSchema = createSelectSchema(clients).pick({
   clientId: true,
-  updatedAt: true,
-  createdAt: true,
+  firstName: true,
+  lastName: true,
+  email: true,
+  phoneNumber: true,
+  company: true,
+  companyNumber: true,
 });
 
 export const clientDeleteSchema = createSelectSchema(clients).pick({

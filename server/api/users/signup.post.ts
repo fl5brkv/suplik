@@ -11,9 +11,7 @@ export default eventHandler(async (event) => {
       statusMessage: 'The provided data is invalid',
     });
 
-  // const {userId, role} = await requireUserSession(event);
-
-  let role: 'admin' | 'technician' = 'admin';
+  const {role} = await requireUserSession(event);
 
   // @ts-ignore
   if (role !== 'admin')

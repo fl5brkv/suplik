@@ -122,7 +122,7 @@ function addProduct() {
 
 const onSubmit = async () =>  {
   await $fetch('/api/inquiries', {
-    method: 'post'
+    method: 'post',
     body: inquiry,
   });
   alert('Inquiry submitted!');
