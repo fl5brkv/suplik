@@ -38,5 +38,5 @@ export default eventHandler(async (event) => {
     },
   });
 
-  return 'sfsdf';
+  return 'Succesfull'
 });

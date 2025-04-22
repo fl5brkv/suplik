@@ -1,0 +1,44 @@
+import {z} from 'zod';
+import {serviceSelectSchema} from '../database/schema/tables/services';
+import {productSelectSchema} from '../database/schema/tables/products';
+import {USelectServicesProducts} from '~~/types/ui';
+
+type Selected =
+  | z.infer<typeof serviceSelectSchema>
+  | z.infer<typeof productSelectSchema>;
+
+export const formatItems = (
+  selected: Selected[]
+): USelectServicesProducts[] => {
+  const grouped = new Map<string, USelectServicesProducts[]>();
+
+  selected.forEach((item) => {
+    const group = item.details?.group;
+    const entry: USelectServicesProducts = {
+      type: 'item',
+      label: item.name,
+      id: ('serviceId' in item ? item.serviceId : item.productId) as number,
+    };
+
+    if (!grouped.has(group)) {
+      grouped.set(group, []);
+    }
+
+    grouped.get(group)!.push(entry);
+  });
+
+  const result: USelectServicesProducts[] = [];
+
+  const entries = Array.from(grouped.entries());
+  entries.forEach(([label, items], idx) => {
+    result.push({type: 'label', label});
+
+    result.push(...items);
+
+    if (idx < entries.length - 1) {
+      result.push({type: 'separator'});
+    }
+  });
+
+  return result;
+};
