@@ -1,6 +1,7 @@
 CREATE TABLE `clients` (
 	`client_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`firstName` text NOT NULL,
+	`first_name` text NOT NULL,
+	`last_name` text NOT NULL,
 	`email` text NOT NULL,
 	`phone_number` text NOT NULL,
 	`company` text,
@@ -12,7 +13,7 @@ CREATE TABLE `clients` (
 CREATE TABLE `inquiries` (
 	`inquiry_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`client_id` integer NOT NULL,
-	`status` text DEFAULT 'new',
+	`status` text DEFAULT 'new' NOT NULL,
 	`additional_info` text,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
@@ -53,6 +54,44 @@ CREATE TABLE `products` (
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE `quotation_products` (
+	`quotation_product_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`quotation_id` integer NOT NULL,
+	`product_id` integer NOT NULL,
+	`quantity` integer NOT NULL,
+	`unit_price` integer NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	FOREIGN KEY (`quotation_id`) REFERENCES `quotations`(`quotation_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`product_id`) REFERENCES `products`(`product_id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `quotation_services` (
+	`quotation_service_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`quotation_id` integer NOT NULL,
+	`service_id` integer NOT NULL,
+	`quantity` integer NOT NULL,
+	`unit_price` integer NOT NULL,
+	`date` text NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	FOREIGN KEY (`quotation_id`) REFERENCES `quotations`(`quotation_id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`service_id`) REFERENCES `services`(`service_id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE TABLE `quotations` (
+	`quotation_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`inquiry_id` integer NOT NULL,
+	`total_price` real NOT NULL,
+	`status` text NOT NULL,
+	`internal_note` text,
+	`external_note` text,
+	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
+	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
+	FOREIGN KEY (`inquiry_id`) REFERENCES `inquiries`(`inquiry_id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `quotations_inquiry_id_unique` ON `quotations` (`inquiry_id`);--> statement-breakpoint
 CREATE TABLE `services` (
 	`service_id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,

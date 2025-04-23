@@ -3,6 +3,7 @@ import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {suppliers} from './suppliers';
 import {z} from 'zod';
+import { inquiryProducts } from './inquiryProducts';
 
 export const products = sqliteTable('products', {
   productId: integer('product_id').primaryKey({

@@ -1,4 +1,4 @@
-import {sql} from 'drizzle-orm';
+import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer, check} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {services} from './services';
@@ -25,6 +25,14 @@ export const inquiryServices = sqliteTable('inquiry_services', {
   createdAt: integer('created_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .notNull(),
+});
+
+export const inquiryServiceSelectSchema = createSelectSchema(
+  inquiryServices
+).pick({
+  serviceId: true,
+  quantity: true,
+  date: true,
 });
 
 export const inquiryServiceInsertSchema = createInsertSchema(

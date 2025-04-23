@@ -63,10 +63,16 @@
 
 <script setup lang="ts">
 const {data: serviceData, status: serviceStatus} = await useFetch<any[]>(
-  '/api/services'
+  '/api/services',
+  {
+    method: 'get',
+  }
 );
 const {data: productData, status: productStatus} = await useFetch<any[]>(
-  '/api/products'
+  '/api/products',
+  {
+    method: 'get',
+  }
 );
 
 const inquiry = reactive({
@@ -120,11 +126,11 @@ function addProduct() {
   }
 }
 
-const onSubmit = async () =>  {
+const onSubmit = async () => {
   await $fetch('/api/inquiries', {
     method: 'post',
     body: inquiry,
   });
   alert('Inquiry submitted!');
-}
+};
 </script>

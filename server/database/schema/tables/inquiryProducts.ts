@@ -1,4 +1,4 @@
-import {sql} from 'drizzle-orm';
+import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer, check} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {products} from './products';
@@ -17,6 +17,7 @@ export const inquiryProducts = sqliteTable('inquiry_products', {
     })
     .notNull(),
   quantity: integer('quantity').notNull(),
+  date: text('date').notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -26,7 +27,17 @@ export const inquiryProducts = sqliteTable('inquiry_products', {
     .notNull(),
 });
 
-export const inquiryProductInsertSchema = createInsertSchema(inquiryProducts).pick({
+export const inquiryProductSelectSchema = createSelectSchema(
+  inquiryProducts
+).pick({
   productId: true,
-  quantity: true
+  quantity: true,
 });
+
+export const inquiryProductInsertSchema = createInsertSchema(
+  inquiryProducts
+).pick({
+  productId: true,
+  quantity: true,
+});
+

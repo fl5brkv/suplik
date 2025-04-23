@@ -1,13 +1,14 @@
 export default defineNuxtRouteMiddleware((to) => {
-  const {loggedIn} = useUserSession();
+  return
+  // const {loggedIn} = useUserSession();
 
-  const publicPaths = ['/login', '/inquiries/new', '/quotes/client'];
+  // const publicPaths = ['/login', '/inquiries/new', '/quotes/client'];
 
-  const isPublicPath = publicPaths.some(
-    (path) => to.path === path || to.path.startsWith(`${path}/`)
-  );
+  // const isPublicPath = publicPaths.some(
+  //   (path) => to.path === path || to.path.startsWith(`${path}/`)
+  // );
 
-  if (loggedIn.value && to.path === '/login') return navigateTo('/orders');
+  // if (loggedIn.value && to.path === '/login') return navigateTo('/clients');
 
-  if (!isPublicPath && !loggedIn.value) return navigateTo('/login');
+  // if (!isPublicPath && !loggedIn.value) return navigateTo('/login');
 });

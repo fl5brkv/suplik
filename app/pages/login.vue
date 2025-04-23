@@ -49,7 +49,7 @@ const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
     });
 
     await fetch();
-    await navigateTo('/orders');
+    await navigateTo('/clients');
   } catch (err: any) {
     const error = err as NuxtError;
 

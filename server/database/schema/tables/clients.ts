@@ -1,13 +1,14 @@
-import {sql} from 'drizzle-orm';
+import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
+import { inquiries } from './inquiries';
 
 export const clients = sqliteTable('clients', {
   clientId: integer('client_id').primaryKey({
     autoIncrement: true,
   }),
-  firstName: text('firstName').notNull(),
-  lastName: text('firstName').notNull(),
+  firstName: text('first_name').notNull(),
+  lastName: text('last_name').notNull(),
   email: text('email').notNull(),
   phoneNumber: text('phone_number').notNull(),
   company: text('company'),

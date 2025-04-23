@@ -1,13 +1,336 @@
 <template>
-  <h1>page content</h1>
-  <div>table with data from get request /inquiries with clients name/id/email?</div>
-  <div>of course new inquiry button</div>
-  <div>
-    each inquiry will have button that would open the form and the form will be
-    prefilled with the inquiry details + admin would add quotes rows, like
-    internal note, extenrnal note, price, then the button click makes request to
-    /quote/send which will insert into quotes table and send email
-  </div>
+  <MyQuotationsInsert
+    v-model:open="showQuotationsInsert"
+    :inquiry="selectedInquiry" />
 
-  <h2>access: admin</h2>
+  <UDashboardPanel id="inquiries">
+    <template #header>
+      <UDashboardNavbar title="Inquiries">
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+
+        <template #right>
+          <!-- add new -->
+        </template>
+      </UDashboardNavbar>
+    </template>
+
+    <template #body>
+      <div class="flex flex-wrap items-center justify-between gap-1.5">
+        <UInput
+          v-model="globalFilter"
+          class="max-w-sm"
+          placeholder="Filter..." />
+
+        <div class="flex flex-wrap items-center gap-1.5">
+          <!-- delete -->
+        </div>
+      </div>
+
+      <UTable
+        ref="table"
+        v-model:global-filter="globalFilter"
+        v-model:pagination="pagination"
+        :pagination-options="{
+          getPaginationRowModel: getPaginationRowModel(),
+        }"
+        class="shrink-0"
+        :data="data"
+        :columns="columns"
+        :loading="status === 'pending'"
+        :ui="{
+          base: 'table-fixed border-separate border-spacing-0',
+          thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
+          tbody: '[&>tr]:last:[&>td]:border-b-0',
+          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
+          td: 'border-b border-(--ui-border)',
+        }">
+        <template #expanded="{row}">
+          <pre>{{ row.original }}</pre>
+        </template></UTable
+      >
+
+      <div
+        class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+        <div class="text-sm text-(--ui-text-muted)">
+          {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }}
+          of
+          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
+          selected.
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <UPagination
+            :default-page="
+              (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+            "
+            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+            :total="table?.tableApi?.getFilteredRowModel().rows.length"
+            @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)" />
+        </div>
+      </div>
+    </template>
+  </UDashboardPanel>
 </template>
+
+<script setup lang="ts">
+import {UBadge} from '#components';
+import type {TableColumn} from '@nuxt/ui';
+// @ts-ignore
+import {getPaginationRowModel, type Row} from '@tanstack/table-core';
+import type {z} from 'zod';
+import type {inquirySelectSchema} from '~~/server/database/schema/tables/inquiries';
+
+const UButton = resolveComponent('UButton');
+const UDropdownMenu = resolveComponent('UDropdownMenu');
+const UCheckbox = resolveComponent('UCheckbox');
+
+const toast = useToast();
+const table = useTemplateRef('table');
+
+const showQuotationsInsert = ref(false);
+const selectedInquiry = ref();
+
+type Inquiry = z.infer<typeof inquirySelectSchema> & {
+  client: {
+    firstName: string;
+    lastName: string;
+  };
+  inquiryService: {
+    serviceId: number;
+    serviceQuantity: number;
+    date: string;
+    serviceName: string;
+  }[];
+  inquiryProduct: {
+    productId: number;
+    productQuantity: number;
+    productName: string;
+  }[];
+};
+
+const {data, status} = await useFetch<Inquiry[]>('/api/inquiries', {
+  method: 'get',
+  lazy: true,
+});
+
+function getRowItems(row: Row<Inquiry>) {
+  return [
+    {
+      type: 'label',
+      label: 'Actions',
+    },
+    {
+      label: 'Copy customer ID',
+      icon: 'i-lucide-copy',
+      onSelect() {
+        navigator.clipboard.writeText(row.original.id.toString());
+        toast.add({
+          title: 'Copied to clipboard',
+          description: 'Customer ID copied to clipboard',
+        });
+      },
+    },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'Provide a quote',
+      icon: 'lucide:file-pen',
+      onSelect() {
+        selectedInquiry.value = row.original;
+        showQuotationsInsert.value = true;
+      },
+    },
+    {
+      label: 'Delete inquiry',
+      icon: 'i-lucide-trash',
+      color: 'error',
+      onSelect() {
+        toast.add({
+          title: 'Inquiry deleted',
+          description: 'The inquiry has been deleted.',
+        });
+      },
+    },
+  ];
+}
+
+const columns: TableColumn<Inquiry>[] = [
+  {
+    id: 'select',
+    header: ({table}) =>
+      h(UCheckbox, {
+        modelValue: table.getIsSomePageRowsSelected()
+          ? 'indeterminate'
+          : table.getIsAllPageRowsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+          table.toggleAllPageRowsSelected(!!value),
+        ariaLabel: 'Select all',
+      }),
+    cell: ({row}) =>
+      h(UCheckbox, {
+        modelValue: row.getIsSelected(),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+          row.toggleSelected(!!value),
+        ariaLabel: 'Select row',
+      }),
+  },
+  {
+    accessorKey: 'inquiryId',
+    header: 'ID',
+    cell: ({row}) => `Inquiry #${row.original.inquiryId}`,
+  },
+  {
+    accessorKey: 'client',
+    header: 'Client',
+    cell: ({row}) => {
+      return [
+        h(
+          'p',
+          {class: 'font-medium text-(--ui-text-highlighted)'},
+          `${row.original.client.firstName} ${row.original.client.lastName}`
+        ),
+        row.original.client.email &&
+          h('p', {class: 'text-sm text-gray-500'}, row.original.client.email),
+      ];
+    },
+  },
+  {
+    id: 'services',
+    header: 'Services',
+    cell: ({row}) => {
+      const UTooltip = resolveComponent('UTooltip');
+      const UButton = resolveComponent('UButton');
+
+      const services = row.original.inquiryService || [];
+      if (!services.length) return h('span', {class: 'text-sm'}, '-');
+      const first = services[0];
+      const rest = services.slice(1);
+
+      const tooltipText = rest
+        .map(
+          (s) =>
+            `${s.serviceName?.toLowerCase() || ''}\n${
+              s.serviceQuantity ?? 1
+            }x • ${s.date || ''}`
+        )
+        .join('\n\n');
+
+      return h('div', {class: 'flex items-center gap-1'}, [
+        first &&
+          h('div', {class: 'text-sm leading-tight'}, [
+            h('p', {class: 'lowercase'}, first.serviceName || '-'),
+            h(
+              'p',
+              {class: 'text-xs text-gray-500'},
+              `${first.serviceQuantity ?? 1}x • ${first.date || ''}`
+            ),
+          ]),
+        rest.length &&
+          h(UTooltip, {text: tooltipText}, () =>
+            h(UButton, {
+              icon: 'i-lucide-plus',
+              size: '2xs',
+              variant: 'ghost',
+              color: 'neutral',
+              class: 'cursor-default',
+            })
+          ),
+      ]);
+    },
+  },
+  {
+    id: 'products',
+    header: 'Products',
+    cell: ({row}) => {
+      const UTooltip = resolveComponent('UTooltip');
+      const UButton = resolveComponent('UButton');
+
+      const products = row.original.inquiryProduct || [];
+      if (!products.length) return h('span', {class: 'text-sm'}, '-');
+      const first = products[0];
+      const rest = products.slice(1);
+
+      const tooltipText = rest
+        .map(
+          (p) =>
+            `${p.productName?.toLowerCase() || ''}\n${p.productQuantity ?? 1}x`
+        )
+        .join('\n\n');
+
+      return h('div', {class: 'flex items-center gap-1'}, [
+        first &&
+          h('div', {class: 'text-sm leading-tight'}, [
+            h('p', {class: 'lowercase'}, first.productName || '-'),
+            h(
+              'p',
+              {class: 'text-xs text-gray-500'},
+              `${first.productQuantity ?? 1}x`
+            ),
+          ]),
+        rest.length &&
+          h(UTooltip, {text: tooltipText}, () =>
+            h(UButton, {
+              icon: 'i-lucide-plus',
+              size: '2xs',
+              variant: 'ghost',
+              color: 'neutral',
+              class: 'cursor-default',
+            })
+          ),
+      ]);
+    },
+  },
+
+  {
+    accessorKey: 'status',
+    header: 'Status',
+    cell: ({row}) => {
+      const color = {
+        new: 'success' as const,
+        quoted: 'info' as const,
+        rejected: 'error' as const,
+      }[row.original.status];
+      return h(
+        UBadge,
+        {class: 'capitalize', variant: 'subtle', color},
+        () => row.original.status
+      );
+    },
+  },
+  {
+    id: 'actions',
+    cell: ({row}) => {
+      return h(
+        'div',
+        {class: 'text-right'},
+        h(
+          UDropdownMenu,
+          {
+            content: {
+              align: 'end',
+            },
+            items: getRowItems(row),
+          },
+          () =>
+            h(UButton, {
+              icon: 'i-lucide-ellipsis-vertical',
+              color: 'neutral',
+              variant: 'ghost',
+              class: 'ml-auto',
+            })
+        )
+      );
+    },
+  },
+];
+
+const globalFilter = ref('');
+
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 10,
+});
+</script>

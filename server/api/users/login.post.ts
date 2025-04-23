@@ -24,19 +24,27 @@ export default eventHandler(async (event) => {
     .where(eq(tables.users.email, email))
     .get();
 
-  if (!selected || !(await verifyPassword(selected.password, password)))
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Incorrect email or password.',
-    });
-
   await replaceUserSession(event, {
     user: {
-      userId: selected.userId,
-      role: selected.role,
-      email: selected.email,
+      userId: selected?.userId,
+      role: selected?.role,
+      email: selected?.email,
     },
   });
 
-  return 'Succesfull'
+  // if (!selected || !(await verifyPassword(selected.password, password)))
+  //   throw createError({
+  //     statusCode: 401,
+  //     statusMessage: 'Incorrect email or password.',
+  //   });
+
+  // await replaceUserSession(event, {
+  //   user: {
+  //     userId: selected.userId,
+  //     role: selected.role,
+  //     email: selected.email,
+  //   },
+  // });
+
+  return 'Succesfull';
 });

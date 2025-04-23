@@ -1,4 +1,3 @@
-import {z} from 'zod';
 import {inquiryInsertSchema} from '~~/server/database/schema/tables/inquiries';
 
 export default eventHandler(async (event) => {

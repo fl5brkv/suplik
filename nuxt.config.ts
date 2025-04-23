@@ -1,8 +1,11 @@
 import tailwindcss from '@tailwindcss/vite';
-import type {NuxtPage} from 'nuxt/schema';
 
 export default defineNuxtConfig({
-  modules: ['@nuxthub/core', 'nuxt-auth-utils', '@nuxt/ui-pro'],
+  modules: [
+    '@nuxthub/core',
+    'nuxt-auth-utils',
+    '@nuxt/ui-pro',
+  ],
 
   css: ['~/assets/css/main.css'],
 
@@ -14,6 +17,13 @@ export default defineNuxtConfig({
     database: true,
   },
 
+  components: [
+    {
+      path: '~/components',
+      prefix: 'My'
+    }
+  ],
+
   nitro: {
     experimental: {
       tasks: true, // for db seed to work
@@ -22,7 +32,7 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2024-11-01',
 
-  devtools: {enabled: true},
+  devtools: {enabled: false},
 
   future: {
     compatibilityVersion: 4,

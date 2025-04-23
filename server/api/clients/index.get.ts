@@ -6,6 +6,7 @@ export default eventHandler(async (event) => {
       clientId: tables.clients.clientId,
       firstName: tables.clients.firstName,
       lastName: tables.clients.lastName,
+      email: tables.clients.email,
       phoneNumber: tables.clients.phoneNumber,
       company: tables.clients.company,
       companyNumber: tables.clients.companyNumber,
