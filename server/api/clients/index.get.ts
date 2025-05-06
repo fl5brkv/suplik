@@ -3,7 +3,7 @@ export default eventHandler(async (event) => {
 
   const selected = await useDrizzle()
     .select({
-      clientId: tables.clients.clientId,
+      id: tables.clients.id,
       firstName: tables.clients.firstName,
       lastName: tables.clients.lastName,
       email: tables.clients.email,

@@ -3,16 +3,17 @@ import {sqliteTable, text, integer, check} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {services} from './services';
 import {inquiries} from './inquiries';
+import { z } from 'zod';
 
 export const inquiryServices = sqliteTable('inquiry_services', {
-  inquiryServiceId: integer('inquiry_service_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   inquiryId: integer('inquiry_id')
-    .references(() => inquiries.inquiryId, {onDelete: 'cascade'})
+    .references(() => inquiries.id, {onDelete: 'cascade'})
     .notNull(),
   serviceId: integer('service_id')
-    .references(() => services.serviceId, {
+    .references(() => services.id, {
       onDelete: 'cascade',
     })
     .notNull(),
@@ -30,7 +31,7 @@ export const inquiryServices = sqliteTable('inquiry_services', {
 export const inquiryServiceSelectSchema = createSelectSchema(
   inquiryServices
 ).pick({
-  serviceId: true,
+  id: true,
   quantity: true,
   date: true,
 });
@@ -42,3 +43,5 @@ export const inquiryServiceInsertSchema = createInsertSchema(
   quantity: true,
   date: true,
 });
+
+export type InquiryServiceInsert = z.infer<typeof inquiryServiceInsertSchema>;

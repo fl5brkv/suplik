@@ -4,12 +4,13 @@ import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {z} from 'zod';
 
 export const services = sqliteTable('services', {
-  serviceId: integer('service_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   name: text('name').notNull(),
   unitPrice: text('unit_price'),
-  details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  group: text('group').notNull(),
+  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -20,7 +21,7 @@ export const services = sqliteTable('services', {
 });
 
 export const serviceSelectSchema = createSelectSchema(services).pick({
-  serviceId: true,
+  id: true,
   name: true,
-  details: true,
+  group: true,
 });

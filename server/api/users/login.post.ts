@@ -15,7 +15,7 @@ export default eventHandler(async (event) => {
 
   const selected = await useDrizzle()
     .select({
-      userId: tables.users.userId,
+      id: tables.users.id,
       role: tables.users.role,
       email: tables.users.email,
       password: tables.users.password,
@@ -24,27 +24,19 @@ export default eventHandler(async (event) => {
     .where(eq(tables.users.email, email))
     .get();
 
+  if (!selected || !(await verifyPassword(selected.password, password)))
+    throw createError({
+      statusCode: 401,
+      statusMessage: 'Incorrect email or password.',
+    });
+
   await replaceUserSession(event, {
     user: {
-      userId: selected?.userId,
-      role: selected?.role,
-      email: selected?.email,
+      id: selected.id,
+      role: selected.role,
+      email: selected.email,
     },
   });
-
-  // if (!selected || !(await verifyPassword(selected.password, password)))
-  //   throw createError({
-  //     statusCode: 401,
-  //     statusMessage: 'Incorrect email or password.',
-  //   });
-
-  // await replaceUserSession(event, {
-  //   user: {
-  //     userId: selected.userId,
-  //     role: selected.role,
-  //     email: selected.email,
-  //   },
-  // });
 
   return 'Succesfull';
 });

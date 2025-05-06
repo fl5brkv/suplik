@@ -4,9 +4,9 @@ export default eventHandler(async (event) => {
   if (role === 'admin') {
     const selected = await useDrizzle()
       .select({
-        serviceId: tables.services.serviceId,
+        id: tables.services.id,
         name: tables.services.name,
-        details: tables.services.details,
+        group: tables.services.group,
         unitPrice: tables.services.unitPrice,
       })
       .from(tables.services);
@@ -15,9 +15,9 @@ export default eventHandler(async (event) => {
   } else {
     const selected = await useDrizzle()
       .select({
-        serviceId: tables.services.serviceId,
+        id: tables.services.id,
         name: tables.services.name,
-        details: tables.services.details,
+        group: tables.services.group,
       })
       .from(tables.services);
 

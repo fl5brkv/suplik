@@ -1,6 +1,4 @@
-import {
-  quotationInsertSchema,
-} from '~~/server/database/schema/tables/quotations';
+import {quotationInsertSchema} from '~~/server/database/schema/tables/quotations';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
@@ -17,17 +15,16 @@ export default eventHandler(async (event) => {
 
   const {
     inquiryId,
-    totalPrice,
     internalNote,
-    quotationService,
-    quotationProduct,
+    quotationServices,
+    quotationProducts,
   } = result.data;
-  
+
   const inserted = await useDrizzle()
     .insert(tables.quotations)
-    .values({inquiryId, totalPrice, internalNote, status: 'sent'})
+    .values({inquiryId, internalNote, status: 'sent'})
     .onConflictDoNothing()
-    .returning({quotationId: tables.quotations.quotationId})
+    .returning({quotationId: tables.quotations.id})
     .get();
 
   if (!inserted)

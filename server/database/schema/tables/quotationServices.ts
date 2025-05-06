@@ -5,14 +5,14 @@ import {quotations} from './quotations';
 import {services} from './services';
 
 export const quotationServices = sqliteTable('quotation_services', {
-  quotationServiceId: integer('quotation_service_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   quotationId: integer('quotation_id')
-    .references(() => quotations.quotationId, {onDelete: 'cascade'})
+    .references(() => quotations.id, {onDelete: 'cascade'})
     .notNull(),
   serviceId: integer('service_id')
-    .references(() => services.serviceId, {onDelete: 'cascade'})
+    .references(() => services.id, {onDelete: 'cascade'})
     .notNull(),
   quantity: integer('quantity').notNull(),
   unitPrice: integer('unit_price').notNull(),

@@ -11,11 +11,12 @@ export default eventHandler(async (event) => {
       statusMessage: 'The provided data is invalid',
     });
 
-  const {client, additionalInfo, inquiryService, inquiryProduct} = result.data;
+  const {client, additionalInfo, inquiryServices, inquiryProducts} =
+    result.data;
 
   try {
-    const existingClient = await useDrizzle()
-      .select({clientId: tables.clients.clientId})
+    const selected = await useDrizzle()
+      .select({id: tables.clients.id})
       .from(tables.clients)
       .where(
         and(
@@ -23,41 +24,70 @@ export default eventHandler(async (event) => {
           eq(tables.clients.phoneNumber, client.phoneNumber)
         )
       )
-      .limit(1);
+      .get();
 
     const clientId =
-      existingClient[0]?.clientId ??
+      selected?.id ??
       (
         await useDrizzle()
           .insert(tables.clients)
           .values(client)
-          .returning({clientId: tables.clients.clientId})
-      )[0].clientId;
+          .returning({id: tables.clients.id})
+          .get()
+      )?.id;
 
-    const [insertedInquiry] = await useDrizzle()
+    const inserted = await useDrizzle()
       .insert(tables.inquiries)
       .values({additionalInfo, clientId})
-      .returning({inquiryId: tables.inquiries.inquiryId});
+      .returning({id: tables.inquiries.id})
+      .get();
 
-    if (inquiryService?.length)
+    if (inquiryServices?.length) {
       await useDrizzle()
         .insert(tables.inquiryServices)
         .values(
-          inquiryService.map((s) => ({
+          inquiryServices.map((s) => ({
             ...s,
-            inquiryId: insertedInquiry.inquiryId,
+            inquiryId: inserted.id,
           }))
         );
+    }
 
-    if (inquiryProduct?.length)
+    if (inquiryProducts?.length) {
       await useDrizzle()
-        .insert(tables.inquiryProducts)
-        .values(
-          inquiryProduct.map((p) => ({
-            ...p,
-            inquiryId: insertedInquiry.inquiryId,
-          }))
-        );
+            .insert(tables.inquiryProducts)
+            .values(
+              inquiryProducts.map((p) => ({
+                ...p,
+                inquiryId: inserted.id,
+              }))
+            )
+    }
+
+    // doesnt work
+    // await useDrizzle().batch([
+    //   inquiryServices?.length
+    //     ? await useDrizzle()
+    //         .insert(tables.inquiryServices)
+    //         .values(
+    //           inquiryServices.map((s) => ({
+    //             ...s,
+    //             inquiryId: inserted.id,
+    //           }))
+    //         )
+    //     : null,
+
+    //   inquiryProducts?.length
+    //     ? await useDrizzle()
+    //         .insert(tables.inquiryProducts)
+    //         .values(
+    //           inquiryProducts.map((p) => ({
+    //             ...p,
+    //             inquiryId: inserted.id,
+    //           }))
+    //         )
+    //     : null,
+    // ]);
 
     return sendNoContent(event);
   } catch (err: any) {

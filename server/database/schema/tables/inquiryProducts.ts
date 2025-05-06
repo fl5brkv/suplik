@@ -3,21 +3,22 @@ import {sqliteTable, text, integer, check} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {products} from './products';
 import {inquiries} from './inquiries';
+import { z } from 'zod';
 
 export const inquiryProducts = sqliteTable('inquiry_products', {
-  inquiryProductId: integer('inquiry_product_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   inquiryId: integer('inquiry_id')
-    .references(() => inquiries.inquiryId, {onDelete: 'cascade'})
+    .references(() => inquiries.id, {onDelete: 'cascade'})
     .notNull(),
   productId: integer('product_id')
-    .references(() => products.productId, {
+    .references(() => products.id, {
       onDelete: 'cascade',
     })
     .notNull(),
   quantity: integer('quantity').notNull(),
-  date: text('date').notNull(),
+  date: text('date'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -30,8 +31,9 @@ export const inquiryProducts = sqliteTable('inquiry_products', {
 export const inquiryProductSelectSchema = createSelectSchema(
   inquiryProducts
 ).pick({
-  productId: true,
+  id: true,
   quantity: true,
+  date: true,
 });
 
 export const inquiryProductInsertSchema = createInsertSchema(
@@ -39,5 +41,7 @@ export const inquiryProductInsertSchema = createInsertSchema(
 ).pick({
   productId: true,
   quantity: true,
+  date: true,
 });
 
+export type InquiryProductInsert = z.infer<typeof inquiryProductInsertSchema>;

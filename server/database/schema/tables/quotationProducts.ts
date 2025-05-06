@@ -5,17 +5,18 @@ import {quotations} from './quotations';
 import {products} from './products';
 
 export const quotationProducts = sqliteTable('quotation_products', {
-  quotationProductId: integer('quotation_product_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   quotationId: integer('quotation_id')
-    .references(() => quotations.quotationId, {onDelete: 'cascade'})
+    .references(() => quotations.id, {onDelete: 'cascade'})
     .notNull(),
   productId: integer('product_id')
-    .references(() => products.productId, {onDelete: 'cascade'})
+    .references(() => products.id, {onDelete: 'cascade'})
     .notNull(),
   quantity: integer('quantity').notNull(),
   unitPrice: integer('unit_price').notNull(),
+  date: text('date'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -31,8 +32,8 @@ export const quotationProductSelectSchema = createSelectSchema(
   productId: true,
   quantity: true,
   unitPrice: true,
+  date: true,
 });
-
 
 export const quotationProductInsertSchema = createInsertSchema(
   quotationProducts
@@ -40,4 +41,5 @@ export const quotationProductInsertSchema = createInsertSchema(
   productId: true,
   quantity: true,
   unitPrice: true,
+  date: true,
 });

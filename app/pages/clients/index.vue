@@ -68,6 +68,7 @@
 
 <script setup lang="ts">
 import type {TableColumn} from '@nuxt/ui';
+// @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
 import type {z} from 'zod';
 import type {clientSelectSchema} from '~~/server/database/schema/tables/clients';

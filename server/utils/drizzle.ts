@@ -5,7 +5,7 @@ import {schema} from '~~/server/database/schema/index';
 
 export const tables = schema;
 
-export function useDrizzle() {
+export const useDrizzle = () => {
   return drizzle(hubDatabase(), {schema});
 }
 

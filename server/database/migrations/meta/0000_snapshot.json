@@ -1,14 +1,14 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "061a522d-80b2-414c-89f8-30fc124e3c26",
+  "id": "1096db4b-b056-4a58-a1a1-1412fdefba0b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "clients": {
       "name": "clients",
       "columns": {
-        "client_id": {
-          "name": "client_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -82,8 +82,8 @@
     "inquiries": {
       "name": "inquiries",
       "columns": {
-        "inquiry_id": {
-          "name": "inquiry_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -130,15 +130,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "inquiries_client_id_clients_client_id_fk": {
-          "name": "inquiries_client_id_clients_client_id_fk",
+        "inquiries_client_id_clients_id_fk": {
+          "name": "inquiries_client_id_clients_id_fk",
           "tableFrom": "inquiries",
           "tableTo": "clients",
           "columnsFrom": [
             "client_id"
           ],
           "columnsTo": [
-            "client_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -151,8 +151,8 @@
     "inquiry_products": {
       "name": "inquiry_products",
       "columns": {
-        "inquiry_product_id": {
-          "name": "inquiry_product_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -179,6 +179,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "date": {
+          "name": "date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "integer",
@@ -198,28 +205,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "inquiry_products_inquiry_id_inquiries_inquiry_id_fk": {
-          "name": "inquiry_products_inquiry_id_inquiries_inquiry_id_fk",
+        "inquiry_products_inquiry_id_inquiries_id_fk": {
+          "name": "inquiry_products_inquiry_id_inquiries_id_fk",
           "tableFrom": "inquiry_products",
           "tableTo": "inquiries",
           "columnsFrom": [
             "inquiry_id"
           ],
           "columnsTo": [
-            "inquiry_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "inquiry_products_product_id_products_product_id_fk": {
-          "name": "inquiry_products_product_id_products_product_id_fk",
+        "inquiry_products_product_id_products_id_fk": {
+          "name": "inquiry_products_product_id_products_id_fk",
           "tableFrom": "inquiry_products",
           "tableTo": "products",
           "columnsFrom": [
             "product_id"
           ],
           "columnsTo": [
-            "product_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -232,8 +239,8 @@
     "inquiry_services": {
       "name": "inquiry_services",
       "columns": {
-        "inquiry_service_id": {
-          "name": "inquiry_service_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -286,28 +293,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "inquiry_services_inquiry_id_inquiries_inquiry_id_fk": {
-          "name": "inquiry_services_inquiry_id_inquiries_inquiry_id_fk",
+        "inquiry_services_inquiry_id_inquiries_id_fk": {
+          "name": "inquiry_services_inquiry_id_inquiries_id_fk",
           "tableFrom": "inquiry_services",
           "tableTo": "inquiries",
           "columnsFrom": [
             "inquiry_id"
           ],
           "columnsTo": [
-            "inquiry_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "inquiry_services_service_id_services_service_id_fk": {
-          "name": "inquiry_services_service_id_services_service_id_fk",
+        "inquiry_services_service_id_services_id_fk": {
+          "name": "inquiry_services_service_id_services_id_fk",
           "tableFrom": "inquiry_services",
           "tableTo": "services",
           "columnsFrom": [
             "service_id"
           ],
           "columnsTo": [
-            "service_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -320,8 +327,8 @@
     "products": {
       "name": "products",
       "columns": {
-        "product_id": {
-          "name": "product_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -357,8 +364,8 @@
           "autoincrement": false,
           "default": 0
         },
-        "details": {
-          "name": "details",
+        "group": {
+          "name": "group",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -390,8 +397,8 @@
     "quotation_products": {
       "name": "quotation_products",
       "columns": {
-        "quotation_product_id": {
-          "name": "quotation_product_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -425,6 +432,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "date": {
+          "name": "date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "updated_at": {
           "name": "updated_at",
           "type": "integer",
@@ -444,28 +458,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "quotation_products_quotation_id_quotations_quotation_id_fk": {
-          "name": "quotation_products_quotation_id_quotations_quotation_id_fk",
+        "quotation_products_quotation_id_quotations_id_fk": {
+          "name": "quotation_products_quotation_id_quotations_id_fk",
           "tableFrom": "quotation_products",
           "tableTo": "quotations",
           "columnsFrom": [
             "quotation_id"
           ],
           "columnsTo": [
-            "quotation_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "quotation_products_product_id_products_product_id_fk": {
-          "name": "quotation_products_product_id_products_product_id_fk",
+        "quotation_products_product_id_products_id_fk": {
+          "name": "quotation_products_product_id_products_id_fk",
           "tableFrom": "quotation_products",
           "tableTo": "products",
           "columnsFrom": [
             "product_id"
           ],
           "columnsTo": [
-            "product_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -478,8 +492,8 @@
     "quotation_services": {
       "name": "quotation_services",
       "columns": {
-        "quotation_service_id": {
-          "name": "quotation_service_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -539,28 +553,28 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "quotation_services_quotation_id_quotations_quotation_id_fk": {
-          "name": "quotation_services_quotation_id_quotations_quotation_id_fk",
+        "quotation_services_quotation_id_quotations_id_fk": {
+          "name": "quotation_services_quotation_id_quotations_id_fk",
           "tableFrom": "quotation_services",
           "tableTo": "quotations",
           "columnsFrom": [
             "quotation_id"
           ],
           "columnsTo": [
-            "quotation_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "quotation_services_service_id_services_service_id_fk": {
-          "name": "quotation_services_service_id_services_service_id_fk",
+        "quotation_services_service_id_services_id_fk": {
+          "name": "quotation_services_service_id_services_id_fk",
           "tableFrom": "quotation_services",
           "tableTo": "services",
           "columnsFrom": [
             "service_id"
           ],
           "columnsTo": [
-            "service_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -573,8 +587,8 @@
     "quotations": {
       "name": "quotations",
       "columns": {
-        "quotation_id": {
-          "name": "quotation_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -642,15 +656,15 @@
         }
       },
       "foreignKeys": {
-        "quotations_inquiry_id_inquiries_inquiry_id_fk": {
-          "name": "quotations_inquiry_id_inquiries_inquiry_id_fk",
+        "quotations_inquiry_id_inquiries_id_fk": {
+          "name": "quotations_inquiry_id_inquiries_id_fk",
           "tableFrom": "quotations",
           "tableTo": "inquiries",
           "columnsFrom": [
             "inquiry_id"
           ],
           "columnsTo": [
-            "inquiry_id"
+            "id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -663,8 +677,8 @@
     "services": {
       "name": "services",
       "columns": {
-        "service_id": {
-          "name": "service_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -684,8 +698,8 @@
           "notNull": false,
           "autoincrement": false
         },
-        "details": {
-          "name": "details",
+        "group": {
+          "name": "group",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -717,8 +731,8 @@
     "suppliers": {
       "name": "suppliers",
       "columns": {
-        "supplier_id": {
-          "name": "supplier_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
@@ -771,8 +785,8 @@
     "users": {
       "name": "users",
       "columns": {
-        "user_id": {
-          "name": "user_id",
+        "id": {
+          "name": "id",
           "type": "integer",
           "primaryKey": true,
           "notNull": true,

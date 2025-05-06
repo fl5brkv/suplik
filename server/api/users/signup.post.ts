@@ -1,6 +1,8 @@
 import {signupSchema} from '~~/server/database/schema/tables/users';
 
 export default eventHandler(async (event) => {
+  await requireAdminSession(event);
+
   const result = await readValidatedBody(event, (body) =>
     signupSchema.safeParse(body)
   );
@@ -9,15 +11,6 @@ export default eventHandler(async (event) => {
     throw createError({
       statusCode: 400, 
       statusMessage: 'The provided data is invalid',
-    });
-
-  const {role} = await requireUserSession(event);
-
-  // @ts-ignore
-  if (role !== 'admin')
-    throw createError({
-      statusMessage: 'Only admins are allowed to perform this action',
-      data: {message: 'Only admins are allowed to perform this action'},
     });
 
   const {email, password} = result.data;
@@ -29,7 +22,7 @@ export default eventHandler(async (event) => {
       password: await hashPassword(password),
     })
     .onConflictDoNothing()
-    .returning({userId: tables.users.userId, email: tables.users.email})
+    .returning({id: tables.users.id, email: tables.users.email})
     .get();
 
   if (!inserted)

@@ -3,7 +3,7 @@ import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 
 export const suppliers = sqliteTable('suppliers', {
-  supplierId: integer('supplier_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   name: text('name').notNull(),

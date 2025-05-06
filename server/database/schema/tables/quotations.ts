@@ -13,12 +13,13 @@ import {
 } from './quotationProducts';
 
 export const quotations = sqliteTable('quotations', {
-  quotationId: integer('quotation_id').primaryKey({autoIncrement: true}),
+  id: integer('id').primaryKey({
+    autoIncrement: true,
+  }),
   inquiryId: integer('inquiry_id')
-    .references(() => inquiries.inquiryId, {onDelete: 'cascade'})
+    .references(() => inquiries.id, {onDelete: 'cascade'})
     .unique()
     .notNull(),
-  totalPrice: real('total_price').notNull(),
   status: text('status', {
     enum: ['sent', 'accepted', 'declined'],
   }).notNull(),
@@ -35,22 +36,24 @@ export const quotations = sqliteTable('quotations', {
 
 export const quotationSelectSchema = createSelectSchema(quotations)
   .pick({
-    totalPrice: true,
     status: true,
     internalNote: true,
   })
   .extend({
-    quotationService: quotationServiceSelectSchema.optional(),
-    quotationProduct: quotationProductSelectSchema.optional(),
+    quotationServices: quotationServiceSelectSchema.optional(),
+    quotationProducts: quotationProductSelectSchema.optional(),
   });
+
+export type QuotationSelect = z.infer<typeof quotationSelectSchema>;
 
 export const quotationInsertSchema = createInsertSchema(quotations)
   .pick({
     inquiryId: true,
-    totalPrice: true,
     internalNote: true,
   })
   .extend({
-    quotationService: z.array(quotationServiceInsertSchema).optional(),
-    quotationProduct: z.array(quotationProductInsertSchema).optional(),
+    quotationServices: z.array(quotationServiceInsertSchema).optional(),
+    quotationProducts: z.array(quotationProductInsertSchema).optional(),
   });
+
+export type QuotationInsert = z.infer<typeof quotationInsertSchema>;

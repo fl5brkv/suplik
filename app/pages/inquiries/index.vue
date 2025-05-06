@@ -79,8 +79,7 @@ import {UBadge} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import type {z} from 'zod';
-import type {inquirySelectSchema} from '~~/server/database/schema/tables/inquiries';
+import type {InquirySelect} from '~~/server/database/schema/tables/inquiries';
 
 const UButton = resolveComponent('UButton');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
@@ -90,32 +89,14 @@ const toast = useToast();
 const table = useTemplateRef('table');
 
 const showQuotationsInsert = ref(false);
-const selectedInquiry = ref();
+const selectedInquiry = ref<InquirySelect>({} as InquirySelect);
 
-type Inquiry = z.infer<typeof inquirySelectSchema> & {
-  client: {
-    firstName: string;
-    lastName: string;
-  };
-  inquiryService: {
-    serviceId: number;
-    serviceQuantity: number;
-    date: string;
-    serviceName: string;
-  }[];
-  inquiryProduct: {
-    productId: number;
-    productQuantity: number;
-    productName: string;
-  }[];
-};
-
-const {data, status} = await useFetch<Inquiry[]>('/api/inquiries', {
+const {data, status} = await useFetch<InquirySelect[]>('/api/inquiries', {
   method: 'get',
   lazy: true,
 });
 
-function getRowItems(row: Row<Inquiry>) {
+function getRowItems(row: Row<InquirySelect>) {
   return [
     {
       type: 'label',
@@ -157,7 +138,7 @@ function getRowItems(row: Row<Inquiry>) {
   ];
 }
 
-const columns: TableColumn<Inquiry>[] = [
+const columns: TableColumn<InquirySelect>[] = [
   {
     id: 'select',
     header: ({table}) =>
@@ -180,7 +161,7 @@ const columns: TableColumn<Inquiry>[] = [
   {
     accessorKey: 'inquiryId',
     header: 'ID',
-    cell: ({row}) => `Inquiry #${row.original.inquiryId}`,
+    cell: ({row}) => `Inquiry #${row.original.id}`,
   },
   {
     accessorKey: 'client',
@@ -198,13 +179,12 @@ const columns: TableColumn<Inquiry>[] = [
     },
   },
   {
-    id: 'services',
     header: 'Services',
     cell: ({row}) => {
       const UTooltip = resolveComponent('UTooltip');
       const UButton = resolveComponent('UButton');
 
-      const services = row.original.inquiryService || [];
+      const services = row.original.inquiryServices || [];
       if (!services.length) return h('span', {class: 'text-sm'}, '-');
       const first = services[0];
       const rest = services.slice(1);
@@ -212,20 +192,20 @@ const columns: TableColumn<Inquiry>[] = [
       const tooltipText = rest
         .map(
           (s) =>
-            `${s.serviceName?.toLowerCase() || ''}\n${
-              s.serviceQuantity ?? 1
-            }x • ${s.date || ''}`
+            `${s.name?.toLowerCase() || ''}\n${s.quantity ?? 1}x • ${
+              s.date || ''
+            }`
         )
         .join('\n\n');
 
       return h('div', {class: 'flex items-center gap-1'}, [
         first &&
           h('div', {class: 'text-sm leading-tight'}, [
-            h('p', {class: 'lowercase'}, first.serviceName || '-'),
+            h('p', {class: 'lowercase'}, first.name || '-'),
             h(
               'p',
               {class: 'text-xs text-gray-500'},
-              `${first.serviceQuantity ?? 1}x • ${first.date || ''}`
+              `${first.quantity ?? 1}x • ${first.date || ''}`
             ),
           ]),
         rest.length &&
@@ -242,13 +222,12 @@ const columns: TableColumn<Inquiry>[] = [
     },
   },
   {
-    id: 'products',
     header: 'Products',
     cell: ({row}) => {
       const UTooltip = resolveComponent('UTooltip');
       const UButton = resolveComponent('UButton');
 
-      const products = row.original.inquiryProduct || [];
+      const products = row.original.inquiryProducts || [];
       if (!products.length) return h('span', {class: 'text-sm'}, '-');
       const first = products[0];
       const rest = products.slice(1);
@@ -256,18 +235,20 @@ const columns: TableColumn<Inquiry>[] = [
       const tooltipText = rest
         .map(
           (p) =>
-            `${p.productName?.toLowerCase() || ''}\n${p.productQuantity ?? 1}x`
+            `${p.name?.toLowerCase() || ''}\n${p.quantity ?? 1}x • ${
+              p.date || ''
+            }`
         )
         .join('\n\n');
 
       return h('div', {class: 'flex items-center gap-1'}, [
         first &&
           h('div', {class: 'text-sm leading-tight'}, [
-            h('p', {class: 'lowercase'}, first.productName || '-'),
+            h('p', {class: 'lowercase'}, first.name || '-'),
             h(
               'p',
               {class: 'text-xs text-gray-500'},
-              `${first.productQuantity ?? 1}x`
+              `${first.quantity ?? 1}x • ${first.date || ''}`
             ),
           ]),
         rest.length &&
@@ -283,7 +264,6 @@ const columns: TableColumn<Inquiry>[] = [
       ]);
     },
   },
-
   {
     accessorKey: 'status',
     header: 'Status',

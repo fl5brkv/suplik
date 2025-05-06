@@ -16,7 +16,7 @@ export default eventHandler(async (event) => {
   const updated = await useDrizzle()
     .update(tables.clients)
     .set(result.data)
-    .where(eq(tables.clients.clientId, result.data.clientId));
+    .where(eq(tables.clients.id, result.data.id));
 
   if (!updated)
     throw createError({

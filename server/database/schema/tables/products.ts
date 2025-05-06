@@ -3,14 +3,14 @@ import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {suppliers} from './suppliers';
 import {z} from 'zod';
-import { inquiryProducts } from './inquiryProducts';
+import {inquiryProducts} from './inquiryProducts';
 
 export const products = sqliteTable('products', {
-  productId: integer('product_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   // supplierId: integer('supplier_id')
-  //  .references(() => suppliers.supplierId, {
+  //  .references(() => suppliers.id, {
   //    onDelete: 'cascade',
   //  })
   //  .notNull(), // this cant be on delete cascade
@@ -18,7 +18,8 @@ export const products = sqliteTable('products', {
   unitPrice: text('unit_price'),
   quantity: integer('quantity').default(0).notNull(),
   reserved: integer('reserved').default(0).notNull(),
-  details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  group: text('group').notNull(),
+  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -29,7 +30,7 @@ export const products = sqliteTable('products', {
 });
 
 export const productSelectSchema = createSelectSchema(products).pick({
-  productId: true,
+  id: true,
   name: true,
-  details: true,
+  group: true,
 });

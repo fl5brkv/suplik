@@ -1,10 +1,11 @@
 import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
-import { inquiries } from './inquiries';
+import {inquiries} from './inquiries';
+import {z} from 'zod';
 
 export const clients = sqliteTable('clients', {
-  clientId: integer('client_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   firstName: text('first_name').notNull(),
@@ -23,7 +24,7 @@ export const clients = sqliteTable('clients', {
 });
 
 export const clientSelectSchema = createSelectSchema(clients).pick({
-  clientId: true,
+  id: true,
   firstName: true,
   lastName: true,
   email: true,
@@ -32,17 +33,40 @@ export const clientSelectSchema = createSelectSchema(clients).pick({
   companyNumber: true,
 });
 
-export const clientInsertSchema = createInsertSchema(clients).pick({
-  firstName: true,
-  lastName: true,
-  email: true,
-  phoneNumber: true,
-  company: true,
-  companyNumber: true,
-});
+export const clientInsertSchema = createSelectSchema(clients)
+  .pick({
+    firstName: true,
+    lastName: true,
+    email: true,
+    phoneNumber: true,
+    company: true,
+    companyNumber: true,
+  })
+  .extend({
+    firstName: z
+      .string()
+      .min(1, {
+        message: 'First name is required',
+      })
+      .regex(/^[A-Za-z]+$/, {
+        message: 'First name must contain only alphabets',
+      }),
+    lastName: z
+      .string()
+      .min(2, {
+        message: 'Last name is required',
+      })
+      .regex(/^[A-Za-z]+$/, {
+        message: 'Last name must contain only alphabets',
+      }),
+    email: z.string().email({
+      message: 'Invalid email address',
+    }),
+    phoneNumber: z.string().min(1, {message: 'Phone number is required'}),
+  });
 
 export const clientUpdateSchema = createSelectSchema(clients).pick({
-  clientId: true,
+  id: true,
   firstName: true,
   lastName: true,
   email: true,
@@ -52,5 +76,5 @@ export const clientUpdateSchema = createSelectSchema(clients).pick({
 });
 
 export const clientDeleteSchema = createSelectSchema(clients).pick({
-  clientId: true,
+  id: true,
 });

@@ -3,89 +3,74 @@ export default eventHandler(async (event) => {
 
   const selected = await useDrizzle()
     .select({
-      inquiryId: tables.inquiries.inquiryId,
+      id: tables.inquiries.id,
       clientId: tables.inquiries.clientId,
       status: tables.inquiries.status,
       additionalInfo: tables.inquiries.additionalInfo,
-      firstName: tables.clients.firstName,
-      lastName: tables.clients.lastName,
-      email: tables.clients.email,
-      serviceId: tables.inquiryServices.serviceId,
-      serviceQuantity: tables.inquiryServices.quantity,
-      date: tables.inquiryServices.date,
-      productId: tables.inquiryProducts.productId,
-      productQuantity: tables.inquiryProducts.quantity,
-      serviceName: tables.services.name,
-      productName: tables.products.name,
+      client: {
+        firstName: tables.clients.firstName,
+        lastName: tables.clients.lastName,
+        email: tables.clients.email,
+      },
+      inquiryService: {
+        serviceId: tables.inquiryServices.inquiryId,
+        quantity: tables.inquiryServices.quantity,
+        date: tables.inquiryServices.date,
+        name: tables.services.name,
+      },
+      inquiryProduct: {
+        productId: tables.inquiryProducts.productId,
+        quantity: tables.inquiryProducts.quantity,
+        date: tables.inquiryProducts.date,
+        name: tables.products.name,
+      },
     })
     .from(tables.inquiries)
-    .leftJoin(
-      tables.clients,
-      eq(tables.inquiries.clientId, tables.clients.clientId)
-    )
+    .leftJoin(tables.clients, eq(tables.inquiries.clientId, tables.clients.id))
     .leftJoin(
       tables.inquiryServices,
-      eq(tables.inquiries.inquiryId, tables.inquiryServices.inquiryId)
+      eq(tables.inquiries.id, tables.inquiryServices.inquiryId)
     )
     .leftJoin(
       tables.inquiryProducts,
-      eq(tables.inquiries.inquiryId, tables.inquiryProducts.inquiryId)
+      eq(tables.inquiries.id, tables.inquiryProducts.inquiryId)
     )
     .leftJoin(
       tables.services,
-      eq(tables.inquiryServices.serviceId, tables.services.serviceId)
+      eq(tables.inquiryServices.serviceId, tables.services.id)
     )
     .leftJoin(
       tables.products,
-      eq(tables.inquiryProducts.productId, tables.products.productId)
+      eq(tables.inquiryProducts.productId, tables.products.id)
     );
 
-  const byInquiryId = new Map();
+  const inquiriesMap = new Map();
 
-  for (const row of selected) {
-    if (!byInquiryId.has(row.inquiryId)) {
-      byInquiryId.set(row.inquiryId, {
-        inquiryId: row.inquiryId,
-        clientId: row.clientId,
-        status: row.status,
-        additionalInfo: row.additionalInfo,
-        client: {
-          firstName: row.firstName,
-          lastName: row.lastName,
-          email: row.email,
-        },
-        inquiryService: [],
-        inquiryProduct: [],
+  for (const entry of selected) {
+    if (!inquiriesMap.has(entry.id)) {
+      inquiriesMap.set(entry.id, {
+        id: entry.id,
+        clientId: entry.clientId,
+        status: entry.status,
+        additionalInfo: entry.additionalInfo,
+        client: entry.client,
+        inquiryServices: [],
+        inquiryProducts: [],
       });
     }
 
-    const inquiry = byInquiryId.get(row.inquiryId);
+    const inquiry = inquiriesMap.get(entry.id);
 
-    if (
-      row.serviceId &&
-      !inquiry.inquiryService.some((s: any) => s.serviceId === row.serviceId)
-    ) {
-      inquiry.inquiryService.push({
-        serviceId: row.serviceId,
-        serviceQuantity: row.serviceQuantity,
-        date: row.date,
-        serviceName: row.serviceName,
-      });
+    if (entry.inquiryService && entry.inquiryService.serviceId !== null) {
+      inquiry.inquiryServices.push(entry.inquiryService);
     }
 
-    if (
-      row.productId &&
-      !inquiry.inquiryProduct.some((p: any) => p.productId === row.productId)
-    ) {
-      inquiry.inquiryProduct.push({
-        productId: row.productId,
-        productQuantity: row.productQuantity,
-        productName: row.productName,
-      });
+    if (entry.inquiryProduct && entry.inquiryProduct.productId !== null) {
+      inquiry.inquiryProducts.push(entry.inquiryProduct);
     }
   }
 
-  const nestedSelected = Array.from(byInquiryId.values());
+  const result = Array.from(inquiriesMap.values());
 
-  return nestedSelected;
+  return result;
 });

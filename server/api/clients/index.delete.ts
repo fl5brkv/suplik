@@ -15,7 +15,7 @@ export default eventHandler(async (event) => {
 
   const deleted = await useDrizzle()
     .delete(tables.clients)
-    .where(eq(tables.clients.clientId, result.data.clientId));
+    .where(eq(tables.clients.id, result.data.id));
 
   if (!deleted)
     throw createError({

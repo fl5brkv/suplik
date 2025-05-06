@@ -16,11 +16,11 @@ import {serviceSelectSchema} from './services';
 import {quotationSelectSchema} from './quotations';
 
 export const inquiries = sqliteTable('inquiries', {
-  inquiryId: integer('inquiry_id').primaryKey({
+  id: integer('id').primaryKey({
     autoIncrement: true,
   }),
   clientId: integer('client_id')
-    .references(() => clients.clientId, {onDelete: 'cascade'})
+    .references(() => clients.id, {onDelete: 'cascade'})
     .notNull(),
   status: text('status', {
     enum: ['new', 'quoted', 'rejected'],
@@ -39,7 +39,7 @@ export const inquiries = sqliteTable('inquiries', {
 
 export const inquirySelectSchema = createSelectSchema(inquiries)
   .pick({
-    inquiryId: true,
+    id: true,
     clientId: true,
     status: true,
     additionalInfo: true,
@@ -50,20 +50,26 @@ export const inquirySelectSchema = createSelectSchema(inquiries)
       lastName: true,
       email: true,
     }),
-    inquiryService: inquiryServiceSelectSchema,
-    inquiryProduct: inquiryProductSelectSchema,
-    service: serviceSelectSchema.pick({
-      serviceId: true,
-    }),
-    product: productSelectSchema.pick({
-      productId: true,
-    }),
+    inquiryServices: z.array(
+      inquiryServiceSelectSchema.extend({
+        name: serviceSelectSchema.pick({name: true}).shape.name,
+      })
+    ).optional(),
+    inquiryProducts: z.array(
+      inquiryProductSelectSchema.extend({
+        name: productSelectSchema.pick({name: true}).shape.name,
+      })
+    ).optional(),
   });
+
+export type InquirySelect = z.infer<typeof inquirySelectSchema>;
 
 export const inquiryInsertSchema = createInsertSchema(inquiries)
   .pick({additionalInfo: true})
   .extend({
     client: clientInsertSchema,
-    inquiryService: z.array(inquiryServiceInsertSchema).optional(),
-    inquiryProduct: z.array(inquiryProductInsertSchema).optional(),
+    inquiryServices: z.array(inquiryServiceInsertSchema).optional(),
+    inquiryProducts: z.array(inquiryProductInsertSchema).optional(),
   });
+
+export type InquiryInsert = z.infer<typeof inquiryInsertSchema>;

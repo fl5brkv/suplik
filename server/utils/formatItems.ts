@@ -13,11 +13,11 @@ export const formatItems = (
   const grouped = new Map<string, USelectServicesProducts[]>();
 
   selected.forEach((item) => {
-    const group = item.details?.group;
+    const group = item.group;
     const entry: USelectServicesProducts = {
       type: 'item',
       label: item.name,
-      id: ('serviceId' in item ? item.serviceId : item.productId) as number,
+      id: ('serviceId' in item ? item.serviceId : item.id) as number,
     };
 
     if (!grouped.has(group)) {
