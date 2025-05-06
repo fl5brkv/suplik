@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1096db4b-b056-4a58-a1a1-1412fdefba0b",
+  "id": "07811cae-d109-4da3-9343-621f6a425648",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "clients": {
@@ -79,8 +79,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "inquiries": {
-      "name": "inquiries",
+    "item_product_details": {
+      "name": "item_product_details",
       "columns": {
         "id": {
           "name": "id",
@@ -89,24 +89,30 @@
           "notNull": true,
           "autoincrement": true
         },
-        "client_id": {
-          "name": "client_id",
+        "item_id": {
+          "name": "item_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "status": {
-          "name": "status",
-          "type": "text",
+        "supplier_id": {
+          "name": "supplier_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'new'"
+          "autoincrement": false
         },
-        "additional_info": {
-          "name": "additional_info",
-          "type": "text",
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "reserved": {
+          "name": "reserved",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -130,17 +136,30 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "inquiries_client_id_clients_id_fk": {
-          "name": "inquiries_client_id_clients_id_fk",
-          "tableFrom": "inquiries",
-          "tableTo": "clients",
+        "item_product_details_item_id_items_id_fk": {
+          "name": "item_product_details_item_id_items_id_fk",
+          "tableFrom": "item_product_details",
+          "tableTo": "items",
           "columnsFrom": [
-            "client_id"
+            "item_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "item_product_details_supplier_id_suppliers_id_fk": {
+          "name": "item_product_details_supplier_id_suppliers_id_fk",
+          "tableFrom": "item_product_details",
+          "tableTo": "suppliers",
+          "columnsFrom": [
+            "supplier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -148,8 +167,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "inquiry_products": {
-      "name": "inquiry_products",
+    "items": {
+      "name": "items",
       "columns": {
         "id": {
           "name": "id",
@@ -158,181 +177,12 @@
           "notNull": true,
           "autoincrement": true
         },
-        "inquiry_id": {
-          "name": "inquiry_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "product_id": {
-          "name": "product_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "date": {
-          "name": "date",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "inquiry_products_inquiry_id_inquiries_id_fk": {
-          "name": "inquiry_products_inquiry_id_inquiries_id_fk",
-          "tableFrom": "inquiry_products",
-          "tableTo": "inquiries",
-          "columnsFrom": [
-            "inquiry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "inquiry_products_product_id_products_id_fk": {
-          "name": "inquiry_products_product_id_products_id_fk",
-          "tableFrom": "inquiry_products",
-          "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "inquiry_services": {
-      "name": "inquiry_services",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "inquiry_id": {
-          "name": "inquiry_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "service_id": {
-          "name": "service_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "date": {
-          "name": "date",
+        "type": {
+          "name": "type",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "inquiry_services_inquiry_id_inquiries_id_fk": {
-          "name": "inquiry_services_inquiry_id_inquiries_id_fk",
-          "tableFrom": "inquiry_services",
-          "tableTo": "inquiries",
-          "columnsFrom": [
-            "inquiry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "inquiry_services_service_id_services_id_fk": {
-          "name": "inquiry_services_service_id_services_id_fk",
-          "tableFrom": "inquiry_services",
-          "tableTo": "services",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "products": {
-      "name": "products",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
         },
         "name": {
           "name": "name",
@@ -347,22 +197,6 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "reserved": {
-          "name": "reserved",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "group": {
           "name": "group",
@@ -394,8 +228,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "quotation_products": {
-      "name": "quotation_products",
+    "order_items": {
+      "name": "order_items",
       "columns": {
         "id": {
           "name": "id",
@@ -404,15 +238,15 @@
           "notNull": true,
           "autoincrement": true
         },
-        "quotation_id": {
-          "name": "quotation_id",
+        "order_id": {
+          "name": "order_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "product_id": {
-          "name": "product_id",
+        "item_id": {
+          "name": "item_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -425,16 +259,9 @@
           "notNull": true,
           "autoincrement": false
         },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
         "date": {
           "name": "date",
-          "type": "text",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -458,12 +285,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "quotation_products_quotation_id_quotations_id_fk": {
-          "name": "quotation_products_quotation_id_quotations_id_fk",
-          "tableFrom": "quotation_products",
-          "tableTo": "quotations",
+        "order_items_order_id_orders_id_fk": {
+          "name": "order_items_order_id_orders_id_fk",
+          "tableFrom": "order_items",
+          "tableTo": "orders",
           "columnsFrom": [
-            "quotation_id"
+            "order_id"
           ],
           "columnsTo": [
             "id"
@@ -471,17 +298,17 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "quotation_products_product_id_products_id_fk": {
-          "name": "quotation_products_product_id_products_id_fk",
-          "tableFrom": "quotation_products",
-          "tableTo": "products",
+        "order_items_item_id_items_id_fk": {
+          "name": "order_items_item_id_items_id_fk",
+          "tableFrom": "order_items",
+          "tableTo": "items",
           "columnsFrom": [
-            "product_id"
+            "item_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
@@ -489,8 +316,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "quotation_services": {
-      "name": "quotation_services",
+    "orders": {
+      "name": "orders",
       "columns": {
         "id": {
           "name": "id",
@@ -499,121 +326,28 @@
           "notNull": true,
           "autoincrement": true
         },
-        "quotation_id": {
-          "name": "quotation_id",
+        "client_id": {
+          "name": "client_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "service_id": {
-          "name": "service_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "quantity": {
-          "name": "quantity",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "date": {
-          "name": "date",
+        "type": {
+          "name": "type",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
           "autoincrement": false,
-          "default": "(unixepoch())"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "quotation_services_quotation_id_quotations_id_fk": {
-          "name": "quotation_services_quotation_id_quotations_id_fk",
-          "tableFrom": "quotation_services",
-          "tableTo": "quotations",
-          "columnsFrom": [
-            "quotation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "quotation_services_service_id_services_id_fk": {
-          "name": "quotation_services_service_id_services_id_fk",
-          "tableFrom": "quotation_services",
-          "tableTo": "services",
-          "columnsFrom": [
-            "service_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "quotations": {
-      "name": "quotations",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "inquiry_id": {
-          "name": "inquiry_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "total_price": {
-          "name": "total_price",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
+          "default": "'inquiry'"
         },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'new'"
         },
         "internal_note": {
           "name": "internal_note",
@@ -646,22 +380,14 @@
           "default": "(unixepoch())"
         }
       },
-      "indexes": {
-        "quotations_inquiry_id_unique": {
-          "name": "quotations_inquiry_id_unique",
-          "columns": [
-            "inquiry_id"
-          ],
-          "isUnique": true
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
-        "quotations_inquiry_id_inquiries_id_fk": {
-          "name": "quotations_inquiry_id_inquiries_id_fk",
-          "tableFrom": "quotations",
-          "tableTo": "inquiries",
+        "orders_client_id_clients_id_fk": {
+          "name": "orders_client_id_clients_id_fk",
+          "tableFrom": "orders",
+          "tableTo": "clients",
           "columnsFrom": [
-            "inquiry_id"
+            "client_id"
           ],
           "columnsTo": [
             "id"
@@ -670,60 +396,6 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "services": {
-      "name": "services",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "unit_price": {
-          "name": "unit_price",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "group": {
-          "name": "group",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}

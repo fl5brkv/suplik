@@ -1,4 +1,4 @@
-import {clientUpdateSchema} from '~~/server/database/schema/tables/clients';
+import {clientUpdateSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);

@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import type {InquirySelect} from '~~/server/database/schema/tables/inquiries';
+import type {InquirySelect} from '~~/server/database/schema';
 
 const props = defineProps<{inquiry: InquirySelect; open: boolean}>();
 

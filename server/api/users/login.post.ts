@@ -1,4 +1,4 @@
-import {loginSchema} from '~~/server/database/schema/tables/users';
+import {loginSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>

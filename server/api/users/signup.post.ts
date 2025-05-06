@@ -1,4 +1,4 @@
-import {signupSchema} from '~~/server/database/schema/tables/users';
+import {signupSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
