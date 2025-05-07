@@ -1,14 +1,12 @@
-import {z} from 'zod';
-import {serviceSelectSchema} from '../database/schema/tables/services';
-import {productSelectSchema} from '../database/schema/tables/products';
-import {USelectServicesProducts} from '~~/types/ui';
+import {type ItemSelect} from '../database/schema';
 
-type Selected =
-  | z.infer<typeof serviceSelectSchema>
-  | z.infer<typeof productSelectSchema>;
+type USelectServicesProducts =
+  | {type: 'label'; label: string}
+  | {type: 'item'; label: string; id: number}
+  | {type: 'separator'};
 
 export const formatItems = (
-  selected: Selected[]
+  selected: ItemSelect[]
 ): USelectServicesProducts[] => {
   const grouped = new Map<string, USelectServicesProducts[]>();
 

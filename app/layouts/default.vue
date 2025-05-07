@@ -56,7 +56,22 @@ const links = [
       label: 'Inquiries',
       icon: 'lucide:hand-helping',
       to: '/inquiries',
-      badge: '4',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: 'Quotations',
+      icon: 'lucide:file-pen-line',
+      to: '/quotations',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: 'Jobs',
+      icon: 'lucide:hammer',
+      to: '/jobs',
       onSelect: () => {
         open.value = false;
       },

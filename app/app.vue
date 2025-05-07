@@ -22,8 +22,7 @@ useHead({
 });
 
 const title = 'Stodo';
-const description =
-  'Stodo is a CRM system';
+const description = 'Stodo is a CRM system';
 
 useSeoMeta({
   title,

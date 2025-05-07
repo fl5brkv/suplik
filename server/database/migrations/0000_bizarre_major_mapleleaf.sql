@@ -37,7 +37,6 @@ CREATE TABLE `order_items` (
 	`order_id` integer NOT NULL,
 	`item_id` integer NOT NULL,
 	`quantity` integer NOT NULL,
-	`date` integer,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON UPDATE no action ON DELETE cascade,

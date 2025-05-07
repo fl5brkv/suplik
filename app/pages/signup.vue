@@ -7,7 +7,7 @@
         description="Enter credentials of new admin / technician"
         icon="i-lucide-user"
         :fields="fields"
-        @submit="onSubmit" />
+        @submit="submit" />
     </UPageCard>
   </div>
 </template>
@@ -15,7 +15,7 @@
 <script setup lang="ts">
 import * as z from 'zod';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {signupSchema} from '~~/server/database/schema/tables/users';
+import {signupSchema} from '~~/server/database/schema';
 import type {NuxtError} from '#app';
 
 const toast = useToast();
@@ -37,7 +37,7 @@ const fields = ref([
 
 type Schema = z.output<typeof signupSchema>;
 
-const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
+const submit = async (payload: FormSubmitEvent<Schema>) => {
   try {
     await $fetch('/api/users/signup', {
       method: 'POST',

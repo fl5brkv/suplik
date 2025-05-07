@@ -1,8 +1,4 @@
 <template>
-  <MyQuotationsInsert
-    v-model:open="showQuotationsInsert"
-    :inquiry="selectedInquiry" />
-
   <UDashboardPanel id="inquiries">
     <template #header>
       <UDashboardNavbar title="Inquiries">
@@ -11,7 +7,7 @@
         </template>
 
         <template #right>
-          <!-- add new -->
+          <MyOrderInsert />
         </template>
       </UDashboardNavbar>
     </template>
@@ -48,16 +44,14 @@
         }">
         <template #expanded="{row}">
           <pre>{{ row.original }}</pre>
-        </template></UTable
-      >
+        </template>
+      </UTable>
 
       <div
         class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
-          {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }}
-          of
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
-          selected.
+          returned.
         </div>
 
         <div class="flex items-center gap-1.5">
@@ -75,41 +69,41 @@
 </template>
 
 <script setup lang="ts">
-import {UBadge} from '#components';
+import {MyQuotationInsert} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import type {InquirySelect} from '~~/server/database/schema/tables/inquiries';
+import {type OrderSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
+const UBadge = resolveComponent('UBadge');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
-const UCheckbox = resolveComponent('UCheckbox');
 
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const showQuotationsInsert = ref(false);
-const selectedInquiry = ref<InquirySelect>({} as InquirySelect);
+const {data, status} = await useFetch<OrderSelect[]>(
+  '/api/orders?type=inquiry',
+  {
+    method: 'get',
+    lazy: true,
+  }
+);
 
-const {data, status} = await useFetch<InquirySelect[]>('/api/inquiries', {
-  method: 'get',
-  lazy: true,
-});
-
-function getRowItems(row: Row<InquirySelect>) {
+const getRowItems = (row: Row<OrderSelect>) => {
   return [
     {
       type: 'label',
       label: 'Actions',
     },
     {
-      label: 'Copy customer ID',
+      label: 'Copy order ID',
       icon: 'i-lucide-copy',
       onSelect() {
         navigator.clipboard.writeText(row.original.id.toString());
         toast.add({
           title: 'Copied to clipboard',
-          description: 'Customer ID copied to clipboard',
+          description: 'Order ID copied to clipboard',
         });
       },
     },
@@ -120,48 +114,54 @@ function getRowItems(row: Row<InquirySelect>) {
       label: 'Provide a quote',
       icon: 'lucide:file-pen',
       onSelect() {
-        selectedInquiry.value = row.original;
-        showQuotationsInsert.value = true;
+        const overlay = useOverlay();
+
+        overlay.create(MyQuotationInsert, {
+          props: {
+            order: row.original,
+          },
+          defaultOpen: true,
+        });
       },
     },
     {
-      label: 'Delete inquiry',
+      label: 'Delete order',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
         toast.add({
-          title: 'Inquiry deleted',
-          description: 'The inquiry has been deleted.',
+          title: 'Order deleted',
+          description: 'The order has been deleted.',
         });
       },
     },
   ];
-}
+};
 
-const columns: TableColumn<InquirySelect>[] = [
+const columns: TableColumn<OrderSelect>[] = [
   {
-    id: 'select',
-    header: ({table}) =>
-      h(UCheckbox, {
-        modelValue: table.getIsSomePageRowsSelected()
-          ? 'indeterminate'
-          : table.getIsAllPageRowsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          table.toggleAllPageRowsSelected(!!value),
-        ariaLabel: 'Select all',
-      }),
+    id: 'expand',
+    header: 'More',
     cell: ({row}) =>
-      h(UCheckbox, {
-        modelValue: row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
-          row.toggleSelected(!!value),
-        ariaLabel: 'Select row',
+      h(UButton, {
+        color: 'neutral',
+        variant: 'ghost',
+        icon: 'i-lucide-chevron-down',
+        square: true,
+        'aria-label': 'Expand',
+        ui: {
+          leadingIcon: [
+            'transition-transform',
+            row.getIsExpanded() ? 'duration-200 rotate-180' : '',
+          ],
+        },
+        onClick: () => row.toggleExpanded(),
       }),
   },
   {
-    accessorKey: 'inquiryId',
+    accessorKey: 'id',
     header: 'ID',
-    cell: ({row}) => `Inquiry #${row.original.id}`,
+    cell: ({row}) => `#${row.original.id}`,
   },
   {
     accessorKey: 'client',
@@ -179,99 +179,15 @@ const columns: TableColumn<InquirySelect>[] = [
     },
   },
   {
-    header: 'Services',
-    cell: ({row}) => {
-      const UTooltip = resolveComponent('UTooltip');
-      const UButton = resolveComponent('UButton');
-
-      const services = row.original.inquiryServices || [];
-      if (!services.length) return h('span', {class: 'text-sm'}, '-');
-      const first = services[0];
-      const rest = services.slice(1);
-
-      const tooltipText = rest
-        .map(
-          (s) =>
-            `${s.name?.toLowerCase() || ''}\n${s.quantity ?? 1}x • ${
-              s.date || ''
-            }`
-        )
-        .join('\n\n');
-
-      return h('div', {class: 'flex items-center gap-1'}, [
-        first &&
-          h('div', {class: 'text-sm leading-tight'}, [
-            h('p', {class: 'lowercase'}, first.name || '-'),
-            h(
-              'p',
-              {class: 'text-xs text-gray-500'},
-              `${first.quantity ?? 1}x • ${first.date || ''}`
-            ),
-          ]),
-        rest.length &&
-          h(UTooltip, {text: tooltipText}, () =>
-            h(UButton, {
-              icon: 'i-lucide-plus',
-              size: '2xs',
-              variant: 'ghost',
-              color: 'neutral',
-              class: 'cursor-default',
-            })
-          ),
-      ]);
-    },
-  },
-  {
-    header: 'Products',
-    cell: ({row}) => {
-      const UTooltip = resolveComponent('UTooltip');
-      const UButton = resolveComponent('UButton');
-
-      const products = row.original.inquiryProducts || [];
-      if (!products.length) return h('span', {class: 'text-sm'}, '-');
-      const first = products[0];
-      const rest = products.slice(1);
-
-      const tooltipText = rest
-        .map(
-          (p) =>
-            `${p.name?.toLowerCase() || ''}\n${p.quantity ?? 1}x • ${
-              p.date || ''
-            }`
-        )
-        .join('\n\n');
-
-      return h('div', {class: 'flex items-center gap-1'}, [
-        first &&
-          h('div', {class: 'text-sm leading-tight'}, [
-            h('p', {class: 'lowercase'}, first.name || '-'),
-            h(
-              'p',
-              {class: 'text-xs text-gray-500'},
-              `${first.quantity ?? 1}x • ${first.date || ''}`
-            ),
-          ]),
-        rest.length &&
-          h(UTooltip, {text: tooltipText}, () =>
-            h(UButton, {
-              icon: 'i-lucide-plus',
-              size: '2xs',
-              variant: 'ghost',
-              color: 'neutral',
-              class: 'cursor-default',
-            })
-          ),
-      ]);
-    },
-  },
-  {
     accessorKey: 'status',
     header: 'Status',
     cell: ({row}) => {
       const color = {
         new: 'success' as const,
+        declined: 'error' as const,
         quoted: 'info' as const,
-        rejected: 'error' as const,
+        sent: 'warning' as const,
+        accepted: 'neutral' as const,
       }[row.original.status];
       return h(
         UBadge,
@@ -279,6 +195,32 @@ const columns: TableColumn<InquirySelect>[] = [
         () => row.original.status
       );
     },
+  },
+  {
+    id: 'items',
+    header: 'Items',
+    cell: ({row}) => {
+      const items = row.original.orderItems ?? [];
+
+      if (items.length === 0) return '—';
+
+      const first = items[0]?.name ?? '';
+      const second = items[1]?.name?.slice(0, 5) ?? '';
+      const preview = second ? `${first}, ${second}...` : first;
+
+      return h(
+        'span',
+        {
+          title: items.map((i) => i.name).join(', '),
+        },
+        preview
+      );
+    },
+  },
+
+  {
+    accessorKey: 'externalNote',
+    header: 'External Note',
   },
   {
     id: 'actions',

@@ -1,57 +1,3 @@
-<script setup lang="ts">
-import {reactive} from 'vue';
-import type {FormSubmitEvent} from '@nuxt/ui';
-import {type OrderInsert} from '~~/server/database/schema';
-
-const toast = useToast();
-
-definePageMeta({
-  layout: false,
-});
-
-const state = reactive<OrderInsert>({
-  client: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    company: '',
-    companyNumber: '',
-  },
-  orderItems: [
-    {
-      itemId: 0,
-      quantity: 0,
-      date: undefined,
-    },
-  ],
-  externalNote: '',
-});
-
-function addItem() {
-  state.orderItems.push({
-    itemId: 0,
-    quantity: 0,
-    date: undefined,
-  });
-}
-
-function removeItem() {
-  if (state.orderItems.length > 1) {
-    state.orderItems.pop();
-  }
-}
-
-async function onSubmit(event: FormSubmitEvent<OrderInsert>) {
-  toast.add({
-    title: 'Success',
-    description: 'Order submitted.',
-    color: 'success',
-  });
-  console.log(event.data);
-}
-</script>
-
 <template>
   <UForm :state="state" class="space-y-6" @submit="onSubmit">
     <h2 class="font-bold text-lg">Client Information</h2>
@@ -88,9 +34,7 @@ async function onSubmit(event: FormSubmitEvent<OrderInsert>) {
         required>
         <UInput v-model="item.quantity" type="number" min="1" />
       </UFormField>
-      <UFormField label="Date" :name="`orderItems.${idx}.date`">
-        <UCalendar v-model="item.date" />
-      </UFormField>
+
       <UButton
         color="error"
         variant="ghost"
@@ -111,3 +55,54 @@ async function onSubmit(event: FormSubmitEvent<OrderInsert>) {
     <UButton type="submit" color="primary"> Submit Order </UButton>
   </UForm>
 </template>
+
+<script setup lang="ts">
+import type {FormSubmitEvent} from '@nuxt/ui';
+import {type OrderInsert} from '~~/server/database/schema';
+
+const toast = useToast();
+
+definePageMeta({
+  layout: false,
+});
+
+const state = reactive<OrderInsert>({
+  client: {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    company: '',
+    companyNumber: '',
+  },
+  orderItems: [
+    {
+      itemId: 0,
+      quantity: 0,
+    },
+  ],
+  externalNote: '',
+});
+
+function addItem() {
+  state.orderItems.push({
+    itemId: 0,
+    quantity: 0,
+  });
+}
+
+function removeItem() {
+  if (state.orderItems.length > 1) {
+    state.orderItems.pop();
+  }
+}
+
+async function onSubmit(event: FormSubmitEvent<OrderInsert>) {
+  toast.add({
+    title: 'Success',
+    description: 'Order submitted.',
+    color: 'success',
+  });
+  console.log(event.data);
+}
+</script>

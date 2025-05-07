@@ -98,6 +98,14 @@ export const items = sqliteTable('items', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const itemSelectSchema = createSelectSchema(items).pick({
+  id: true,
+  name: true,
+  group: true,
+});
+
+export type ItemSelect = z.infer<typeof itemSelectSchema>;
 // #endregion
 
 // #region itemProductDetails
@@ -135,7 +143,6 @@ export const orderItems = sqliteTable('order_items', {
     .references(() => items.id)
     .notNull(),
   quantity: integer('quantity').notNull(),
-  date: integer('date', {mode: 'timestamp'}),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -145,11 +152,22 @@ export const orderItems = sqliteTable('order_items', {
     .notNull(),
 });
 
+export const orderItemSelectSchema = createSelectSchema(orderItems).pick({
+  itemId: true,
+  quantity: true,
+});
+
 export const orderItemInsertSchema = createInsertSchema(orderItems).pick({
   itemId: true,
   quantity: true,
-  date: true,
 });
+
+export const orderItemUpdateSchema = createSelectSchema(orderItems).pick({
+  itemId: true,
+  quantity: true,
+});
+
+export type OrderItem = z.infer<typeof orderItemUpdateSchema>;
 // #endregion
 
 // #region orders
@@ -164,7 +182,7 @@ export const orders = sqliteTable('orders', {
     .default('inquiry')
     .notNull(),
   status: text('status', {
-    enum: ['new', 'declined', 'quoted', 'sent', 'accepted'],
+    enum: ['new', 'declined', 'draft', 'sent', 'accepted'],
   })
     .default('new')
     .notNull(),
@@ -179,6 +197,29 @@ export const orders = sqliteTable('orders', {
     .notNull(),
 });
 
+export const orderSelectSchema = createSelectSchema(orders)
+  .pick({
+    id: true,
+    type: true,
+    status: true,
+    internalNote: true,
+    externalNote: true,
+  })
+  .extend({
+    client: clientSelectSchema.pick({
+      firstName: true,
+      lastName: true,
+      email: true,
+    }),
+    orderItems: z.array(
+      orderItemSelectSchema.extend({
+        name: itemSelectSchema.pick({name: true}).shape.name,
+      })
+    ),
+  });
+
+export type OrderSelect = z.infer<typeof orderSelectSchema>;
+
 export const orderInsertSchema = createInsertSchema(orders)
   .pick({externalNote: true})
   .extend({
@@ -187,6 +228,23 @@ export const orderInsertSchema = createInsertSchema(orders)
   });
 
 export type OrderInsert = z.infer<typeof orderInsertSchema>;
+
+export const orderUpdateSchema = createSelectSchema(orders)
+  .pick({
+    id: true,
+    type: true,
+    status: true,
+    internalNote: true,
+    externalNote: true,
+  })
+  .extend({
+    client: clientUpdateSchema.pick({
+      email: true,
+    }),
+    orderItems: z.array(orderItemUpdateSchema),
+  });
+
+export type OrderUpdate = z.infer<typeof orderUpdateSchema>;
 // #endregion
 
 // #region suppliers
