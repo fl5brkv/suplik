@@ -1,7 +1,38 @@
 import {sql} from 'drizzle-orm';
-import {sqliteTable, text, integer} from 'drizzle-orm/sqlite-core';
+import {sqliteTable, text, integer, blob} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {z} from 'zod';
+
+// #region users
+export const users = sqliteTable('users', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  role: text('role', {
+    enum: ['admin', 'technician'],
+  }).default('technician'),
+  email: text('email').unique().notNull(),
+  password: text('password').notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const signupSchema = createInsertSchema(users).pick({
+  email: true,
+  password: true,
+});
+// .extend({
+//   email: z.string().email({message: 'Invalid email address'}),
+// });
+
+export const loginSchema = createSelectSchema(users).pick({
+  email: true,
+  password: true,
+});
+// #endregion
 
 // #region clients
 export const clients = sqliteTable('clients', {
@@ -80,16 +111,11 @@ export const clientDeleteSchema = createSelectSchema(clients).pick({
 });
 // #endregion
 
-// #region items
-export const items = sqliteTable('items', {
-  id: integer('id').primaryKey({
-    autoIncrement: true,
-  }),
-  type: text('type', {enum: ['product', 'service']}).notNull(),
+// #region categories
+export const categories = sqliteTable('categories', {
+  id: integer('id').primaryKey({autoIncrement: true}),
   name: text('name').notNull(),
-  unitPrice: text('unit_price'),
-  group: text('group').notNull(),
-  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  type: text('type', {enum: ['product', 'service']}).notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -98,153 +124,6 @@ export const items = sqliteTable('items', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
-
-export const itemSelectSchema = createSelectSchema(items).pick({
-  id: true,
-  name: true,
-  group: true,
-});
-
-export type ItemSelect = z.infer<typeof itemSelectSchema>;
-// #endregion
-
-// #region itemProductDetails
-export const itemProductDetails = sqliteTable('item_product_details', {
-  id: integer('id').primaryKey({
-    autoIncrement: true,
-  }),
-  itemId: integer('item_id')
-    .references(() => items.id)
-    .notNull(),
-  supplierId: integer('supplier_id')
-    .references(() => suppliers.id)
-    .notNull(),
-  quantity: integer().notNull(),
-  reserved: integer(),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
-});
-// #endregion
-
-// #region orderItems
-export const orderItems = sqliteTable('order_items', {
-  id: integer('id').primaryKey({
-    autoIncrement: true,
-  }),
-  orderId: integer('order_id')
-    .references(() => orders.id, {onDelete: 'cascade'})
-    .notNull(),
-  itemId: integer('item_id')
-    .references(() => items.id)
-    .notNull(),
-  quantity: integer('quantity').notNull(),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
-});
-
-export const orderItemSelectSchema = createSelectSchema(orderItems).pick({
-  itemId: true,
-  quantity: true,
-});
-
-export const orderItemInsertSchema = createInsertSchema(orderItems).pick({
-  itemId: true,
-  quantity: true,
-});
-
-export const orderItemUpdateSchema = createSelectSchema(orderItems).pick({
-  itemId: true,
-  quantity: true,
-});
-
-export type OrderItem = z.infer<typeof orderItemUpdateSchema>;
-// #endregion
-
-// #region orders
-export const orders = sqliteTable('orders', {
-  id: integer('id').primaryKey({
-    autoIncrement: true,
-  }),
-  clientId: integer('client_id')
-    .references(() => clients.id, {onDelete: 'cascade'})
-    .notNull(),
-  type: text('type', {enum: ['inquiry', 'quotation']})
-    .default('inquiry')
-    .notNull(),
-  status: text('status', {
-    enum: ['new', 'declined', 'draft', 'sent', 'accepted'],
-  })
-    .default('new')
-    .notNull(),
-  internalNote: text('internal_note'),
-  externalNote: text('external_note'),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
-});
-
-export const orderSelectSchema = createSelectSchema(orders)
-  .pick({
-    id: true,
-    type: true,
-    status: true,
-    internalNote: true,
-    externalNote: true,
-  })
-  .extend({
-    client: clientSelectSchema.pick({
-      firstName: true,
-      lastName: true,
-      email: true,
-    }),
-    orderItems: z.array(
-      orderItemSelectSchema.extend({
-        name: itemSelectSchema.pick({name: true}).shape.name,
-      })
-    ),
-  });
-
-export type OrderSelect = z.infer<typeof orderSelectSchema>;
-
-export const orderInsertSchema = createInsertSchema(orders)
-  .pick({externalNote: true})
-  .extend({
-    client: clientInsertSchema,
-    orderItems: z.array(orderItemInsertSchema),
-  });
-
-export type OrderInsert = z.infer<typeof orderInsertSchema>;
-
-export const orderUpdateSchema = createSelectSchema(orders)
-  .pick({
-    id: true,
-    type: true,
-    status: true,
-    internalNote: true,
-    externalNote: true,
-  })
-  .extend({
-    client: clientUpdateSchema.pick({
-      email: true,
-    }),
-    orderItems: z.array(orderItemUpdateSchema),
-  });
-
-export type OrderUpdate = z.infer<typeof orderUpdateSchema>;
 // #endregion
 
 // #region suppliers
@@ -265,16 +144,56 @@ export const suppliers = sqliteTable('suppliers', {
 });
 // #endregion
 
-// #region users
-export const users = sqliteTable('users', {
-  id: integer('id').primaryKey({
-    autoIncrement: true,
-  }),
-  role: text('role', {
-    enum: ['admin', 'technician'],
-  }).default('technician'),
-  email: text('email').unique().notNull(),
-  password: text('password').notNull(),
+// #region items
+export const items = sqliteTable('items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  categoryId: integer('category_id').references(() => categories.id),
+  type: text('type', {enum: ['product', 'service']}).notNull(),
+  name: text('name').notNull(),
+  unitPrice: text('unit_price'),
+  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region productDetails
+export const productDetails = sqliteTable('product_details', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  supplierId: integer('supplier_id')
+    .references(() => suppliers.id)
+    .notNull(),
+  stock: integer('stock').default(0),
+  reserved: integer('reserved').default(0),
+  purchasePrice: text('purchase_price'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region demandItems
+export const demandItems = sqliteTable('demand_items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  demandId: integer('demand_id')
+    .references(() => demands.id, {onDelete: 'cascade'})
+    .notNull(),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -284,16 +203,222 @@ export const users = sqliteTable('users', {
     .notNull(),
 });
 
-export const signupSchema = createInsertSchema(users).pick({
-  email: true,
-  password: true,
-});
-// .extend({
-//   email: z.string().email({message: 'Invalid email address'}),
+// export const demandItemSelectSchema = createSelectSchema(demandItems).pick({
+//   itemId: true,
+//   quantity: true,
 // });
 
-export const loginSchema = createSelectSchema(users).pick({
-  email: true,
-  password: true,
+// export const demandItemInsertSchema = createInsertSchema(demandItems).pick({
+//   itemId: true,
+//   quantity: true,
+// });
+
+// export const demandItemUpdateSchema = createSelectSchema(demandItems).pick({
+//   itemId: true,
+//   quantity: true,
+// });
+
+// export type DemandItem = z.infer<typeof demandItemUpdateSchema>;
+// #endregion
+
+// #region demands
+export const demands = sqliteTable('demands', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  clientId: integer('client_id')
+    .references(() => clients.id, {onDelete: 'cascade'})
+    .notNull(),
+  status: text('status', {
+    enum: ['new', 'quoted', 'declined'],
+  })
+    .default('new')
+    .notNull(),
+  // date: text({ mode: 'json' }),
+  // address: text('address'),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+// export const demandSelectSchema = createSelectSchema(demands)
+//   .pick({
+//     id: true,
+//     status: true,
+//     internalNote: true,
+//     externalNote: true,
+//   })
+//   .extend({
+//     client: clientSelectSchema.pick({
+//       firstName: true,
+//       lastName: true,
+//       email: true,
+//     }),
+//     demandItems: z.array(
+//       demandItemSelectSchema.extend({
+//         name: itemSelectSchema.pick({name: true}).shape.name,
+//       })
+//     ),
+//   });
+
+// export type DemandSelect = z.infer<typeof demandSelectSchema>;
+
+// export const demandInsertSchema = createInsertSchema(demands)
+//   .pick({externalNote: true})
+//   .extend({
+//     client: clientInsertSchema,
+//     demandItems: z.array(demandItemInsertSchema),
+//   });
+
+// export type DemandInsert = z.infer<typeof demandInsertSchema>;
+
+// export const demandUpdateSchema = createSelectSchema(demands)
+//   .pick({
+//     id: true,
+//     status: true,
+//     internalNote: true,
+//     externalNote: true,
+//   })
+//   .extend({
+//     client: clientUpdateSchema.pick({
+//       email: true,
+//     }),
+//     demandItems: z.array(demandItemUpdateSchema),
+//   });
+
+// export type DemandUpdate = z.infer<typeof demandUpdateSchema>;
+// #endregion
+
+// #region quotationItems
+export const quotationItems = sqliteTable('quotation_items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  quotationId: integer('quotation_id')
+    .references(() => quotations.id, {onDelete: 'cascade'})
+    .notNull(),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  unitPrice: text('unit_price').notNull(),
+  // date: text({ mode: 'json' }),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region quotation
+export const quotations = sqliteTable('quotations', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  demandId: integer('demand_id').references(() => demands.id, {
+    onDelete: 'set null',
+  }),
+  status: text('status', {
+    enum: ['sent', 'accepted', 'commented', 'declined'],
+  })
+    .default('sent')
+    .notNull(),
+  expiresAt: integer('expires_at', {mode: 'number'}),
+  additionalInfo: text('additional_info'),
+  // attachment: blob(),
+  version: integer('version'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region jobItems
+export const jobItems = sqliteTable('job_items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  jobId: integer('job_id')
+    .references(() => jobs.id, {onDelete: 'cascade'})
+    .notNull(),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  status: text('status', {
+    enum: ['pending', 'in_progress', 'completed', 'blocked'],
+  })
+    .default('pending')
+    .notNull(),
+  quantity: integer('quantity').notNull(), // Quantity of the item used
+  // date: text({ mode: 'json' }),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region jobs
+export const jobs = sqliteTable('jobs', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  demandId: integer('demand_id')
+    .references(() => demands.id, {onDelete: 'cascade'})
+    .notNull(),
+  // attachment: blob(),
+  // signed: integer({mode: 'boolean'}),
+  // signedAt: integer({mode: 'timestamp'}),
+  // clientSigned: integer({mode: 'boolean'}),
+  // clientSignedAt: integer({mode: 'timestamp'}),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region order
+export const orders = sqliteTable('orders', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  status: text('status', {
+    enum: ['pending', 'ordered', 'delivered', 'canceled'],
+  })
+    .default('pending')
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  expectedDelivery: integer('expected_delivery', {mode: 'number'}),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+// #endregion
+
+// #region jobItemsToOrders
+export const jobItemsToOrders = sqliteTable('job_items_to_orders', {
+  jobItemId: integer('job_item_id')
+    .notNull()
+    .references(() => jobItems.id),
+  orderId: integer('order_id')
+    .notNull()
+    .references(() => orders.id),
 });
 // #endregion
