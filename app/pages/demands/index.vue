@@ -7,7 +7,7 @@
         </template>
 
         <template #right>
-          <MyOrderInsert />
+          <MyDemandInsert />
         </template>
       </UDashboardNavbar>
     </template>
@@ -36,11 +36,11 @@
         :columns="columns"
         :loading="status === 'pending'"
         :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
+          base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-          td: 'border-b border-(--ui-border)',
+          tbody: '[&>tr]:last:[&>td]:bdemand-b-0',
+          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bdemand-y bdemand-(--ui-bdemand) first:bdemand-l last:bdemand-r',
+          td: 'bdemand-b bdemand-(--ui-bdemand)',
         }">
         <template #expanded="{row}">
           <pre>{{ row.original }}</pre>
@@ -48,7 +48,7 @@
       </UTable>
 
       <div
-        class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+        class="flex items-center justify-between gap-3 bdemand-t bdemand-(--ui-bdemand) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
           returned.
@@ -69,11 +69,11 @@
 </template>
 
 <script setup lang="ts">
-import {MyQuotationInsert} from '#components';
+import {MyQuoteInsert} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type OrderSelect} from '~~/server/database/schema';
+import {type DemandSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -82,28 +82,25 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<OrderSelect[]>(
-  '/api/orders?type=inquiry',
-  {
-    method: 'get',
-    lazy: true,
-  }
-);
+const {data, status} = await useFetch<DemandSelect[]>('/api/demands', {
+  method: 'get',
+  lazy: true,
+});
 
-const getRowItems = (row: Row<OrderSelect>) => {
+const getRowItems = (row: Row<DemandSelect>) => {
   return [
     {
       type: 'label',
       label: 'Actions',
     },
     {
-      label: 'Copy order ID',
+      label: 'Copy demand ID',
       icon: 'i-lucide-copy',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString());
+        navigator.clipboard.writeText(row.original.id);
         toast.add({
           title: 'Copied to clipboard',
-          description: 'Order ID copied to clipboard',
+          description: 'Demand ID copied to clipboard',
         });
       },
     },
@@ -116,29 +113,29 @@ const getRowItems = (row: Row<OrderSelect>) => {
       onSelect() {
         const overlay = useOverlay();
 
-        overlay.create(MyQuotationInsert, {
+        overlay.create(MyQuoteInsert, {
           props: {
-            order: row.original,
+            demand: row.original,
           },
           defaultOpen: true,
         });
       },
     },
     {
-      label: 'Delete order',
+      label: 'Delete demand',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
         toast.add({
-          title: 'Order deleted',
-          description: 'The order has been deleted.',
+          title: 'Demand deleted',
+          description: 'The demand has been deleted.',
         });
       },
     },
   ];
 };
 
-const columns: TableColumn<OrderSelect>[] = [
+const columns: TableColumn<DemandSelect>[] = [
   {
     id: 'expand',
     header: 'More',
@@ -183,11 +180,9 @@ const columns: TableColumn<OrderSelect>[] = [
     header: 'Status',
     cell: ({row}) => {
       const color = {
-        new: 'success' as const,
+        new: 'warning' as const,
         declined: 'error' as const,
         quoted: 'info' as const,
-        sent: 'warning' as const,
-        accepted: 'neutral' as const,
       }[row.original.status];
       return h(
         UBadge,
@@ -200,18 +195,18 @@ const columns: TableColumn<OrderSelect>[] = [
     id: 'items',
     header: 'Items',
     cell: ({row}) => {
-      const items = row.original.orderItems ?? [];
+      const items = row.original.demandItems ?? [];
 
       if (items.length === 0) return '—';
 
-      const first = items[0]?.name ?? '';
-      const second = items[1]?.name?.slice(0, 5) ?? '';
+      const first = items[0]?.item.name ?? '';
+      const second = items[1]?.item.name.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: items.map((i) => i.name).join(', '),
+          title: items.map((i) => i.item.name).join(', '),
         },
         preview
       );
@@ -219,8 +214,8 @@ const columns: TableColumn<OrderSelect>[] = [
   },
 
   {
-    accessorKey: 'externalNote',
-    header: 'External Note',
+    accessorKey: 'additionalInfo',
+    header: 'Additional Info',
   },
   {
     id: 'actions',

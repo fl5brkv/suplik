@@ -7,7 +7,7 @@
     <UButton label="Open" color="neutral" variant="subtle" />
 
     <template #body>
-      <div>form for inserting order</div>
+      <div>form for inserting demand</div>
     </template>
 
     <template #footer>

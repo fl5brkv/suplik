@@ -6,100 +6,18 @@ export default defineTask({
   async run() {
     console.log('Running DB seed task...');
 
-    const categories = [
-      {name: 'Electronics', type: 'product' as const},
-      {name: 'Cleaning Services', type: 'service' as const},
-      {name: 'Furniture', type: 'product' as const},
-      {name: 'Consulting', type: 'service' as const},
-    ];
-
-    await useDrizzle().insert(tables.categories).values(categories);
-
-    const suppliers = [
+    const users = [
       {
-        name: 'Tech Supplies Inc.',
-        email: 'sales@techsupplies.com',
-        phoneNumber: '123-456-7890',
+        email: 'admin@example.com',
+        password: 'hashedpassword1',
+        role: 'admin' as const,
       },
       {
-        name: 'CleanCo',
-        email: 'contact@cleanco.com',
-        phoneNumber: '555-555-5555',
-      },
-      {
-        name: 'FurniWorld',
-        email: 'hello@furniworld.com',
-        phoneNumber: '888-123-4567',
+        email: 'tech@example.com',
+        password: 'hashedpassword2',
+        role: 'technician' as const,
       },
     ];
-
-    await useDrizzle().insert(tables.suppliers).values(suppliers);
-
-    const items = [
-      {
-        categoryId: 1,
-        type: 'product' as const,
-        name: 'Wireless Mouse',
-        unitPrice: '25.99',
-        category: 'Electronics',
-      },
-      {
-        categoryId: 1,
-        type: 'product' as const,
-        name: 'Laptop',
-        unitPrice: '999.99',
-        category: 'Electronics',
-      },
-      {
-        categoryId: 2,
-        type: 'service' as const,
-        name: 'Office Cleaning',
-        unitPrice: '150.00',
-        category: 'Cleaning Services',
-      },
-      {
-        categoryId: 3,
-        type: 'product' as const,
-        name: 'Office Desk',
-        unitPrice: '299.50',
-        category: 'Furniture',
-      },
-      {
-        categoryId: 4,
-        type: 'service' as const,
-        name: 'IT Consulting',
-        unitPrice: '100.00',
-        category: 'Consulting',
-      },
-    ];
-
-    await useDrizzle().insert(tables.items).values(items);
-
-    const productDetails = [
-      {
-        itemId: 1,
-        supplierId: 1,
-        stock: 100,
-        reserved: 10,
-        purchasePrice: '15.00',
-      },
-      {
-        itemId: 2,
-        supplierId: 1,
-        stock: 50,
-        reserved: 5,
-        purchasePrice: '700.00',
-      },
-      {
-        itemId: 4,
-        supplierId: 3,
-        stock: 30,
-        reserved: 2,
-        purchasePrice: '200.00',
-      },
-    ];
-
-    await useDrizzle().insert(tables.productDetails).values(productDetails);
 
     const clients = [
       {
@@ -144,7 +62,92 @@ export default defineTask({
       },
     ];
 
-    await useDrizzle().insert(tables.clients).values(clients);
+    const categories = [
+      {name: 'Electronics', type: 'product' as const},
+      {name: 'Cleaning Services', type: 'service' as const},
+      {name: 'Furniture', type: 'product' as const},
+      {name: 'Consulting', type: 'service' as const},
+    ];
+
+    const suppliers = [
+      {
+        name: 'Tech Supplies Inc.',
+        email: 'sales@techsupplies.com',
+        phoneNumber: '123-456-7890',
+      },
+      {
+        name: 'CleanCo',
+        email: 'contact@cleanco.com',
+        phoneNumber: '555-555-5555',
+      },
+      {
+        name: 'FurniWorld',
+        email: 'hello@furniworld.com',
+        phoneNumber: '888-123-4567',
+      },
+    ];
+
+    const items = [
+      {
+        categoryId: 1,
+        type: 'product' as const,
+        name: 'Wireless Mouse',
+        // unitPrice: '25.99',
+        category: 'Electronics',
+      },
+      {
+        categoryId: 1,
+        type: 'product' as const,
+        name: 'Laptop',
+        // unitPrice: '999.99',
+        category: 'Electronics',
+      },
+      {
+        categoryId: 2,
+        type: 'service' as const,
+        name: 'Office Cleaning',
+        // unitPrice: '150.00',
+        category: 'Cleaning Services',
+      },
+      {
+        categoryId: 3,
+        type: 'product' as const,
+        name: 'Office Desk',
+        // unitPrice: '299.50',
+        category: 'Furniture',
+      },
+      {
+        categoryId: 4,
+        type: 'service' as const,
+        name: 'IT Consulting',
+        // unitPrice: '100.00',
+        category: 'Consulting',
+      },
+    ];
+
+    const productDetails = [
+      {
+        itemId: 1,
+        supplierId: 1,
+        stock: 100,
+        reserved: 10,
+        // purchasePrice: '15.00',
+      },
+      {
+        itemId: 2,
+        supplierId: 1,
+        stock: 50,
+        reserved: 5,
+        // purchasePrice: '700.00',
+      },
+      {
+        itemId: 4,
+        supplierId: 3,
+        stock: 30,
+        reserved: 2,
+        // purchasePrice: '200.00',
+      },
+    ];
 
     const demands = [
       {
@@ -169,8 +172,6 @@ export default defineTask({
       },
     ];
 
-    await useDrizzle().insert(tables.demands).values(demands);
-
     const demandItems = [
       {demandId: 1, itemId: 1, quantity: 10},
 
@@ -182,9 +183,7 @@ export default defineTask({
       {demandId: 4, itemId: 2, quantity: 1},
     ];
 
-    await useDrizzle().insert(tables.demandItems).values(demandItems);
-
-    const quotations = [
+    const quotes = [
       {
         demandId: 2,
         status: 'sent' as const,
@@ -201,21 +200,70 @@ export default defineTask({
       },
     ];
 
-    await useDrizzle().insert(tables.quotations).values(quotations);
+    const quoteItems = [
+      {
+        quoteId: 1,
+        itemId: 4,
+        quantity: 2,
+        // unitPrice: '299.50'
+      },
+      {
+        quoteId: 1,
+        itemId: 3,
+        quantity: 1,
+        //  unitPrice: '150.00'
+      },
 
-    const quotationItems = [
-      {quotationId: 1, itemId: 1, quantity: 10, unitPrice: '25.99'},
-
-      {quotationId: 2, itemId: 4, quantity: 2, unitPrice: '299.50'},
-      {quotationId: 2, itemId: 3, quantity: 1, unitPrice: '150.00'},
-
-      {quotationId: 3, itemId: 5, quantity: 3, unitPrice: '100.00'},
-
-      {quotationId: 4, itemId: 2, quantity: 1, unitPrice: '999.99'},
-      {quotationId: 4, itemId: 1, quantity: 2, unitPrice: '25.99'},
+      {
+        quoteId: 2,
+        itemId: 2,
+        quantity: 1,
+        //unitPrice: '999.99'
+      },
+      {
+        quoteId: 2,
+        itemId: 1,
+        quantity: 2,
+        // unitPrice: '25.99'
+      },
     ];
 
-    await useDrizzle().insert(tables.quotationItems).values(quotationItems);
+    const jobs = [
+      {demandId: 1, additionalInfo: 'Install next week'},
+      {demandId: 2, additionalInfo: 'This is additional info'},
+    ];
+
+    const jobItems = [
+      {jobId: 1, itemId: 1, quantity: 2, status: 'pending' as const},
+      {jobId: 1, itemId: 2, quantity: 1, status: 'in_progress' as const},
+      {jobId: 2, itemId: 3, quantity: 1, status: 'blocked' as const},
+    ];
+
+    const orders = [
+      {
+        itemId: 3,
+        status: 'ordered' as const,
+        quantity: 10,
+        expectedDelivery: '2025-07-08',
+      },
+    ];
+
+    const jobItemsToOrders = [{jobItemId: 3, orderId: 1}];
+
+    await useDrizzle().insert(tables.users).values(users);
+    await useDrizzle().insert(tables.clients).values(clients);
+    await useDrizzle().insert(tables.categories).values(categories);
+    await useDrizzle().insert(tables.suppliers).values(suppliers);
+    await useDrizzle().insert(tables.items).values(items);
+    await useDrizzle().insert(tables.productDetails).values(productDetails);
+    await useDrizzle().insert(tables.demands).values(demands);
+    await useDrizzle().insert(tables.demandItems).values(demandItems);
+    await useDrizzle().insert(tables.quotes).values(quotes);
+    await useDrizzle().insert(tables.quoteItems).values(quoteItems);
+    await useDrizzle().insert(tables.jobs).values(jobs);
+    await useDrizzle().insert(tables.jobItems).values(jobItems);
+    await useDrizzle().insert(tables.orders).values(orders);
+    await useDrizzle().insert(tables.jobItemsToOrders).values(jobItemsToOrders);
 
     return {result: 'success'};
   },

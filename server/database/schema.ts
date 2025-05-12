@@ -1,4 +1,4 @@
-import {sql} from 'drizzle-orm';
+import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer, blob} from 'drizzle-orm/sqlite-core';
 import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {z} from 'zod';
@@ -150,8 +150,9 @@ export const items = sqliteTable('items', {
   categoryId: integer('category_id').references(() => categories.id),
   type: text('type', {enum: ['product', 'service']}).notNull(),
   name: text('name').notNull(),
-  unitPrice: text('unit_price'),
+  // unitPrice: text('unit_price'),
   // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  // isPublic: integer('is_public', {mode: 'boolean'}),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -160,6 +161,13 @@ export const items = sqliteTable('items', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const itemSelectSchema = createSelectSchema(items).pick({
+  id: true,
+  name: true,
+});
+
+export type ItemSelect = z.infer<typeof itemSelectSchema>;
 // #endregion
 
 // #region productDetails
@@ -173,7 +181,7 @@ export const productDetails = sqliteTable('product_details', {
     .notNull(),
   stock: integer('stock').default(0),
   reserved: integer('reserved').default(0),
-  purchasePrice: text('purchase_price'),
+  // purchasePrice: text('purchase_price'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -203,15 +211,23 @@ export const demandItems = sqliteTable('demand_items', {
     .notNull(),
 });
 
-// export const demandItemSelectSchema = createSelectSchema(demandItems).pick({
-//   itemId: true,
-//   quantity: true,
-// });
+export const demandItemSelectSchema = createSelectSchema(demandItems).pick({
+  itemId: true,
+  quantity: true,
+});
 
-// export const demandItemInsertSchema = createInsertSchema(demandItems).pick({
-//   itemId: true,
-//   quantity: true,
-// });
+export const demandItemInsertSchema = createInsertSchema(demandItems).pick({
+  itemId: true,
+  quantity: true,
+});
+
+export const demandItemsRelations = relations(demandItems, ({one}) => ({
+  demand: one(demands, {
+    fields: [demandItems.demandId],
+    references: [demands.id],
+  }),
+  item: one(items, {fields: [demandItems.itemId], references: [items.id]}),
+}));
 
 // export const demandItemUpdateSchema = createSelectSchema(demandItems).pick({
 //   itemId: true,
@@ -244,36 +260,42 @@ export const demands = sqliteTable('demands', {
     .notNull(),
 });
 
-// export const demandSelectSchema = createSelectSchema(demands)
-//   .pick({
-//     id: true,
-//     status: true,
-//     internalNote: true,
-//     externalNote: true,
-//   })
-//   .extend({
-//     client: clientSelectSchema.pick({
-//       firstName: true,
-//       lastName: true,
-//       email: true,
-//     }),
-//     demandItems: z.array(
-//       demandItemSelectSchema.extend({
-//         name: itemSelectSchema.pick({name: true}).shape.name,
-//       })
-//     ),
-//   });
+export const demandSelectSchema = createSelectSchema(demands)
+  .pick({
+    id: true,
+    status: true,
+    additionalInfo: true,
+  })
+  .extend({
+    client: clientSelectSchema.pick({
+      firstName: true,
+      lastName: true,
+      email: true,
+    }),
+    demandItems: z.array(
+      demandItemSelectSchema.extend({
+        item: itemSelectSchema,
+      })
+    ),
+  });
+export type DemandSelect = z.infer<typeof demandSelectSchema>;
 
-// export type DemandSelect = z.infer<typeof demandSelectSchema>;
+export const demandInsertSchema = createInsertSchema(demands)
+  .pick({additionalInfo: true})
+  .extend({
+    client: clientInsertSchema,
+    demandItems: z.array(demandItemInsertSchema),
+  });
 
-// export const demandInsertSchema = createInsertSchema(demands)
-//   .pick({externalNote: true})
-//   .extend({
-//     client: clientInsertSchema,
-//     demandItems: z.array(demandItemInsertSchema),
-//   });
+export type DemandInsert = z.infer<typeof demandInsertSchema>;
 
-// export type DemandInsert = z.infer<typeof demandInsertSchema>;
+export const demandsRelations = relations(demands, ({one, many}) => ({
+  client: one(clients, {
+    fields: [demands.clientId],
+    references: [clients.id],
+  }),
+  demandItems: many(demandItems),
+}));
 
 // export const demandUpdateSchema = createSelectSchema(demands)
 //   .pick({
@@ -292,19 +314,17 @@ export const demands = sqliteTable('demands', {
 // export type DemandUpdate = z.infer<typeof demandUpdateSchema>;
 // #endregion
 
-// #region quotationItems
-export const quotationItems = sqliteTable('quotation_items', {
+// #region quoteItems
+export const quoteItems = sqliteTable('quote_items', {
   id: integer('id').primaryKey({autoIncrement: true}),
-  quotationId: integer('quotation_id')
-    .references(() => quotations.id, {onDelete: 'cascade'})
+  quoteId: integer('quote_id')
+    .references(() => quotes.id, {onDelete: 'cascade'})
     .notNull(),
   itemId: integer('item_id')
     .references(() => items.id)
     .notNull(),
   quantity: integer('quantity').notNull(),
-  unitPrice: text('unit_price').notNull(),
-  // date: text({ mode: 'json' }),
-  additionalInfo: text('additional_info'),
+  // unitPrice: text('unit_price').notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -313,23 +333,35 @@ export const quotationItems = sqliteTable('quotation_items', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const quoteItemInsertSchema = createInsertSchema(quoteItems).pick({
+  itemId: true,
+  quantity: true,
+});
+
+export const quoteItemsRelations = relations(quoteItems, ({one}) => ({
+  item: one(items, {
+    fields: [quoteItems.itemId],
+    references: [items.id],
+  }),
+}));
 // #endregion
 
-// #region quotation
-export const quotations = sqliteTable('quotations', {
+// #region quotes
+export const quotes = sqliteTable('quotes', {
   id: integer('id').primaryKey({autoIncrement: true}),
-  demandId: integer('demand_id').references(() => demands.id, {
-    onDelete: 'set null',
-  }),
+  demandId: integer('demand_id')
+    .references(() => demands.id)
+    .notNull(),
   status: text('status', {
     enum: ['sent', 'accepted', 'commented', 'declined'],
   })
     .default('sent')
     .notNull(),
-  expiresAt: integer('expires_at', {mode: 'number'}),
+  expiresAt: integer('expires_at', {mode: 'number'}).notNull(),
   additionalInfo: text('additional_info'),
   // attachment: blob(),
-  version: integer('version'),
+  version: integer('version').default(1).notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -338,6 +370,15 @@ export const quotations = sqliteTable('quotations', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const quoteInsertSchema = createInsertSchema(quotes)
+  .pick({demandId: true, expiresAt: true, additionalInfo: true})
+  .extend({
+    client: clientInsertSchema.pick({email: true}),
+    quoteItems: z.array(quoteItemInsertSchema),
+  });
+
+export type QuoteInsert = z.infer<typeof quoteInsertSchema>;
 // #endregion
 
 // #region jobItems
@@ -401,7 +442,7 @@ export const orders = sqliteTable('orders', {
     .default('pending')
     .notNull(),
   quantity: integer('quantity').notNull(),
-  expectedDelivery: integer('expected_delivery', {mode: 'number'}),
+  expectedDelivery: text('expected_delivery'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)

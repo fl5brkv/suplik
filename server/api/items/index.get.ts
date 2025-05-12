@@ -33,8 +33,8 @@ export default eventHandler(async (event) => {
         .select({
           id: tables.items.id,
           name: tables.items.name,
-          group: tables.items.group,
-          unitPrice: tables.items.unitPrice,
+          // group: tables.items.group,
+          // unitPrice: tables.items.unitPrice,
         })
         .from(tables.items);
   
@@ -44,7 +44,7 @@ export default eventHandler(async (event) => {
         .select({
           id: tables.items.id,
           name: tables.items.name,
-          group: tables.items.group,
+          // group: tables.items.group,
         })
         .from(tables.items);
   

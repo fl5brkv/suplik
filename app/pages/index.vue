@@ -1,8 +1,3 @@
 <template>
-  <h1>page content</h1>
-  <div>
-
-  </div>
-
-  <h2>access: </h2>
+  <h1>Stodo.sk</h1>
 </template>

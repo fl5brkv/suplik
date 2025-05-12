@@ -53,17 +53,17 @@ const links = [
       },
     },
     {
-      label: 'Inquiries',
+      label: 'Demands',
       icon: 'lucide:hand-helping',
-      to: '/inquiries',
+      to: '/demands',
       onSelect: () => {
         open.value = false;
       },
     },
     {
-      label: 'Quotations',
+      label: 'Quotes',
       icon: 'lucide:file-pen-line',
-      to: '/quotations',
+      to: '/quotes',
       onSelect: () => {
         open.value = false;
       },
