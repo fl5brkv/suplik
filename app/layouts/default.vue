@@ -76,6 +76,52 @@ const links = [
         open.value = false;
       },
     },
+    {
+      label: 'Items',
+      icon: 'lucide:archive',
+      children: [
+        {
+          label: 'Products',
+          to: '/products',
+          icon: 'lucide:boxes',
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+        {
+          label: 'Suppliers',
+          to: '/suppliers',
+          icon: 'lucide:file-user',
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+        {
+          label: 'Orders',
+          to: '/orders',
+          icon: 'lucide:ship',
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+        {
+          label: 'Complaints',
+          to: '/complaints',
+          icon: 'lucide:package-x',
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+        {
+          label: 'Services',
+          to: '/services',
+          icon: 'lucide:life-buoy',
+          onSelect: () => {
+            open.value = false;
+          },
+        },
+      ],
+    },
     // {
     //   label: 'Settings',
     //   to: '/settings',

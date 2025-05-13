@@ -1,13 +1,16 @@
 <template>
-  <UDashboardPanel id="demands">
+  <UDashboardPanel id="services">
     <template #header>
-      <UDashboardNavbar title="Demands">
+      <UDashboardNavbar title="Services">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
         <template #right>
-          <MyDemandInsert />
+          <UButtonGroup orientation="horizontal">
+            <MyCategoryInsert type="service" />
+            <MyServiceInsert />
+          </UButtonGroup>
         </template>
       </UDashboardNavbar>
     </template>
@@ -69,11 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import {MyQuoteInsert} from '#components';
+import {MyServiceUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type DemandSelect} from '~~/server/database/schema';
+import {type ItemSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -82,12 +85,14 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<DemandSelect[]>('/api/demands', {
+const {data, status} = await useFetch<ItemSelect[]>('/api/items', {
+  key: 'services',
   method: 'get',
+  query: {type: 'service'},
   lazy: true,
 });
 
-const getRowItems = (row: Row<DemandSelect>) => {
+const getRowItems = (row: Row<ItemSelect>) => {
   return [
     {
       type: 'label',
@@ -108,34 +113,52 @@ const getRowItems = (row: Row<DemandSelect>) => {
       type: 'separator',
     },
     {
-      label: 'Provide a quote',
+      label: 'Update service',
       icon: 'lucide:file-pen',
       onSelect() {
         const overlay = useOverlay();
 
-        overlay.create(MyQuoteInsert, {
+        overlay.create(MyServiceUpdate, {
           props: {
-            demand: row.original,
+            service: row.original,
           },
           defaultOpen: true,
         });
       },
     },
     {
-      label: 'Delete demand',
+      label: 'Delete service',
       icon: 'i-lucide-trash',
       color: 'error',
-      onSelect() {
-        toast.add({
-          title: 'Demand deleted',
-          description: 'The demand has been deleted.',
-        });
+      async onSelect() {
+        try {
+          await $fetch(`/api/items`, {
+            method: 'DELETE',
+            body: {id: row.original.id},
+          });
+
+          data.value = data.value?.filter(
+            (item) => item.id !== row.original.id
+          );
+
+          toast.add({
+            title: 'Service deleted',
+            description: 'The service has been deleted.',
+            color: 'success',
+          });
+        } catch (error) {
+          toast.add({
+            title: 'Error',
+            description: 'Failed to delete the service.',
+            color: 'error',
+          });
+        }
       },
     },
   ];
 };
 
-const columns: TableColumn<DemandSelect>[] = [
+const columns: TableColumn<ItemSelect>[] = [
   {
     id: 'expand',
     header: 'More',
@@ -161,61 +184,30 @@ const columns: TableColumn<DemandSelect>[] = [
     cell: ({row}) => `#${row.original.id}`,
   },
   {
-    accessorKey: 'client',
-    header: 'Client',
-    cell: ({row}) => {
-      return [
-        h(
-          'p',
-          {class: 'font-medium text-(--ui-text-highlighted)'},
-          `${row.original.client.firstName} ${row.original.client.lastName}`
-        ),
-        row.original.client.email &&
-          h('p', {class: 'text-sm text-gray-500'}, row.original.client.email),
-      ];
-    },
+    accessorKey: 'name',
+    header: 'Name',
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
+    accessorKey: 'category',
+    header: 'Category',
+    cell: ({row}) => row.original.category.name,
+  },
+  {
+    accessorKey: 'isPublic',
+    header: 'Public',
     cell: ({row}) => {
-      const color = {
-        new: 'warning' as const,
-        declined: 'error' as const,
-        quoted: 'info' as const,
-      }[row.original.status];
+      const isPublic = row.original.isPublic;
       return h(
         UBadge,
-        {class: 'capitalize', variant: 'subtle', color},
-        () => row.original.status
-      );
-    },
-  },
-  {
-    id: 'items',
-    header: 'Items',
-    cell: ({row}) => {
-      const items = row.original.demandItems ?? [];
-
-      if (items.length === 0) return '—';
-
-      const first = items[0]?.item.name ?? '';
-      const second = items[1]?.item.name.slice(0, 5) ?? '';
-      const preview = second ? `${first}, ${second}...` : first;
-
-      return h(
-        'span',
         {
-          title: items.map((i) => i.item.name).join(', '),
+          icon: isPublic ? 'i-lucide-arrow-right' : 'i-lucide-x',
+          color: isPublic ? 'success' : 'error',
+          variant: 'subtle',
+          class: 'capitalize',
         },
-        preview
+        () => (isPublic ? 'Yes' : 'No')
       );
     },
-  },
-
-  {
-    accessorKey: 'additionalInfo',
-    header: 'Additional Info',
   },
   {
     id: 'actions',

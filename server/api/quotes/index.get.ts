@@ -1,21 +1,17 @@
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
 
-  const selected = await useDrizzle().query.demands.findMany({
+  const selected = await useDrizzle().query.quotes.findMany({
     columns: {
       id: true,
+      demandId: true,
       status: true,
+      expiresAt: true,
+      version: true,
       additionalInfo: true,
     },
     with: {
-      client: {
-        columns: {
-          firstName: true,
-          lastName: true,
-          email: true,
-        },
-      },
-      demandItems: {
+      quoteItems: {
         columns: {
           itemId: true,
           quantity: true,
@@ -25,14 +21,6 @@ export default eventHandler(async (event) => {
             columns: {
               id: true,
               name: true,
-            },
-            with: {
-              productDetail: {
-                columns: {
-                  stock: true,
-                  reserved: true,
-                },
-              },
             },
           },
         },

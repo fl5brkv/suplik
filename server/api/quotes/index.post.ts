@@ -1,7 +1,6 @@
 import {quoteInsertSchema} from '~~/server/database/schema';
 import {render} from '@vue-email/render';
 import MyEmailQuotation from '~~/app/components/email/Quotation.vue';
-import {inArray} from 'drizzle-orm';
 export default eventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>
     quoteInsertSchema.safeParse(body)
@@ -43,8 +42,24 @@ export default eventHandler(async (event) => {
         quoteId: insertedQuote.id,
       }))
     )
-    .returning({id: tables.quoteItems.id})
+    .returning({
+      id: tables.quoteItems.id,
+      itemId: tables.quoteItems.itemId,
+      quantity: tables.quoteItems.quantity,
+    })
     .all();
+
+  for (const quoteItem of insertedQuoteItems) {
+    await useDrizzle()
+      .update(tables.productDetails)
+      .set({reserved: quoteItem.quantity})
+      .where(
+        and(
+          eq(tables.productDetails.itemId, quoteItem.id),
+          gt(tables.productDetails.stock, quoteItem.quantity)
+        )
+      );
+  }
 
   const selected = await useDrizzle().query.quoteItems.findMany({
     where: (quoteItems, {inArray}) =>
@@ -63,39 +78,6 @@ export default eventHandler(async (event) => {
       },
     },
   });
-  // const selected = useDrizzle()
-  //   .select({
-  //     id: tables.quoteItems.id,
-  //     quantity: tables.quoteItems.quantity,
-  //     itemName: items.name,
-  //   })
-  //   .from(quoteItems)
-  //   .leftJoin(items, eq(quoteItems.itemId, items.id))
-  //   .where(inArray(quoteItems.id, insertedQuoteItemIds))
-  //   .all();
-  // const selected = await useDrizzle()
-  //   .select({
-  //     id: tables.items.id,
-  //     name: tables.items.name,
-  //   })
-  //   .from(tables.items)
-  //   .where(
-  //     inArray(
-  //       tables.items.id,
-  //       insertedQuoteItems.map((item) => item.itemId)
-  //     )
-  //   )
-  //   .all();
-
-  // const mergedQuoteItems = insertedQuoteItems.map((item) => {
-  //   const matched = selected.find((s) => s.id === item.itemId);
-  //   if (!matched)
-  //     throw createError({statusCode: 500, statusMessage: 'Item not found'});
-  //   return {
-  //     ...item,
-  //     name: matched.name,
-  //   };
-  // });
 
   const html = await render(
     MyEmailQuotation,

@@ -94,6 +94,7 @@ export default defineTask({
         name: 'Wireless Mouse',
         // unitPrice: '25.99',
         category: 'Electronics',
+        isPublic: true,
       },
       {
         categoryId: 1,
@@ -101,6 +102,7 @@ export default defineTask({
         name: 'Laptop',
         // unitPrice: '999.99',
         category: 'Electronics',
+        isPublic: true,
       },
       {
         categoryId: 2,
@@ -108,6 +110,7 @@ export default defineTask({
         name: 'Office Cleaning',
         // unitPrice: '150.00',
         category: 'Cleaning Services',
+        isPublic: false,
       },
       {
         categoryId: 3,
@@ -115,6 +118,7 @@ export default defineTask({
         name: 'Office Desk',
         // unitPrice: '299.50',
         category: 'Furniture',
+        isPublic: false,
       },
       {
         categoryId: 4,
@@ -122,6 +126,7 @@ export default defineTask({
         name: 'IT Consulting',
         // unitPrice: '100.00',
         category: 'Consulting',
+        isPublic: true,
       },
     ];
 

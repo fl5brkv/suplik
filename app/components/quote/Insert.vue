@@ -1,7 +1,7 @@
 <template>
   <UModal
     title="Provide a Quote"
-    description="This is useful when you want a form in a Modal."
+    description="This is a description."
     :ui="{footer: 'justify-end'}">
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
@@ -17,13 +17,11 @@
           :help="`${props.demand.client.firstName} ${props.demand.client.lastName} `">
           <UInput v-model="state.client.email" />
         </UFormField>
-        <div v-for="(quoteItem, idx) in state.quoteItems" :key="idx">
-          <!-- <UFormField
-            :label="`Item: ${quoteItem.item.name}`"
-            :name="`demandItems.${idx}.name`">
-            <UInput v-model="quoteItem.item.name" disabled />
-          </UFormField> -->
 
+        <div
+          v-for="(quoteItem, idx) in state.quoteItems"
+          :key="idx"
+          class="flex gap-2 items-end">
           <USelect
             v-model="quoteItem.itemId"
             :items="data"
@@ -31,36 +29,27 @@
             :loading="status === 'pending'"
             class="w-48" />
 
-          <UFormField label="Quantity" :name="`demandItems.${idx}.quantity`">
+          <UFormField label="Quantity" :name="`quoteItems.${idx}.quantity`">
             <UInputNumber v-model="quoteItem.quantity" />
           </UFormField>
+          <UButton
+            v-if="state.quoteItems.length > 1"
+            icon="i-lucide-x"
+            color="error"
+            variant="ghost"
+            size="sm"
+            @click="removeItem(idx)" />
         </div>
-        <UButton label="Submit" color="neutral" type="submit" />
-      </UForm>
-
-      <!-- <div
-        v-for="(item, idx) in state.items"
-        :key="idx"
-        class="flex gap-2 items-center">
-        <USelect
-          v-model="item.description"
-          :items="items"
-          placeholder="Select item"
-          :loading="status === 'pending'"
-          class="w-48" />
         <UButton
-          color="neutral"
-          variant="ghost"
+          color="primary"
+          variant="subtle"
           size="sm"
-          @click="removeItem(idx)">
-          Remove
+          class="self-start"
+          @click.prevent="addItem">
+          Add Item
         </UButton>
-      </div>
-      <UButton color="neutral" variant="subtle" size="sm" @click="addItem">
-        Add Item
-      </UButton> -->
-
-      {{ state }}
+        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
+      </UForm>
     </template>
   </UModal>
 </template>
@@ -87,6 +76,7 @@ const {data, status} = await useFetch('/api/items', {
     return data?.map((item) => ({
       label: item.name,
       value: item.id,
+      productDetail: item.productDetail,
     }));
   },
   lazy: true,
@@ -105,6 +95,14 @@ const state = reactive({
   })),
 });
 
+const addItem = () => {
+  state.quoteItems.push({itemId: 0, quantity: 1});
+};
+
+const removeItem = (idx: number) => {
+  state.quoteItems.splice(idx, 1);
+};
+
 watch(
   () => props.demand,
   (newDemand) => {
@@ -113,6 +111,34 @@ watch(
 );
 
 const submit = async (payload: FormSubmitEvent<QuoteInsert>) => {
+  for (const quoteItem of state.quoteItems) {
+    const item = data.value?.find((i) => i.value === quoteItem.itemId);
+
+    if (item && item.productDetail) {
+      const availableStock =
+        item.productDetail.stock - item.productDetail.reserved;
+
+      if (quoteItem.quantity > availableStock) {
+        toast.add({
+          title: 'Insufficient Stock',
+          description: `Requested quantity (${quoteItem.quantity}) exceeds available stock (${availableStock}) for item "${item.label}".`,
+          color: 'error',
+          actions: [
+            {
+              label: 'View Items',
+              icon: 'i-lucide-box',
+              onClick: () => {
+                emit('close', true);
+                navigateTo('/items');
+              },
+            },
+          ],
+        });
+        return;
+      }
+    }
+  }
+
   try {
     await $fetch('/api/quotes', {
       method: 'POST',

@@ -71,7 +71,7 @@ import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
 import type {z} from 'zod';
-import type {clientSelectSchema} from '~~/server/database/schema/tables/clients';
+import type {clientSelectSchema} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UDropdownMenu = resolveComponent('UDropdownMenu');

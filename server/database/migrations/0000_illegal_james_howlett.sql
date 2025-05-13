@@ -41,9 +41,10 @@ CREATE TABLE `demands` (
 --> statement-breakpoint
 CREATE TABLE `items` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`category_id` integer,
+	`category_id` integer NOT NULL,
 	`type` text NOT NULL,
 	`name` text NOT NULL,
+	`is_public` integer NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
@@ -93,11 +94,11 @@ CREATE TABLE `product_details` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`item_id` integer NOT NULL,
 	`supplier_id` integer NOT NULL,
-	`stock` integer DEFAULT 0,
-	`reserved` integer DEFAULT 0,
+	`stock` integer NOT NULL,
+	`reserved` integer NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -117,8 +118,8 @@ CREATE TABLE `quotes` (
 	`demand_id` integer NOT NULL,
 	`status` text DEFAULT 'sent' NOT NULL,
 	`expires_at` integer NOT NULL,
-	`additional_info` text,
 	`version` integer DEFAULT 1 NOT NULL,
+	`additional_info` text,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`demand_id`) REFERENCES `demands`(`id`) ON UPDATE no action ON DELETE no action

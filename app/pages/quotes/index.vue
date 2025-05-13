@@ -1,13 +1,13 @@
 <template>
-  <UDashboardPanel id="inquiries">
+  <UDashboardPanel id="quotes">
     <template #header>
-      <UDashboardNavbar title="Inquiries">
+      <UDashboardNavbar title="Quotes">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
         <template #right>
-          <!-- add new -->
+          <!-- <MyQuoteInsert /> -->
         </template>
       </UDashboardNavbar>
     </template>
@@ -36,11 +36,11 @@
         :columns="columns"
         :loading="status === 'pending'"
         :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
+          base: 'table-fixed bquote-separate bquote-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-          td: 'border-b border-(--ui-border)',
+          tbody: '[&>tr]:last:[&>td]:bquote-b-0',
+          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bquote-y bquote-(--ui-bquote) first:bquote-l last:bquote-r',
+          td: 'bquote-b bquote-(--ui-bquote)',
         }">
         <template #expanded="{row}">
           <pre>{{ row.original }}</pre>
@@ -48,7 +48,7 @@
       </UTable>
 
       <div
-        class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+        class="flex items-center justify-between gap-3 bquote-t bquote-(--ui-bquote) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
           returned.
@@ -69,72 +69,73 @@
 </template>
 
 <script setup lang="ts">
-import {UBadge} from '#components';
+import {MyQuoteInsert} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type OrderSelect} from '~~/server/database/schema';
+import {type QuoteSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
+const UBadge = resolveComponent('UBadge');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
 
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const showQuotationsInsert = ref(false);
-const selectedInquiry = ref<OrderSelect>({} as OrderSelect);
+const {data, status} = await useFetch<QuoteSelect[]>('/api/quotes', {
+  method: 'get',
+  lazy: true,
+});
 
-const {data, status} = await useFetch<OrderSelect[]>(
-  '/api/orders?type=quotation',
-  {
-    method: 'get',
-    lazy: true,
-  }
-);
-
-function getRowItems(row: Row<OrderSelect>) {
+const getRowItems = (row: Row<QuoteSelect>) => {
   return [
     {
       type: 'label',
       label: 'Actions',
     },
     {
-      label: 'Copy order ID',
+      label: 'Copy demand ID',
       icon: 'i-lucide-copy',
       onSelect() {
-        navigator.clipboard.writeText(row.original.id.toString());
+        navigator.clipboard.writeText(row.original.id);
         toast.add({
           title: 'Copied to clipboard',
-          description: 'Order ID copied to clipboard',
+          description: 'Demand ID copied to clipboard',
         });
       },
     },
     {
       type: 'separator',
     },
+    // {
+    //   label: 'Provide a quote',
+    //   icon: 'lucide:file-pen',
+    //   onSelect() {
+    //     const overlay = useOverlay();
+
+    //     overlay.create(MyQuoteInsert, {
+    //       props: {
+    //         quote: row.original,
+    //       },
+    //       defaultOpen: true,
+    //     });
+    //   },
+    // },
     {
-      label: 'New job',
-      icon: 'lucide:hammer',
-      onSelect() {
-        selectedInquiry.value = row.original;
-        showQuotationsInsert.value = true;
-      },
-    },
-    {
-      label: 'Delete order',
+      label: 'Delete quote',
       icon: 'i-lucide-trash',
       color: 'error',
       onSelect() {
         toast.add({
-          title: 'Order deleted',
-          description: 'The order has been deleted.',
+          title: 'Quote deleted',
+          description: 'The quote has been deleted.',
         });
       },
     },
   ];
-}
+};
 
-const columns: TableColumn<OrderSelect>[] = [
+const columns: TableColumn<QuoteSelect>[] = [
   {
     id: 'expand',
     header: 'More',
@@ -160,30 +161,19 @@ const columns: TableColumn<OrderSelect>[] = [
     cell: ({row}) => `#${row.original.id}`,
   },
   {
-    accessorKey: 'client',
-    header: 'Client',
-    cell: ({row}) => {
-      return [
-        h(
-          'p',
-          {class: 'font-medium text-(--ui-text-highlighted)'},
-          `${row.original.client.firstName} ${row.original.client.lastName}`
-        ),
-        row.original.client.email &&
-          h('p', {class: 'text-sm text-gray-500'}, row.original.client.email),
-      ];
-    },
+    accessorKey: 'demandId',
+    header: 'Demand ID',
+    cell: ({row}) => `Demand #${row.original.id}`,
   },
   {
     accessorKey: 'status',
     header: 'Status',
     cell: ({row}) => {
       const color = {
-        new: 'success' as const,
+        accepted: 'warning' as const,
         declined: 'error' as const,
-        quoted: 'info' as const,
-        sent: 'warning' as const,
-        accepted: 'neutral' as const,
+        sent: 'info' as const,
+        commented: 'success' as const,
       }[row.original.status];
       return h(
         UBadge,
@@ -193,30 +183,37 @@ const columns: TableColumn<OrderSelect>[] = [
     },
   },
   {
+    accessorKey: 'expiresAt',
+    header: 'Expires at',
+  },
+  {
     id: 'items',
     header: 'Items',
     cell: ({row}) => {
-      const items = row.original.orderItems ?? [];
+      const items = row.original.quoteItems ?? [];
 
       if (items.length === 0) return '—';
 
-      const first = items[0]?.name ?? '';
-      const second = items[1]?.name?.slice(0, 5) ?? '';
+      const first = items[0]?.item.name ?? '';
+      const second = items[1]?.item.name.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: items.map((i) => i.name).join(', '),
+          title: items.map((i) => i.item.name).join(', '),
         },
         preview
       );
     },
   },
-
   {
-    accessorKey: 'externalNote',
-    header: 'External Note',
+    accessorKey: 'version',
+    header: 'Version',
+  },
+  {
+    accessorKey: 'additionalInfo',
+    header: 'Additional Info',
   },
   {
     id: 'actions',

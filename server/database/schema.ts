@@ -1,6 +1,10 @@
 import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer, blob} from 'drizzle-orm/sqlite-core';
-import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
+import {
+  createInsertSchema,
+  createSelectSchema,
+  createUpdateSchema,
+} from 'drizzle-zod';
 import {z} from 'zod';
 
 // #region users
@@ -124,6 +128,23 @@ export const categories = sqliteTable('categories', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const categorySelectSchema = createSelectSchema(categories).pick({
+  id: true,
+  name: true,
+});
+
+export type CategorySelect = z.infer<typeof categorySelectSchema>;
+
+export const categoryInsertSchema = createInsertSchema(categories).pick({
+  name: true,
+});
+
+export type CategoryInsert = z.infer<typeof categoryInsertSchema>;
+
+export const categoriesRelations = relations(categories, ({many}) => ({
+  items: many(items),
+}));
 // #endregion
 
 // #region suppliers
@@ -142,45 +163,32 @@ export const suppliers = sqliteTable('suppliers', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
-// #endregion
 
-// #region items
-export const items = sqliteTable('items', {
-  id: integer('id').primaryKey({autoIncrement: true}),
-  categoryId: integer('category_id').references(() => categories.id),
-  type: text('type', {enum: ['product', 'service']}).notNull(),
-  name: text('name').notNull(),
-  // unitPrice: text('unit_price'),
-  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
-  // isPublic: integer('is_public', {mode: 'boolean'}),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
-});
-
-export const itemSelectSchema = createSelectSchema(items).pick({
+export const supplierSelectSchema = createSelectSchema(suppliers).pick({
   id: true,
   name: true,
+  email: true,
+  phoneNumber: true,
 });
 
-export type ItemSelect = z.infer<typeof itemSelectSchema>;
+export type SupplierSelect = z.infer<typeof supplierSelectSchema>;
+
+export const suppliersRelations = relations(suppliers, ({many}) => ({
+  productDetails: many(productDetails),
+}));
 // #endregion
 
 // #region productDetails
 export const productDetails = sqliteTable('product_details', {
   id: integer('id').primaryKey({autoIncrement: true}),
   itemId: integer('item_id')
-    .references(() => items.id)
+    .references(() => items.id, {onDelete: 'cascade'})
     .notNull(),
   supplierId: integer('supplier_id')
     .references(() => suppliers.id)
     .notNull(),
-  stock: integer('stock').default(0),
-  reserved: integer('reserved').default(0),
+  stock: integer('stock').notNull(),
+  reserved: integer('reserved').notNull(),
   // purchasePrice: text('purchase_price'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
@@ -190,6 +198,118 @@ export const productDetails = sqliteTable('product_details', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const productDetailSelectSchema = createSelectSchema(productDetails)
+  .pick({
+    supplierId: true,
+    stock: true,
+    reserved: true,
+  })
+  .extend({
+    supplier: supplierSelectSchema.pick({name: true}),
+  });
+
+export const productDetailInsertSchema = createInsertSchema(
+  productDetails
+).pick({
+  supplierId: true,
+  stock: true,
+  reserved: true,
+});
+
+export const productDetailUpdateSchema = createInsertSchema(
+  productDetails
+).pick({
+  supplierId: true,
+  stock: true,
+  reserved: true,
+});
+
+export const productDetailsRelations = relations(productDetails, ({one}) => ({
+  item: one(items, {
+    fields: [productDetails.itemId],
+    references: [items.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [productDetails.supplierId],
+    references: [suppliers.id],
+  }),
+}));
+// #endregion
+
+// #region items
+export const items = sqliteTable('items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  categoryId: integer('category_id')
+    .references(() => categories.id)
+    .notNull(),
+  type: text('type', {enum: ['product', 'service']}).notNull(),
+  name: text('name').notNull(),
+  // unitPrice: text('unit_price'),
+  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  isPublic: integer('is_public', {mode: 'boolean'}).notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const itemSelectSchema = createSelectSchema(items)
+  .pick({
+    id: true,
+    categoryId: true,
+    name: true,
+    isPublic: true,
+  })
+  .extend({
+    category: categorySelectSchema.pick({name: true}),
+    productDetail: productDetailSelectSchema.optional(),
+  });
+
+export type ItemSelect = z.infer<typeof itemSelectSchema>;
+
+export const itemInsertSchema = createInsertSchema(items)
+  .pick({
+    categoryId: true,
+    name: true,
+    isPublic: true,
+  })
+  .extend({
+    productDetail: productDetailInsertSchema.optional(),
+  });
+
+export type ItemInsert = z.infer<typeof itemInsertSchema>;
+
+export const itemUpdateSchema = createSelectSchema(items)
+  .pick({
+    id: true,
+    categoryId: true,
+    name: true,
+    isPublic: true,
+  })
+  .extend({
+    productDetail: productDetailUpdateSchema.optional(),
+  });
+
+export type ItemUpdate = z.infer<typeof itemUpdateSchema>;
+
+export const itemDeleteSchema = createSelectSchema(items).pick({
+  id: true,
+});
+
+export const itemsRelations = relations(items, ({one}) => ({
+  category: one(categories, {
+    fields: [items.categoryId],
+    references: [categories.id],
+  }),
+  productDetail: one(productDetails, {
+    fields: [items.id],
+    references: [productDetails.itemId],
+  }),
+}));
 // #endregion
 
 // #region demandItems
@@ -228,13 +348,6 @@ export const demandItemsRelations = relations(demandItems, ({one}) => ({
   }),
   item: one(items, {fields: [demandItems.itemId], references: [items.id]}),
 }));
-
-// export const demandItemUpdateSchema = createSelectSchema(demandItems).pick({
-//   itemId: true,
-//   quantity: true,
-// });
-
-// export type DemandItem = z.infer<typeof demandItemUpdateSchema>;
 // #endregion
 
 // #region demands
@@ -296,22 +409,6 @@ export const demandsRelations = relations(demands, ({one, many}) => ({
   }),
   demandItems: many(demandItems),
 }));
-
-// export const demandUpdateSchema = createSelectSchema(demands)
-//   .pick({
-//     id: true,
-//     status: true,
-//     internalNote: true,
-//     externalNote: true,
-//   })
-//   .extend({
-//     client: clientUpdateSchema.pick({
-//       email: true,
-//     }),
-//     demandItems: z.array(demandItemUpdateSchema),
-//   });
-
-// export type DemandUpdate = z.infer<typeof demandUpdateSchema>;
 // #endregion
 
 // #region quoteItems
@@ -334,6 +431,11 @@ export const quoteItems = sqliteTable('quote_items', {
     .notNull(),
 });
 
+export const quoteItemSelectSchema = createSelectSchema(quoteItems).pick({
+  itemId: true,
+  quantity: true,
+});
+
 export const quoteItemInsertSchema = createInsertSchema(quoteItems).pick({
   itemId: true,
   quantity: true,
@@ -343,6 +445,10 @@ export const quoteItemsRelations = relations(quoteItems, ({one}) => ({
   item: one(items, {
     fields: [quoteItems.itemId],
     references: [items.id],
+  }),
+  quote: one(quotes, {
+    fields: [quoteItems.quoteId],
+    references: [quotes.id],
   }),
 }));
 // #endregion
@@ -359,9 +465,9 @@ export const quotes = sqliteTable('quotes', {
     .default('sent')
     .notNull(),
   expiresAt: integer('expires_at', {mode: 'number'}).notNull(),
-  additionalInfo: text('additional_info'),
   // attachment: blob(),
   version: integer('version').default(1).notNull(),
+  additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -371,6 +477,25 @@ export const quotes = sqliteTable('quotes', {
     .notNull(),
 });
 
+export const quoteSelectSchema = createSelectSchema(quotes)
+  .pick({
+    id: true,
+    demandId: true,
+    status: true,
+    expiresAt: true,
+    version: true,
+    additionalInfo: true,
+  })
+  .extend({
+    quoteItems: z.array(
+      quoteItemSelectSchema.extend({
+        item: itemSelectSchema,
+      })
+    ),
+  });
+
+export type QuoteSelect = z.infer<typeof quoteSelectSchema>;
+
 export const quoteInsertSchema = createInsertSchema(quotes)
   .pick({demandId: true, expiresAt: true, additionalInfo: true})
   .extend({
@@ -379,6 +504,10 @@ export const quoteInsertSchema = createInsertSchema(quotes)
   });
 
 export type QuoteInsert = z.infer<typeof quoteInsertSchema>;
+
+export const quotesRelations = relations(quotes, ({many}) => ({
+  quoteItems: many(quoteItems),
+}));
 // #endregion
 
 // #region jobItems
