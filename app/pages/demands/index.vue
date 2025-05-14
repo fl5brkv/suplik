@@ -35,7 +35,7 @@
         :data="data"
         :columns="columns"
         :loading="status === 'pending'"
-        :ui="{
+       :ui="{
           base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:bdemand-b-0',

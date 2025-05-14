@@ -50,7 +50,7 @@
         </template>
       </UTable>
 
-      <div
+     <div
         class="flex items-center justify-between gap-3 bdemand-t bdemand-(--ui-bdemand) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
@@ -97,20 +97,6 @@ const getRowItems = (row: Row<ItemSelect>) => {
     {
       type: 'label',
       label: 'Actions',
-    },
-    {
-      label: 'Copy demand ID',
-      icon: 'i-lucide-copy',
-      onSelect() {
-        navigator.clipboard.writeText(row.original.id);
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Demand ID copied to clipboard',
-        });
-      },
-    },
-    {
-      type: 'separator',
     },
     {
       label: 'Update service',
@@ -188,9 +174,8 @@ const columns: TableColumn<ItemSelect>[] = [
     header: 'Name',
   },
   {
-    accessorKey: 'category',
+    accessorKey: 'category.name',
     header: 'Category',
-    cell: ({row}) => row.original.category.name,
   },
   {
     accessorKey: 'isPublic',

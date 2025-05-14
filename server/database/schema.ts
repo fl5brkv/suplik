@@ -173,6 +173,29 @@ export const supplierSelectSchema = createSelectSchema(suppliers).pick({
 
 export type SupplierSelect = z.infer<typeof supplierSelectSchema>;
 
+export const supplierInsertSchema = createInsertSchema(suppliers).pick({
+  name: true,
+  email: true,
+  phoneNumber: true,
+});
+
+export type SupplierInsert = z.infer<typeof supplierInsertSchema>;
+
+export const supplierUpdateSchema = createSelectSchema(suppliers).pick({
+  id: true,
+  name: true,
+  email: true,
+  phoneNumber: true,
+});
+
+export type SupplierUpdate = z.infer<typeof supplierUpdateSchema>;
+
+export const supplierDeleteSchema = createSelectSchema(suppliers).pick({
+  id: true,
+});
+
+export type SupplierDelete = z.infer<typeof supplierDeleteSchema>;
+
 export const suppliersRelations = relations(suppliers, ({many}) => ({
   productDetails: many(productDetails),
 }));

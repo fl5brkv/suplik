@@ -36,15 +36,14 @@
         :columns="columns"
         :loading="status === 'pending'"
         :ui="{
-          base: 'table-fixed border-separate border-spacing-0',
+          base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:border-b-0',
-          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] border-y border-(--ui-border) first:border-l last:border-r',
-          td: 'border-b border-(--ui-border)',
-        }" />
-
-      <div
-        class="flex items-center justify-between gap-3 border-t border-(--ui-border) pt-4 mt-auto">
+          tbody: '[&>tr]:last:[&>td]:bdemand-b-0',
+          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bdemand-y bdemand-(--ui-bdemand) first:bdemand-l last:bdemand-r',
+          td: 'bdemand-b bdemand-(--ui-bdemand)',
+        }"/>
+   <div
+        class="flex items-center justify-between gap-3 bdemand-t bdemand-(--ui-bdemand) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }}
           of

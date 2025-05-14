@@ -91,12 +91,6 @@ const state = reactive({
     reserved: 0,
   },
 });
-// watch(
-//   () => props.product,
-//   (newProduct) => {
-//     Object.assign(state, newProduct);
-//   }
-// );
 
 const submit = async (payload: FormSubmitEvent<ItemUpdate>) => {
   try {

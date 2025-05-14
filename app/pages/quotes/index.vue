@@ -35,20 +35,20 @@
         :data="data"
         :columns="columns"
         :loading="status === 'pending'"
-        :ui="{
-          base: 'table-fixed bquote-separate bquote-spacing-0',
+       :ui="{
+          base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
-          tbody: '[&>tr]:last:[&>td]:bquote-b-0',
-          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bquote-y bquote-(--ui-bquote) first:bquote-l last:bquote-r',
-          td: 'bquote-b bquote-(--ui-bquote)',
+          tbody: '[&>tr]:last:[&>td]:bdemand-b-0',
+          th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bdemand-y bdemand-(--ui-bdemand) first:bdemand-l last:bdemand-r',
+          td: 'bdemand-b bdemand-(--ui-bdemand)',
         }">
         <template #expanded="{row}">
           <pre>{{ row.original }}</pre>
         </template>
       </UTable>
 
-      <div
-        class="flex items-center justify-between gap-3 bquote-t bquote-(--ui-bquote) pt-4 mt-auto">
+         <div
+        class="flex items-center justify-between gap-3 bdemand-t bdemand-(--ui-bdemand) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
           returned.
