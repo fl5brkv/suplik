@@ -84,7 +84,6 @@ const {data, status} = await useFetch('/api/items', {
 
 const state = reactive({
   demandId: props.demand.id,
-  expiresAt: 0,
   additionalInfo: '',
   client: {
     email: props.demand.client.email,

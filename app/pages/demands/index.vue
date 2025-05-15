@@ -94,20 +94,6 @@ const getRowItems = (row: Row<DemandSelect>) => {
       label: 'Actions',
     },
     {
-      label: 'Copy demand ID',
-      icon: 'i-lucide-copy',
-      onSelect() {
-        navigator.clipboard.writeText(row.original.id);
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Demand ID copied to clipboard',
-        });
-      },
-    },
-    {
-      type: 'separator',
-    },
-    {
       label: 'Provide a quote',
       icon: 'lucide:file-pen',
       onSelect() {

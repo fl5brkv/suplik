@@ -181,6 +181,7 @@ export default defineTask({
       {demandId: 1, itemId: 1, quantity: 10},
 
       {demandId: 2, itemId: 4, quantity: 2},
+
       {demandId: 2, itemId: 3, quantity: 1},
 
       {demandId: 3, itemId: 5, quantity: 3},
@@ -190,18 +191,34 @@ export default defineTask({
 
     const quotes = [
       {
+        demandId: 1,
+        status: 'accepted' as const,
+        additionalInfo: 'Sending you quote',
+        version: 1,
+      },
+      {
         demandId: 2,
         status: 'sent' as const,
-        expiresAt: Date.now() + 5 * 24 * 60 * 60 * 1000, // 5 days from now
         additionalInfo: 'Sent for review. Expiry date in 5 days.',
         version: 1,
       },
       {
         demandId: 4,
-        status: 'declined' as const,
-        expiresAt: Date.now() + 10 * 24 * 60 * 60 * 1000, // 10 days from now
-        additionalInfo: 'I dont like the price.',
+        status: 'sent' as const,
+        additionalInfo: 'This is the 1st version of our quote',
         version: 1,
+      },
+      {
+        demandId: 4,
+        status: 'declined' as const,
+        additionalInfo: 'I dont like the price.',
+        version: 2,
+      },
+      {
+        demandId: 4,
+        status: 'sent' as const,
+        additionalInfo: 'This is the new price for your quote.',
+        version: 3,
       },
     ];
 

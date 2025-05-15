@@ -3,50 +3,22 @@ import {z} from 'zod';
 export default eventHandler(async (event) => {
   // const {role} = await getUserSession(event);
 
-  const role = 'admin';
+  const query = await getValidatedQuery(event, (query) =>
+    z
+      .object({
+        type: z.enum(['product', 'service']),
+      })
+      .safeParse(query)
+  );
 
-  if (role === 'admin') {
-    const query = await getValidatedQuery(event, (query) =>
-      z
-        .object({
-          type: z.enum(['product', 'service']),
-        })
-        .safeParse(query)
-    );
+  if (query.success) {
+    await requireAdminSession(event);
 
-    if (!query.success)
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'The provided query is invalid',
-      });
-
-    // const selected = await useDrizzle()
-    //   .select({
-    //     id: tables.items.id,
-    //     categoryId: tables.items.categoryId,
-    //     name: tables.items.name,
-    //     isPublic: tables.items.isPublic,
-    //     category: {
-    //       name: tables.categories.name,
-    //     },
-    //     productDetail: {
-    //       stock: tables.productDetails.stock,
-    //       reserved: tables.productDetails.reserved,
-    //     },
-    //   })
-    //   .from(tables.items)
-    //   .leftJoin(
-    //     tables.categories,
-    //     eq(tables.items.categoryId, tables.categories.id)
-    //   )
-    //   .leftJoin(
-    //     tables.productDetails,
-    //     eq(tables.items.id, tables.productDetails.itemId)
-    //   )
-
-    //   .where(eq(tables.items.type, query.data.type));
-
-    // return selected;
+    // if (!query.success)
+    //   throw createError({
+    //     statusCode: 400,
+    //     statusMessage: 'The provided query is invalid',
+    //   });
 
     const selected = await useDrizzle().query.items.findMany({
       columns: {
@@ -86,11 +58,14 @@ export default eventHandler(async (event) => {
     const selected = await useDrizzle().query.items.findMany({
       columns: {
         id: true,
+        categoryId: true,
         name: true,
+        isPublic: true,
       },
       with: {
         productDetail: {
           columns: {
+            supplierId: true,
             stock: true,
             reserved: true,
           },
@@ -101,3 +76,34 @@ export default eventHandler(async (event) => {
     return selected;
   }
 });
+
+// const selected = await useDrizzle()
+//   .select({
+//     id: tables.items.id,
+//     categoryId: tables.items.categoryId,
+//     name: tables.items.name,
+//     isPublic: tables.items.isPublic,
+//     category: {name: tables.categories.name},
+//     productDetail: {
+//       supplierId: tables.productDetails.supplierId,
+//       stock: tables.productDetails.stock,
+//       reserved: tables.productDetails.reserved,
+//       picovina: {
+//         hellot: tables.suppliers.id,
+//       },
+//     },
+//   })
+//   .from(tables.items)
+//   .leftJoin(
+//     tables.categories,
+//     eq(tables.items.categoryId, tables.categories.id)
+//   )
+//   .leftJoin(
+//     tables.productDetails,
+//     eq(tables.items.id, tables.productDetails.itemId)
+//   )
+//   .leftJoin(
+//     tables.suppliers,
+//     eq(tables.productDetails.supplierId, tables.suppliers.id)
+//   )
+//   .where(eq(tables.items.type, query.data.type));

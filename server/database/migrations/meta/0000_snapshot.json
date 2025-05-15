@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8370ca91-47d5-4af8-bc42-1ffd2508aa05",
+  "id": "4c9af2b2-dfd5-4e45-a8a3-aa6f991efa34",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categories": {
@@ -828,13 +828,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'sent'"
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
         },
         "version": {
           "name": "version",

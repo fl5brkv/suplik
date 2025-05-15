@@ -1,6 +1,8 @@
 import {quoteInsertSchema} from '~~/server/database/schema';
 import {render} from '@vue-email/render';
-import MyEmailQuotation from '~~/app/components/email/Quotation.vue';
+import MyEmailQuote from '~~/app/components/email/Quote.vue';
+import {digest} from 'ohash';
+
 export default eventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>
     quoteInsertSchema.safeParse(body)
@@ -23,13 +25,12 @@ export default eventHandler(async (event) => {
     .insert(tables.quotes)
     .values({
       demandId: result.data.demandId,
-      expiresAt: result.data.expiresAt,
       additionalInfo: result.data.additionalInfo,
     })
     .returning({
       id: tables.quotes.id,
       demandId: tables.quotes.demandId,
-      expiresAt: tables.quotes.expiresAt,
+      version: tables.quotes.version,
       additionalInfo: tables.quotes.additionalInfo,
     })
     .get();
@@ -79,14 +80,21 @@ export default eventHandler(async (event) => {
     },
   });
 
+  const config = useRuntimeConfig(event);
+
+  const expiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+  const token = digest(`${insertedQuote.id}:${config.salt}`);
+
   const html = await render(
-    MyEmailQuotation,
+    MyEmailQuote,
     {
-      id: insertedQuote.id,
-      expiresAt: insertedQuote.expiresAt,
       additionalInfo: insertedQuote.additionalInfo,
       client: result.data.client,
-      quotationItems: selected,
+      quoteItems: selected,
+      response: `${config.public.baseURL}/quotes/${encodeURIComponent(
+        btoa(`${insertedQuote.id}:${token}:${expiresAt}`)
+      )}`,
     },
     {
       pretty: true,
@@ -97,7 +105,7 @@ export default eventHandler(async (event) => {
 
   await sendMail({
     to: result.data.client.email,
-    subject: `Order #${insertedQuote.id} quotation`,
+    subject: 'Order quotation',
     html,
   });
 

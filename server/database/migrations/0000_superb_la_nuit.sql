@@ -117,7 +117,6 @@ CREATE TABLE `quotes` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`demand_id` integer NOT NULL,
 	`status` text DEFAULT 'sent' NOT NULL,
-	`expires_at` integer NOT NULL,
 	`version` integer DEFAULT 1 NOT NULL,
 	`additional_info` text,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,

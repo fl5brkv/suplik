@@ -28,26 +28,33 @@
         ref="table"
         v-model:global-filter="globalFilter"
         v-model:pagination="pagination"
-        :pagination-options="{
-          getPaginationRowModel: getPaginationRowModel(),
-        }"
+        :pagination-options="{getPaginationRowModel: getPaginationRowModel()}"
         class="shrink-0"
         :data="data"
         :columns="columns"
         :loading="status === 'pending'"
-       :ui="{
+        :grouping="['demandId']"
+        :grouping-options="groupingOptions"
+        :ui="{
           base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:bdemand-b-0',
           th: 'py-1 first:rounded-l-[calc(var(--ui-radius)*2)] last:rounded-r-[calc(var(--ui-radius)*2)] bdemand-y bdemand-(--ui-bdemand) first:bdemand-l last:bdemand-r',
-          td: 'bdemand-b bdemand-(--ui-bdemand)',
+          td: 'empty:p-0',
+          root: 'min-w-full',
         }">
-        <template #expanded="{row}">
-          <pre>{{ row.original }}</pre>
-        </template>
-      </UTable>
+        <template #expandable-cell="{row}">
+          <div v-if="row.getIsGrouped()" class="flex items-center">
+            <UButton
+              variant="outline"
+              color="neutral"
+              class="mr-2"
+              size="xs"
+              :icon="row.getIsExpanded() ? 'i-lucide-minus' : 'i-lucide-plus'"
+              @click="row.toggleExpanded()" /></div></template
+      ></UTable>
 
-         <div
+      <div
         class="flex items-center justify-between gap-3 bdemand-t bdemand-(--ui-bdemand) pt-4 mt-auto">
         <div class="text-sm text-(--ui-text-muted)">
           {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
@@ -69,10 +76,13 @@
 </template>
 
 <script setup lang="ts">
-import {MyQuoteInsert} from '#components';
-import type {TableColumn} from '@nuxt/ui';
-// @ts-ignore
-import {getPaginationRowModel, type Row} from '@tanstack/table-core';
+import type {DropdownMenuItem, TableColumn} from '@nuxt/ui';
+import {
+  getPaginationRowModel,
+  type Row,
+  getGroupedRowModel,
+  type GroupingOptions,
+} from '@tanstack/table-core';
 import {type QuoteSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
@@ -87,73 +97,49 @@ const {data, status} = await useFetch<QuoteSelect[]>('/api/quotes', {
   lazy: true,
 });
 
-const getRowItems = (row: Row<QuoteSelect>) => {
-  return [
+const getRowItems = (row: Row<QuoteSelect>): DropdownMenuItem[] => {
+  const items: DropdownMenuItem[] = [
     {
       type: 'label',
       label: 'Actions',
     },
-    {
-      label: 'Copy demand ID',
-      icon: 'i-lucide-copy',
-      onSelect() {
-        navigator.clipboard.writeText(row.original.id);
-        toast.add({
-          title: 'Copied to clipboard',
-          description: 'Demand ID copied to clipboard',
-        });
-      },
-    },
-    {
-      type: 'separator',
-    },
-    // {
-    //   label: 'Provide a quote',
-    //   icon: 'lucide:file-pen',
-    //   onSelect() {
-    //     const overlay = useOverlay();
-
-    //     overlay.create(MyQuoteInsert, {
-    //       props: {
-    //         quote: row.original,
-    //       },
-    //       defaultOpen: true,
-    //     });
-    //   },
-    // },
-    {
-      label: 'Delete quote',
-      icon: 'i-lucide-trash',
-      color: 'error',
-      onSelect() {
-        toast.add({
-          title: 'Quote deleted',
-          description: 'The quote has been deleted.',
-        });
-      },
-    },
   ];
+
+  if (row.original.status === 'accepted') {
+    items.push({
+      label: 'Provide a job',
+      icon: 'lucide:file-pen',
+      onSelect() {
+        const overlay = useOverlay();
+
+        overlay.create(MyQuoteInsert, {
+          props: {
+            quote: row.original,
+          },
+          defaultOpen: true,
+        });
+      },
+    });
+  }
+
+  items.push({
+    label: 'Delete quote',
+    icon: 'i-lucide-trash',
+    color: 'error',
+    onSelect() {
+      toast.add({
+        title: 'Quote deleted',
+        description: 'The quote has been deleted.',
+      });
+    },
+  });
+
+  return items;
 };
 
 const columns: TableColumn<QuoteSelect>[] = [
   {
-    id: 'expand',
-    header: 'More',
-    cell: ({row}) =>
-      h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        icon: 'i-lucide-chevron-down',
-        square: true,
-        'aria-label': 'Expand',
-        ui: {
-          leadingIcon: [
-            'transition-transform',
-            row.getIsExpanded() ? 'duration-200 rotate-180' : '',
-          ],
-        },
-        onClick: () => row.toggleExpanded(),
-      }),
+    id: 'expandable',
   },
   {
     accessorKey: 'id',
@@ -163,7 +149,6 @@ const columns: TableColumn<QuoteSelect>[] = [
   {
     accessorKey: 'demandId',
     header: 'Demand ID',
-    cell: ({row}) => `Demand #${row.original.id}`,
   },
   {
     accessorKey: 'status',
@@ -181,10 +166,6 @@ const columns: TableColumn<QuoteSelect>[] = [
         () => row.original.status
       );
     },
-  },
-  {
-    accessorKey: 'expiresAt',
-    header: 'Expires at',
   },
   {
     id: 'items',
@@ -210,10 +191,12 @@ const columns: TableColumn<QuoteSelect>[] = [
   {
     accessorKey: 'version',
     header: 'Version',
+    aggregationFn: 'max',
   },
   {
     accessorKey: 'additionalInfo',
     header: 'Additional Info',
+    aggregationFn: 'max',
   },
   {
     id: 'actions',
@@ -247,5 +230,10 @@ const globalFilter = ref('');
 const pagination = ref({
   pageIndex: 0,
   pageSize: 10,
+});
+
+const groupingOptions = ref<GroupingOptions>({
+  groupedColumnMode: 'remove',
+  getGroupedRowModel: getGroupedRowModel(),
 });
 </script>

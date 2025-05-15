@@ -487,7 +487,6 @@ export const quotes = sqliteTable('quotes', {
   })
     .default('sent')
     .notNull(),
-  expiresAt: integer('expires_at', {mode: 'number'}).notNull(),
   // attachment: blob(),
   version: integer('version').default(1).notNull(),
   additionalInfo: text('additional_info'),
@@ -505,7 +504,6 @@ export const quoteSelectSchema = createSelectSchema(quotes)
     id: true,
     demandId: true,
     status: true,
-    expiresAt: true,
     version: true,
     additionalInfo: true,
   })
@@ -520,13 +518,20 @@ export const quoteSelectSchema = createSelectSchema(quotes)
 export type QuoteSelect = z.infer<typeof quoteSelectSchema>;
 
 export const quoteInsertSchema = createInsertSchema(quotes)
-  .pick({demandId: true, expiresAt: true, additionalInfo: true})
+  .pick({demandId: true, additionalInfo: true})
   .extend({
     client: clientInsertSchema.pick({email: true}),
     quoteItems: z.array(quoteItemInsertSchema),
   });
 
 export type QuoteInsert = z.infer<typeof quoteInsertSchema>;
+
+export const quoteResponseUpdateSchema = createSelectSchema(quotes).pick({
+  status: true,
+  additionalInfo: true,
+});
+
+export type QuoteResponseUpdate = z.infer<typeof quoteResponseUpdateSchema>;
 
 export const quotesRelations = relations(quotes, ({many}) => ({
   quoteItems: many(quoteItems),

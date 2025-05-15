@@ -1,5 +1,5 @@
 import tailwindcss from '@tailwindcss/vite';
-import vue from '@vitejs/plugin-vue'
+import vue from '@vitejs/plugin-vue';
 
 export default defineNuxtConfig({
   modules: [
@@ -28,7 +28,7 @@ export default defineNuxtConfig({
 
   nitro: {
     experimental: {
-      tasks: true, // db seed 
+      tasks: true, // db seed
     },
     rollupConfig: {
       plugins: [vue()], // vue-email
@@ -43,6 +43,13 @@ export default defineNuxtConfig({
     auth: {
       user: 'a48d362e4012e1',
       pass: 'e593d1246b3384',
+    },
+  },
+
+  runtimeConfig: {
+    salt: import.meta.env.NUXT_PASSWORD_SALT,
+    public: {
+      baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
     },
   },
 
