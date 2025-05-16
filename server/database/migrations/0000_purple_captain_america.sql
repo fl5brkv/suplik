@@ -82,9 +82,9 @@ CREATE TABLE `jobs` (
 CREATE TABLE `orders` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`item_id` integer NOT NULL,
-	`status` text DEFAULT 'pending' NOT NULL,
+	`status` text DEFAULT 'sent' NOT NULL,
 	`quantity` integer NOT NULL,
-	`expected_delivery` text,
+	`delivery` text,
 	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
 	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
 	FOREIGN KEY (`item_id`) REFERENCES `items`(`id`) ON UPDATE no action ON DELETE no action

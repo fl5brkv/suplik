@@ -105,7 +105,7 @@ export default eventHandler(async (event) => {
 
   await sendMail({
     to: result.data.client.email,
-    subject: 'Order quotation',
+    subject: 'Demand quotation',
     html,
   });
 

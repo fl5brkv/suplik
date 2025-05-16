@@ -9,22 +9,15 @@ export default eventHandler(async (event) => {
 
   const [id] = decodedResponse.split(':');
 
-  const selected = await useDrizzle().query.quotes.findFirst({
-    where: (quotes, {eq}) => eq(tables.quotes.id, Number(id)),
+  const selected = await useDrizzle().query.orders.findFirst({
+    where: (orders, {eq}) => eq(tables.orders.id, Number(id)),
     columns: {
-      additionalInfo: true,
+      quantity: true,
     },
     with: {
-      quoteItems: {
+      item: {
         columns: {
-          quantity: true,
-        },
-        with: {
-          item: {
-            columns: {
-              name: true,
-            },
-          },
+          name: true,
         },
       },
     },

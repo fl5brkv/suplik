@@ -1,10 +1,10 @@
 import {digest} from 'ohash';
 import {z} from 'zod';
-import {quoteResponseUpdateSchema} from '~~/server/database/schema';
+import {quoteResponseInsertSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>
-    quoteResponseUpdateSchema.safeParse(body)
+    quoteResponseInsertSchema.safeParse(body)
   );
 
   if (!result.success)

@@ -1,17 +1,17 @@
 <template>
-  <UDashboardPanel id="products">
+  <UDashboardPanel id="orders">
     <template #header>
-      <UDashboardNavbar title="Products">
+      <UDashboardNavbar title="Orders">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
-        <template #right>
+        <!-- <template #right>
           <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert type="product" />
-            <MyProductInsert />
+            <MyCategoryInsert type="order" />
+            <MyOrderInsert />
           </UButtonGroup>
-        </template>
+        </template> -->
       </UDashboardNavbar>
     </template>
 
@@ -72,11 +72,11 @@
 </template>
 
 <script setup lang="ts">
-import {MyOrderInsert, MyProductUpdate} from '#components';
+import {MyOrderUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type ItemSelect} from '~~/server/database/schema';
+import {type OrderSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -85,54 +85,39 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<ItemSelect[]>('/api/items', {
-  key: 'products',
+const {data, status} = await useFetch<OrderSelect[]>('/api/orders', {
+  key: 'orders',
   method: 'get',
-  query: {type: 'product'},
   lazy: true,
 });
 
-const getRowItems = (row: Row<ItemSelect>) => {
+const getRowItems = (row: Row<OrderSelect>) => {
   return [
     {
       type: 'label',
       label: 'Actions',
     },
     {
-      label: 'Make an order',
-      icon: 'lucide:ship',
-      onSelect() {
-        const overlay = useOverlay();
-
-        overlay.create(MyOrderInsert, {
-          props: {
-            product: row.original,
-          },
-          defaultOpen: true,
-        });
-      },
-    },
-    {
-      label: 'Update product',
+      label: 'Update order',
       icon: 'lucide:file-pen',
       onSelect() {
         const overlay = useOverlay();
 
-        overlay.create(MyProductUpdate, {
+        overlay.create(MyOrderUpdate, {
           props: {
-            product: row.original,
+            order: row.original,
           },
           defaultOpen: true,
         });
       },
     },
     {
-      label: 'Delete product',
+      label: 'Delete order',
       icon: 'i-lucide-trash',
       color: 'error',
       async onSelect() {
         try {
-          await $fetch(`/api/items`, {
+          await $fetch(`/api/orders`, {
             method: 'DELETE',
             body: {id: row.original.id},
           });
@@ -142,14 +127,14 @@ const getRowItems = (row: Row<ItemSelect>) => {
           );
 
           toast.add({
-            title: 'Product deleted',
-            description: 'The product has been deleted.',
+            title: 'Order deleted',
+            description: 'The order has been deleted.',
             color: 'success',
           });
         } catch (error) {
           toast.add({
             title: 'Error',
-            description: 'Failed to delete the product.',
+            description: 'Failed to delete the order.',
             color: 'error',
           });
         }
@@ -158,68 +143,41 @@ const getRowItems = (row: Row<ItemSelect>) => {
   ];
 };
 
-const columns: TableColumn<ItemSelect>[] = [
-  {
-    id: 'expand',
-    header: 'More',
-    cell: ({row}) =>
-      h(UButton, {
-        color: 'neutral',
-        variant: 'ghost',
-        icon: 'i-lucide-chevron-down',
-        square: true,
-        'aria-label': 'Expand',
-        ui: {
-          leadingIcon: [
-            'transition-transform',
-            row.getIsExpanded() ? 'duration-200 rotate-180' : '',
-          ],
-        },
-        onClick: () => row.toggleExpanded(),
-      }),
-  },
+const columns: TableColumn<OrderSelect>[] = [
   {
     accessorKey: 'id',
     header: 'ID',
     cell: ({row}) => `#${row.original.id}`,
   },
   {
-    accessorKey: 'name',
-    header: 'Name',
+    accessorKey: 'item.name',
+    header: 'Item Name',
   },
   {
-    accessorKey: 'category',
-    header: 'Category',
-    cell: ({row}) => row.original.category.name,
-  },
-  {
-    accessorKey: 'productDetail.supplier.name',
-    header: 'Supplier',
-  },
-  {
-    accessorKey: 'productDetail.stock',
-    header: 'Stock'
-  },
-   {
-    accessorKey: 'productDetail.reserved',
-    header: 'Reserved'
-  },
-  {
-    accessorKey: 'isPublic',
-    header: 'Public',
+    accessorKey: 'status',
+    header: 'Status',
     cell: ({row}) => {
-      const isPublic = row.original.isPublic;
+      const color = {
+        sent: 'info' as const,
+        accepted: 'success' as const,
+        delivered: 'warning' as const,
+        declined: 'error' as const,
+      }[row.original.status];
       return h(
         UBadge,
-        {
-          icon: isPublic ? 'i-lucide-arrow-right' : 'i-lucide-x',
-          color: isPublic ? 'success' : 'error',
-          variant: 'subtle',
-          class: 'capitalize',
-        },
-        () => (isPublic ? 'Yes' : 'No')
+        {class: 'capitalize', variant: 'subtle', color},
+        () => row.original.status
       );
     },
+  },
+  {
+    accessorKey: 'quantity',
+    header: 'Quantity',
+  },
+  {
+    accessorKey: 'delivery',
+    header: 'Delivery',
+    cell: ({row}) => row.original.delivery || '-',
   },
   {
     id: 'actions',

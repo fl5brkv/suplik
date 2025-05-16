@@ -1,23 +1,19 @@
 <template>
   <div v-if="data">
-    <h1>Quote info:</h1>
-    <p v-if="data.additionalInfo">
-      <strong>Additional Info:</strong> {{ data.additionalInfo }}
+    <h1>Order info:</h1>
+    <p v-if="data.item.name">
+      <strong>Item name:</strong> {{ data.item.name }}
     </p>
-    <ul>
-      <li v-for="(quoteItem, idx) in data.quoteItems" :key="idx">
-        <strong>Item:</strong> {{ quoteItem.item.name }},
-        <strong>Quantity:</strong> {{ quoteItem.quantity }}
-      </li>
-    </ul>
+
+    <p v-if="data.quantity"><strong>Item name:</strong> {{ data.quantity }}</p>
 
     <UForm
       ref="formRef"
       :state="state"
       class="flex flex-col gap-4"
       @submit="submit">
-      <UFormField label="Additional Info From You" name="additionalInfo">
-        <UTextarea v-model="state.additionalInfo" />
+      <UFormField label="Delivery" name="delivery">
+        <UInput v-model="state.delivery" />
       </UFormField>
 
       <UButtonGroup>
@@ -39,7 +35,7 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type QuoteResponseInsert} from '~~/server/database/schema';
+import {type OrderResponseUpdate, type QuoteResponseInsert} from '~~/server/database/schema';
 
 definePageMeta({
   layout: false,
@@ -49,34 +45,31 @@ const route = useRoute();
 
 const toast = useToast();
 
-const {data} = await useFetch(`/api/quotes/${route.params.response}`);
+const {data} = await useFetch(`/api/orders/${route.params.response}`);
 
 const state = reactive({
-  status: '' as 'accepted' | 'declined' | 'commented',
-  additionalInfo: '' as string | null,
+  status: '' as 'accepted' | 'declined',
+  delivery: '',
 });
 
 const formRef = ref();
 
 const buttonStatus = async (status: 'accepted' | 'declined') => {
-  if (status === 'accepted') {
-    state.status = 'accepted';
-  } else if (status === 'declined') {
-    state.status = state.additionalInfo ? 'commented' : 'declined';
-  }
+  state.status = status;
+
   await formRef.value.submit();
 };
 
-const submit = async (payload: FormSubmitEvent<QuoteResponseInsert>) => {
+const submit = async (payload: FormSubmitEvent<OrderResponseUpdate>) => {
   try {
-    await $fetch(`/api/quotes/${route.params.response}`, {
-      method: 'POST',
+    await $fetch(`/api/orders/${route.params.response}`, {
+      method: 'PATCH',
       body: payload.data,
     });
 
     toast.add({
       title: 'Success',
-      description: 'The updated quote was sent to us!',
+      description: 'The updated order was sent to us!',
       color: 'success',
     });
   } catch (err) {

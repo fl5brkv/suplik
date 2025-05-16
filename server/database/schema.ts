@@ -1,10 +1,6 @@
 import {relations, sql} from 'drizzle-orm';
 import {sqliteTable, text, integer, blob} from 'drizzle-orm/sqlite-core';
-import {
-  createInsertSchema,
-  createSelectSchema,
-  createUpdateSchema,
-} from 'drizzle-zod';
+import {createInsertSchema, createSelectSchema} from 'drizzle-zod';
 import {z} from 'zod';
 
 // #region users
@@ -526,12 +522,12 @@ export const quoteInsertSchema = createInsertSchema(quotes)
 
 export type QuoteInsert = z.infer<typeof quoteInsertSchema>;
 
-export const quoteResponseUpdateSchema = createSelectSchema(quotes).pick({
+export const quoteResponseInsertSchema = createSelectSchema(quotes).pick({
   status: true,
   additionalInfo: true,
 });
 
-export type QuoteResponseUpdate = z.infer<typeof quoteResponseUpdateSchema>;
+export type QuoteResponseInsert = z.infer<typeof quoteResponseInsertSchema>;
 
 export const quotesRelations = relations(quotes, ({many}) => ({
   quoteItems: many(quoteItems),
@@ -585,6 +581,15 @@ export const jobs = sqliteTable('jobs', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const jobInsertSchema = createInsertSchema(jobs)
+  .pick({demandId: true, additionalInfo: true})
+  .extend({
+    client: clientInsertSchema.pick({email: true}),
+    quoteItems: z.array(quoteItemInsertSchema),
+  });
+
+export type JobInsert = z.infer<typeof jobInsertSchema>;
 // #endregion
 
 // #region order
@@ -594,12 +599,12 @@ export const orders = sqliteTable('orders', {
     .references(() => items.id)
     .notNull(),
   status: text('status', {
-    enum: ['pending', 'ordered', 'delivered', 'canceled'],
+    enum: ['sent', 'accepted', 'delivered', 'declined'],
   })
-    .default('pending')
+    .default('sent')
     .notNull(),
   quantity: integer('quantity').notNull(),
-  expectedDelivery: text('expected_delivery'),
+  delivery: text('delivery'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -608,6 +613,57 @@ export const orders = sqliteTable('orders', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
+
+export const orderSelectSchema = createSelectSchema(orders)
+  .pick({
+    id: true,
+    itemId: true,
+    status: true,
+    quantity: true,
+    delivery: true,
+  })
+  .extend({
+    item: itemSelectSchema.pick({
+      name: true,
+    }),
+  });
+
+export type OrderSelect = z.infer<typeof orderSelectSchema>;
+
+export const orderInsertSchema = createInsertSchema(orders).pick({
+  itemId: true,
+  quantity: true,
+});
+
+export type OrderInsert = z.infer<typeof orderInsertSchema>;
+
+export const orderUpdateSchema = createSelectSchema(orders).pick({
+  id: true,
+  status: true,
+  delivery: true,
+});
+
+export type OrderUpdate = z.infer<typeof orderUpdateSchema>;
+
+export const orderResponseUpdateSchema = createSelectSchema(orders).pick({
+  status: true,
+  delivery: true,
+});
+
+export type OrderResponseUpdate = z.infer<typeof orderResponseUpdateSchema>;
+
+export const orderDeleteSchema = createSelectSchema(orders).pick({
+  id: true,
+});
+
+export type OrderDelete = z.infer<typeof orderDeleteSchema>;
+
+export const ordersRelations = relations(orders, ({one}) => ({
+  item: one(items, {
+    fields: [orders.itemId],
+    references: [items.id],
+  }),
+}));
 // #endregion
 
 // #region jobItemsToOrders

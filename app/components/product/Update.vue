@@ -1,6 +1,6 @@
 <template>
-  <UModal :title="`New product`" :ui="{footer: 'justify-end'}">
-    <UButton label="New product" color="neutral" variant="subtle" />
+  <UModal :title="`Update product`" :ui="{footer: 'justify-end'}">
+    <UButton label="Update product" color="neutral" variant="subtle" />
 
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">

@@ -264,9 +264,9 @@ export default defineTask({
     const orders = [
       {
         itemId: 3,
-        status: 'ordered' as const,
+        status: 'sent' as const,
         quantity: 10,
-        expectedDelivery: '2025-07-08',
+        delivery: '2025-07-08',
       },
     ];
 
