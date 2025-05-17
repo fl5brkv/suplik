@@ -93,6 +93,7 @@ export default eventHandler(async (event) => {
     .returning({
       id: tables.quotes.id,
       demandId: tables.quotes.demandId,
+      status: tables.quotes.status,
       version: tables.quotes.version,
       additionalInfo: tables.quotes.additionalInfo,
     })
@@ -124,6 +125,10 @@ export default eventHandler(async (event) => {
       statusCode: 400,
       statusMessage: 'There was an error inserting quote items!',
     });
+
+    if (insertedQuote.status === 'accepted')
+      
+  // if the insertedquote status is accepted, create a job?
 
   return sendNoContent(event);
 });

@@ -427,6 +427,7 @@ export const demandsRelations = relations(demands, ({one, many}) => ({
     references: [clients.id],
   }),
   demandItems: many(demandItems),
+  quotes: many(quotes),
 }));
 // #endregion
 
@@ -479,7 +480,7 @@ export const quotes = sqliteTable('quotes', {
     .references(() => demands.id)
     .notNull(),
   status: text('status', {
-    enum: ['sent', 'accepted', 'commented', 'declined'],
+    enum: ['sent', 'accepted', 'declined', 'commented'],
   })
     .default('sent')
     .notNull(),
@@ -529,27 +530,28 @@ export const quoteResponseInsertSchema = createSelectSchema(quotes).pick({
 
 export type QuoteResponseInsert = z.infer<typeof quoteResponseInsertSchema>;
 
-export const quotesRelations = relations(quotes, ({many}) => ({
+export const quotesRelations = relations(quotes, ({one, many}) => ({
+  demand: one(demands, {
+    fields: [quotes.demandId],
+    references: [demands.id],
+  }),
   quoteItems: many(quoteItems),
 }));
 // #endregion
 
-// #region jobItems
-export const jobItems = sqliteTable('job_items', {
+// #region offers
+export const offers = sqliteTable('offers', {
   id: integer('id').primaryKey({autoIncrement: true}),
-  jobId: integer('job_id')
-    .references(() => jobs.id, {onDelete: 'cascade'})
-    .notNull(),
-  itemId: integer('item_id')
-    .references(() => items.id)
+  demandId: integer('demand_id')
+    .references(() => demands.id, {onDelete: 'cascade'})
     .notNull(),
   status: text('status', {
-    enum: ['pending', 'in_progress', 'completed', 'blocked'],
+    enum: ['sent', 'accepted', 'declined', 'commented'],
   })
-    .default('pending')
+    .default('sent')
     .notNull(),
-  quantity: integer('quantity').notNull(), // Quantity of the item used
-  // date: text({ mode: 'json' }),
+  // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
+  // attachment: blob(),
   additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
@@ -561,12 +563,78 @@ export const jobItems = sqliteTable('job_items', {
 });
 // #endregion
 
+// #region jobItemServices
+export const jobItemServices = sqliteTable('job_item_services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  jobItemId: integer('job_item_id')
+    .references(() => jobItems.id, {onDelete: 'cascade'})
+    .notNull(),
+  date: text('date'),
+  additionalInfo: text('additional_info'),
+  // attachment: blob(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+// export const jobItemDetailsRelations = relations(jobItemDetails, ({one}) => ({
+//   jobItems: one(jobItems, {
+//     fields: [jobItemDetails.jobItemId],
+//     references: [jobItems.id],
+//   }),
+// }));
+// #endregion
+
+// #region jobItems
+export const jobItems = sqliteTable('job_items', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  jobId: integer('job_id')
+    .references(() => jobs.id, {onDelete: 'cascade'})
+    .notNull(),
+  itemId: integer('item_id')
+    .references(() => items.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(), // Quantity of the item used
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+// export const jobItemsRelations = relations(jobItems, ({many, one}) => ({
+//   jobs: one(jobs, {fields: [jobItems.jobId], references: [jobs.id]}),
+//   jobItemDetails: many(jobItemDetails),
+// }));
+// #endregion
+
 // #region jobs
 export const jobs = sqliteTable('jobs', {
   id: integer('id').primaryKey({autoIncrement: true}),
   demandId: integer('demand_id')
     .references(() => demands.id, {onDelete: 'cascade'})
     .notNull(),
+  status: text('status', {
+    enum: [
+      'sent',
+      'accepted',
+      'declined',
+      'pending',
+      'in_progress',
+      'completed',
+      'blocked',
+    ],
+  })
+    .default('sent')
+    .notNull(),
+  // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
   // attachment: blob(),
   // signed: integer({mode: 'boolean'}),
   // signedAt: integer({mode: 'timestamp'}),
@@ -582,6 +650,12 @@ export const jobs = sqliteTable('jobs', {
     .notNull(),
 });
 
+// const draftJobSelectSchema = createSelectSchema(jobs)
+//   .pick({demandId: true})
+//   .extend({
+//     demand: demandSelectSchema,
+//   });
+
 export const jobInsertSchema = createInsertSchema(jobs)
   .pick({demandId: true, additionalInfo: true})
   .extend({
@@ -590,16 +664,21 @@ export const jobInsertSchema = createInsertSchema(jobs)
   });
 
 export type JobInsert = z.infer<typeof jobInsertSchema>;
+
+export const jobsRelations = relations(jobs, ({one, many}) => ({
+  demands: one(demands, {fields: [jobs.demandId], references: [demands.id]}),
+  jobItems: many(jobItems),
+}));
 // #endregion
 
-// #region order
+// #region orders
 export const orders = sqliteTable('orders', {
   id: integer('id').primaryKey({autoIncrement: true}),
   itemId: integer('item_id')
     .references(() => items.id)
     .notNull(),
   status: text('status', {
-    enum: ['sent', 'accepted', 'delivered', 'declined'],
+    enum: ['sent', 'accepted', 'declined', 'delivered'],
   })
     .default('sent')
     .notNull(),
