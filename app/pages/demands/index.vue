@@ -35,7 +35,7 @@
         :data="data"
         :columns="columns"
         :loading="status === 'pending'"
-       :ui="{
+        :ui="{
           base: 'table-fixed bdemand-separate bdemand-spacing-0',
           thead: '[&>tr]:bg-(--ui-bg-elevated)/50 [&>tr]:after:content-none',
           tbody: '[&>tr]:last:[&>td]:bdemand-b-0',
@@ -178,27 +178,45 @@ const columns: TableColumn<DemandSelect>[] = [
     },
   },
   {
-    id: 'items',
-    header: 'Items',
+    header: 'Products',
     cell: ({row}) => {
-      const items = row.original.demandItems ?? [];
+      const products = row.original.demandProducts ?? [];
 
-      if (items.length === 0) return '—';
+      if (products.length === 0) return '—';
 
-      const first = items[0]?.item.name ?? '';
-      const second = items[1]?.item.name.slice(0, 5) ?? '';
+      const first = products[0]?.product.name ?? '';
+      const second = products[1]?.product.name.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: items.map((i) => i.item.name).join(', '),
+          title: products.map((i) => i.product.name).join(', '),
         },
         preview
       );
     },
   },
+  {
+    header: 'Services',
+    cell: ({row}) => {
+      const services = row.original.demandServices ?? [];
 
+      if (services.length === 0) return '—';
+
+      const first = services[0]?.service.name ?? '';
+      const second = services[1]?.service.name.slice(0, 5) ?? '';
+      const preview = second ? `${first}, ${second}...` : first;
+
+      return h(
+        'span',
+        {
+          title: services.map((i) => i.service.name).join(', '),
+        },
+        preview
+      );
+    },
+  },
   {
     accessorKey: 'additionalInfo',
     header: 'Additional Info',

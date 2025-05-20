@@ -5,13 +5,6 @@
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
-
-        <!-- <template #right>
-          <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert type="order" />
-            <MyOrderInsert />
-          </UButtonGroup>
-        </template> -->
       </UDashboardNavbar>
     </template>
 
@@ -123,7 +116,7 @@ const getRowItems = (row: Row<OrderSelect>) => {
           });
 
           data.value = data.value?.filter(
-            (item) => item.id !== row.original.id
+            (order) => order.id !== row.original.id
           );
 
           toast.add({
@@ -150,8 +143,8 @@ const columns: TableColumn<OrderSelect>[] = [
     cell: ({row}) => `#${row.original.id}`,
   },
   {
-    accessorKey: 'item.name',
-    header: 'Item Name',
+    accessorKey: 'product.name',
+    header: 'Product Name',
   },
   {
     accessorKey: 'status',

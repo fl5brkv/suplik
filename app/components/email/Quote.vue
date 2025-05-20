@@ -24,9 +24,10 @@
       </Text>
 
       <ul style="margin-bottom: 24px; padding-left: 0; list-style: none">
+        <p>Products</p>
         <li
-          v-for="(item, index) in quoteItems"
-          :key="index"
+          v-for="(product, idx) in quoteProducts"
+          :key="idx"
           style="
             padding: 12px;
             background-color: #f9fafb;
@@ -35,9 +36,28 @@
             border-radius: 4px;
           ">
           <Text style="font-size: 14px; font-weight: 500">
-            Item: {{ item.item.name }}
+            Item: {{ product.product.name }}
           </Text>
-          <Text style="font-size: 14px">Quantity: {{ item.quantity }}</Text>
+          <Text style="font-size: 14px">Quantity: {{ product.quantity }}</Text>
+        </li>
+      </ul>
+
+      <ul style="margin-bottom: 24px; padding-left: 0; list-style: none">
+        <p>Services</p>
+        <li
+          v-for="(service, idx) in quoteServices"
+          :key="idx"
+          style="
+            padding: 12px;
+            background-color: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 12px;
+            border-radius: 4px;
+          ">
+          <Text style="font-size: 14px; font-weight: 500">
+            Item: {{ service.service.name }}
+          </Text>
+          <Text style="font-size: 14px">Quantity: {{ service.quantity }}</Text>
         </li>
       </ul>
 
@@ -108,8 +128,14 @@ defineProps<{
   client: {
     email: string;
   };
-  quoteItems: {
-    item: {
+  quoteProducts: {
+    product: {
+      name: string;
+    };
+    quantity: number;
+  }[];
+  quoteServices: {
+    service: {
       name: string;
     };
     quantity: number;

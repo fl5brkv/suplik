@@ -219,6 +219,8 @@ export default defineTask({
       },
     ];
 
+    await useDrizzle().insert(tables.quotes).values(quotes);
+
     const quoteProducts = [
       {quoteId: 1, productId: 1, quantity: 10},
       {quoteId: 2, productId: 2, quantity: 2},

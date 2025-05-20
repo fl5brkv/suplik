@@ -1,11 +1,11 @@
 <template>
   <div v-if="data">
     <h1>Order info:</h1>
-    <p v-if="data.item.name">
-      <strong>Item name:</strong> {{ data.item.name }}
+    <p v-if="data.product.name">
+      <strong>Product name:</strong> {{ data.product.name }}
     </p>
 
-    <p v-if="data.quantity"><strong>Item name:</strong> {{ data.quantity }}</p>
+    <p v-if="data.quantity"><strong>Product quantity:</strong> {{ data.quantity }}</p>
 
     <UForm
       ref="formRef"
@@ -35,7 +35,9 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type OrderResponseUpdate, type QuoteResponseInsert} from '~~/server/database/schema';
+import {
+  type OrderResponseUpdate,
+} from '~~/server/database/schema';
 
 definePageMeta({
   layout: false,

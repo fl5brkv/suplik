@@ -18,36 +18,86 @@
           <UInput v-model="state.client.email" />
         </UFormField>
 
-        <div
-          v-for="(quoteItem, idx) in state.quoteItems"
-          :key="idx"
-          class="flex gap-2 items-end">
-          <USelect
-            v-model="quoteItem.itemId"
-            :items="data"
-            placeholder="Select item"
-            :loading="status === 'pending'"
-            class="w-48" />
-
-          <UFormField label="Quantity" :name="`quoteItems.${idx}.quantity`">
-            <UInputNumber v-model="quoteItem.quantity" />
-          </UFormField>
+        <div class="flex items-center justify-between">
+          <span class="font-medium">Products</span>
           <UButton
-            v-if="state.quoteItems.length > 1"
-            icon="i-lucide-x"
+            size="xs"
+            @click="addProduct"
+            color="primary"
+            variant="subtle"
+            >Add Product</UButton
+          >
+        </div>
+
+        <div
+          v-for="(quoteProduct, idx) in state.quoteProducts"
+          :key="idx"
+          class="flex gap-2 items-end mt-2">
+          <UFormField
+            :label="idx === 0 ? 'Product' : undefined"
+            :name="`demandProducts.${idx}.productId`"
+            required>
+            <USelect
+              v-model="quoteProduct.productId"
+              :items="productOptions"
+              :loading="productStatus === 'pending'"
+              placeholder="Select product" />
+          </UFormField>
+          <UFormField
+            :label="idx === 0 ? 'Quantity' : undefined"
+            :name="`demandProducts.${idx}.quantity`"
+            required>
+            <UInputNumber v-model="quoteProduct.quantity" :min="1" />
+          </UFormField>
+
+          <UButton
+            label="Remove"
+            size="xs"
             color="error"
             variant="ghost"
-            size="sm"
-            @click="removeItem(idx)" />
+            @click="removeProduct(idx)" />
         </div>
-        <UButton
-          color="primary"
-          variant="subtle"
-          size="sm"
-          class="self-start"
-          @click.prevent="addItem">
-          Add Item
-        </UButton>
+
+        <div class="flex items-center justify-between mt-6">
+          <span class="font-medium">Services</span>
+          <UButton
+            size="xs"
+            @click="addService"
+            color="primary"
+            variant="subtle"
+            >Add Service</UButton
+          >
+        </div>
+
+        <div
+          v-for="(quoteService, idx) in state.quoteServices"
+          :key="idx"
+          class="flex gap-2 items-end">
+          <UFormField
+            :label="idx === 0 ? 'Service' : undefined"
+            :name="`demandServices.${idx}.serviceId`"
+            required>
+            <USelect
+              v-model="quoteService.serviceId"
+              :items="serviceData"
+              :loading="serviceStatus === 'pending'"
+              placeholder="Select service" />
+          </UFormField>
+          <UFormField
+            :label="idx === 0 ? 'Quantity' : undefined"
+            :name="`demandServices.${idx}.quantity`"
+            required>
+            <UInputNumber v-model="quoteService.quantity" :min="1" />
+          </UFormField>
+
+          <UButton
+            label="Remove"
+            size="xs"
+            color="error"
+            variant="ghost"
+            @click="removeService(idx)" />
+        </div>
+
         <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
       </UForm>
     </template>
@@ -58,8 +108,8 @@
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {
-  type ItemSelect,
   type DemandSelect,
+  type ProductSelect,
   type QuoteInsert,
 } from '~~/server/database/schema';
 
@@ -71,15 +121,29 @@ const props = defineProps<{
 
 const emit = defineEmits<{close: [boolean]}>();
 
-const {data, status} = await useFetch('/api/items', {
-  transform: (data: ItemSelect[]) => {
-    return data?.map((item) => ({
-      label: item.name,
-      value: item.id,
-      productDetail: item.productDetail,
-    }));
-  },
+const {data: productData, status: productStatus} = await useFetch<
+  ProductSelect[]
+>('/api/products', {
+  key: 'products',
+  method: 'get',
   lazy: true,
+});
+
+const productOptions = computed(() =>
+  productData.value?.map((product) => ({
+    label: product.name,
+    value: product.id,
+  }))
+);
+const {data: serviceData, status: serviceStatus} = useFetch('/api/services', {
+  key: 'services',
+  method: 'get',
+  lazy: true,
+  transform: (data) =>
+    data?.map((service) => ({
+      label: service.name,
+      value: service.id,
+    })),
 });
 
 const state = reactive({
@@ -88,39 +152,53 @@ const state = reactive({
   client: {
     email: props.demand.client.email,
   },
-  quoteItems: props.demand.demandItems.map((item) => ({
-    itemId: item.itemId,
-    quantity: item.quantity,
+  quoteProducts: props.demand.demandProducts.map((demandProduct) => ({
+    productId: demandProduct.productId,
+    quantity: demandProduct.quantity,
+  })),
+  quoteServices: props.demand.demandServices.map((demandService) => ({
+    serviceId: demandService.serviceId,
+    quantity: demandService.quantity,
   })),
 });
 
-const addItem = () => {
-  state.quoteItems.push({itemId: 0, quantity: 1});
-};
+function addProduct() {
+  state.quoteProducts?.push({
+    // @ts-ignore
+    productId: null,
+    quantity: 1,
+  });
+}
 
-const removeItem = (idx: number) => {
-  state.quoteItems.splice(idx, 1);
-};
+function removeProduct(idx: number) {
+  state.quoteProducts?.splice(idx, 1);
+}
 
-watch(
-  () => props.demand,
-  (newDemand) => {
-    Object.assign(state, newDemand);
-  }
-);
+function addService() {
+  state.quoteServices?.push({
+    // @ts-ignore
+    serviceId: null, //
+    quantity: 1,
+  });
+}
+
+function removeService(idx: number) {
+  state.quoteServices?.splice(idx, 1);
+}
 
 const submit = async (payload: FormSubmitEvent<QuoteInsert>) => {
-  for (const quoteItem of state.quoteItems) {
-    const item = data.value?.find((i) => i.value === quoteItem.itemId);
+  for (const quoteProduct of state.quoteProducts) {
+    const product = productData.value?.find(
+      (p) => p.id === quoteProduct.productId
+    );
 
-    if (item && item.productDetail) {
-      const availableStock =
-        item.productDetail.stock - item.productDetail.reserved;
+    if (product) {
+      const availableStock = product.stock - product.reserved;
 
-      if (quoteItem.quantity > availableStock) {
+      if (quoteProduct.quantity > availableStock) {
         toast.add({
           title: 'Insufficient Stock',
-          description: `Requested quantity (${quoteItem.quantity}) exceeds available stock (${availableStock}) for item "${item.label}".`,
+          description: `Requested quantity (${quoteProduct.quantity}) exceeds available stock (${availableStock}) for product "${product.name}".`,
           color: 'error',
           actions: [
             {

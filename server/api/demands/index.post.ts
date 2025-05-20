@@ -26,14 +26,25 @@ export default eventHandler(async (event) => {
     .returning({id: tables.demands.id})
     .get();
 
-  await useDrizzle()
-    .insert(tables.demandItems)
-    .values(
-      result.data.demandItems.map((demandItem) => ({
-        ...demandItem,
-        demandId: insertedDemand.id,
-      }))
-    );
+  if (result.data.demandProducts)
+    await useDrizzle()
+      .insert(tables.demandProducts)
+      .values(
+        result.data.demandProducts.map((demandProduct) => ({
+          ...demandProduct,
+          demandId: insertedDemand.id,
+        }))
+      );
+
+  if (result.data.demandServices)
+    await useDrizzle()
+      .insert(tables.demandServices)
+      .values(
+        result.data.demandServices.map((demandService) => ({
+          ...demandService,
+          demandId: insertedDemand.id,
+        }))
+      );
 
   return sendNoContent(event);
 });

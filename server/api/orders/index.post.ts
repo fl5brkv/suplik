@@ -19,34 +19,29 @@ export default eventHandler(async (event) => {
     .values(result.data)
     .returning({
       id: tables.orders.id,
-      itemId: tables.orders.itemId,
+      productId: tables.orders.productId,
       quantity: tables.orders.quantity,
     })
     .get();
 
-  const selected = await useDrizzle().query.items.findFirst({
+  const selected = await useDrizzle().query.products.findFirst({
     columns: {
       name: true,
     },
     with: {
-      productDetail: {
-        columns: {},
-        with: {
-          supplier: {
-            columns: {
-              email: true,
-            },
-          },
+      supplier: {
+        columns: {
+          email: true,
         },
       },
     },
-    where: (items, {eq}) => eq(tables.items.id, inserted.itemId),
+    where: (products, {eq}) => eq(tables.products.id, inserted.productId),
   });
 
   if (!selected)
     throw createError({
       statusCode: 404,
-      statusMessage: 'Item not found',
+      statusMessage: 'Product not found',
     });
 
   const config = useRuntimeConfig(event);
@@ -59,7 +54,7 @@ export default eventHandler(async (event) => {
       order: {
         quantity: inserted.quantity,
       },
-      item: {
+      product: {
         name: selected.name,
       },
       response: `${config.public.baseURL}/orders/${encodeURIComponent(
@@ -74,7 +69,7 @@ export default eventHandler(async (event) => {
   const {sendMail} = useNodeMailer();
 
   await sendMail({
-    to: selected.productDetail.supplier.email,
+    to: selected.supplier.email,
     subject: 'New order',
     html,
   });

@@ -10,13 +10,27 @@ export default eventHandler(async (event) => {
       additionalInfo: true,
     },
     with: {
-      quoteItems: {
+      quoteProducts: {
         columns: {
-          itemId: true,
+          productId: true,
           quantity: true,
         },
         with: {
-          item: {
+          product: {
+            columns: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
+      quoteServices: {
+        columns: {
+          serviceId: true,
+          quantity: true,
+        },
+        with: {
+          service: {
             columns: {
               id: true,
               name: true,

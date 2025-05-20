@@ -619,7 +619,7 @@ export const quoteSelectSchema = createSelectSchema(quotes)
     ),
     quoteServices: z.array(
       quoteServiceSelectSchema.extend({
-        product: productSelectSchema,
+        service: serviceSelectSchema,
       })
     ),
   });

@@ -15,7 +15,7 @@ export default eventHandler(async (event) => {
       quantity: true,
     },
     with: {
-      item: {
+      product: {
         columns: {
           name: true,
         },

@@ -4,13 +4,13 @@ export default eventHandler(async (event) => {
   const selected = await useDrizzle().query.orders.findMany({
     columns: {
       id: true,
-      itemId: true,
+      productId: true,
       status: true,
       quantity: true,
       delivery: true,
     },
     with: {
-      item: {
+      product: {
         columns: {
           name: true,
         },

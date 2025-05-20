@@ -27,7 +27,7 @@
             border-radius: 4px;
           ">
           <Text style="font-size: 14px; font-weight: 500">
-            Item: {{ item.name }}
+            Item: {{ product.name }}
           </Text>
           <Text style="font-size: 14px">Quantity: {{ order.quantity }}</Text>
         </li>
@@ -81,7 +81,7 @@ defineProps<{
   order: {
     quantity: number;
   };
-  item: {
+  product: {
     name: string;
   };
   response: string;

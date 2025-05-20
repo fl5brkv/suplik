@@ -2,7 +2,7 @@
   <UModal :title="`Update order`" :ui="{footer: 'justify-end'}">
     <template #body>
       name:
-      <p>{{ props.order.item.name }}</p>
+      <p>{{ props.order.product.name }}</p>
       quantity:
       <p>{{ props.order.quantity }}</p>
 

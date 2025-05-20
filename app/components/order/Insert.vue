@@ -6,9 +6,9 @@
       name:
       <p>{{ props.product.name }}</p>
       stock:
-      <p>{{ props.product.productDetail?.stock }}</p>
+      <p>{{ props.product.stock }}</p>
       reserved:
-      <p>{{ props.product.productDetail?.reserved }}</p>
+      <p>{{ props.product.reserved }}</p>
 
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
         <UFormField label="Quantity" name="quantity">
@@ -24,18 +24,18 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type ItemSelect, type OrderInsert} from '~~/server/database/schema';
+import {type ProductSelect, type OrderInsert} from '~~/server/database/schema';
 
 const toast = useToast();
 
 const props = defineProps<{
-  product: ItemSelect;
+  product: ProductSelect;
 }>();
 
 const emit = defineEmits<{close: [boolean]}>();
 
 const state = reactive({
-  itemId: props.product.id,
+  productId: props.product.id,
   quantity: 0,
 });
 

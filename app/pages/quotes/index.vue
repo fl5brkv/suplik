@@ -107,17 +107,17 @@ const getRowItems = (row: Row<QuoteSelect>): DropdownMenuItem[] => {
 
   if (row.original.status === 'accepted') {
     items.push({
-      label: 'Provide a job',
+      label: 'Provide an offer',
       icon: 'lucide:file-pen',
       onSelect() {
         const overlay = useOverlay();
 
-        overlay.create(MyQuoteInsert, {
-          props: {
-            quote: row.original,
-          },
-          defaultOpen: true,
-        });
+        // overlay.create(MyQuoteInsert, {
+        //   props: {
+        //     quote: row.original,
+        //   },
+        //   defaultOpen: true,
+        // });
       },
     });
   }
@@ -168,21 +168,40 @@ const columns: TableColumn<QuoteSelect>[] = [
     },
   },
   {
-    id: 'items',
-    header: 'Items',
+    header: 'Products',
     cell: ({row}) => {
-      const items = row.original.quoteItems ?? [];
+      const products = row.original.quoteProducts ?? [];
 
-      if (items.length === 0) return '—';
+      if (products.length === 0) return '—';
 
-      const first = items[0]?.item.name ?? '';
-      const second = items[1]?.item.name.slice(0, 5) ?? '';
+      const first = products[0]?.product.name ?? '';
+      const second = products[1]?.product.name.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: items.map((i) => i.item.name).join(', '),
+          title: products.map((i) => i.product.name).join(', '),
+        },
+        preview
+      );
+    },
+  },
+  {
+    header: 'Services',
+    cell: ({row}) => {
+      const services = row.original.quoteServices ?? [];
+
+      if (services.length === 0) return '—';
+
+      const first = services[0]?.service.name ?? '';
+      const second = services[1]?.service.name.slice(0, 5) ?? '';
+      const preview = second ? `${first}, ${second}...` : first;
+
+      return h(
+        'span',
+        {
+          title: services.map((i) => i.service.name).join(', '),
         },
         preview
       );
@@ -197,6 +216,7 @@ const columns: TableColumn<QuoteSelect>[] = [
     accessorKey: 'additionalInfo',
     header: 'Additional Info',
     aggregationFn: 'max',
+    cell: ({row}) => row.getValue('additionalInfo') || '—',
   },
   {
     id: 'actions',

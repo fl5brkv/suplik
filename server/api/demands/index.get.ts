@@ -15,24 +15,24 @@ export default eventHandler(async (event) => {
           email: true,
         },
       },
-      demandItems: {
-        columns: {
-          itemId: true,
-          quantity: true,
-        },
+      demandProducts: {
+        columns: {productId: true, quantity: true},
         with: {
-          item: {
+          product: {
             columns: {
-              id: true,
               name: true,
+              stock: true,
+              reserved: true,
             },
-            with: {
-              productDetail: {
-                columns: {
-                  stock: true,
-                  reserved: true,
-                },
-              },
+          },
+        },
+      },
+      demandServices: {
+        columns: {serviceId: true, quantity: true},
+        with: {
+          service: {
+            columns: {
+              name: true,
             },
           },
         },

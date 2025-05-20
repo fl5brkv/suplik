@@ -31,7 +31,7 @@ export default eventHandler(async (event) => {
       id: true,
     },
     with: {
-      item: {
+      product: {
         columns: {
           id: true,
           name: true,
