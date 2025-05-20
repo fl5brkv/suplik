@@ -8,7 +8,7 @@
 
         <template #right>
           <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert type="product" />
+            <MyCategoryInsert />
             <MyProductInsert />
           </UButtonGroup>
         </template>
@@ -76,7 +76,7 @@ import {MyOrderInsert, MyProductUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 // @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type ItemSelect} from '~~/server/database/schema';
+import {type ProductSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -85,14 +85,13 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<ItemSelect[]>('/api/items', {
+const {data, status} = await useFetch<ProductSelect[]>('/api/products', {
   key: 'products',
   method: 'get',
-  query: {type: 'product'},
   lazy: true,
 });
 
-const getRowItems = (row: Row<ItemSelect>) => {
+const getRowItems = (row: Row<ProductSelect>) => {
   return [
     {
       type: 'label',
@@ -132,13 +131,13 @@ const getRowItems = (row: Row<ItemSelect>) => {
       color: 'error',
       async onSelect() {
         try {
-          await $fetch(`/api/items`, {
+          await $fetch(`/api/products`, {
             method: 'DELETE',
             body: {id: row.original.id},
           });
 
           data.value = data.value?.filter(
-            (item) => item.id !== row.original.id
+            (product) => product.id !== row.original.id
           );
 
           toast.add({
@@ -158,7 +157,7 @@ const getRowItems = (row: Row<ItemSelect>) => {
   ];
 };
 
-const columns: TableColumn<ItemSelect>[] = [
+const columns: TableColumn<ProductSelect>[] = [
   {
     id: 'expand',
     header: 'More',
@@ -193,16 +192,16 @@ const columns: TableColumn<ItemSelect>[] = [
     cell: ({row}) => row.original.category.name,
   },
   {
-    accessorKey: 'productDetail.supplier.name',
+    accessorKey: 'supplier.name',
     header: 'Supplier',
   },
   {
-    accessorKey: 'productDetail.stock',
-    header: 'Stock'
+    accessorKey: 'stock',
+    header: 'Stock',
   },
-   {
-    accessorKey: 'productDetail.reserved',
-    header: 'Reserved'
+  {
+    accessorKey: 'reserved',
+    header: 'Reserved',
   },
   {
     accessorKey: 'isPublic',

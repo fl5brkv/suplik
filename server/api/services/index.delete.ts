@@ -1,11 +1,10 @@
-import {z} from 'zod';
-import {itemDeleteSchema} from '~~/server/database/schema';
+import {serviceDeleteSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
 
   const result = await readValidatedBody(event, (body) =>
-    itemDeleteSchema.safeParse(body)
+    serviceDeleteSchema.safeParse(body)
   );
 
   if (!result.success)
@@ -15,8 +14,8 @@ export default eventHandler(async (event) => {
     });
 
   const deleted = await useDrizzle()
-    .delete(tables.items)
-    .where(eq(tables.items.id, result.data.id));
+    .delete(tables.services)
+    .where(eq(tables.services.id, result.data.id));
 
   if (!deleted)
     throw createError({

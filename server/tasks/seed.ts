@@ -19,6 +19,8 @@ export default defineTask({
       },
     ];
 
+    await useDrizzle().insert(tables.users).values(users);
+
     const clients = [
       {
         firstName: 'Alice',
@@ -62,12 +64,16 @@ export default defineTask({
       },
     ];
 
+    await useDrizzle().insert(tables.clients).values(clients);
+
     const categories = [
-      {name: 'Electronics', type: 'product' as const},
-      {name: 'Cleaning Services', type: 'service' as const},
-      {name: 'Furniture', type: 'product' as const},
-      {name: 'Consulting', type: 'service' as const},
+      {name: 'Electronics'},
+      {name: 'Cleaning Services'},
+      {name: 'Furniture'},
+      {name: 'Consulting'},
     ];
+
+    await useDrizzle().insert(tables.categories).values(categories);
 
     const suppliers = [
       {
@@ -87,72 +93,56 @@ export default defineTask({
       },
     ];
 
-    const items = [
+    await useDrizzle().insert(tables.suppliers).values(suppliers);
+
+    const products = [
       {
         categoryId: 1,
-        type: 'product' as const,
+        supplierId: 1,
         name: 'Wireless Mouse',
-        // unitPrice: '25.99',
-        category: 'Electronics',
+        stock: 100,
+        reserved: 10,
         isPublic: true,
       },
       {
         categoryId: 1,
-        type: 'product' as const,
+        supplierId: 1,
         name: 'Laptop',
-        // unitPrice: '999.99',
-        category: 'Electronics',
+        stock: 50,
+        reserved: 5,
+        isPublic: true,
+      },
+      {
+        categoryId: 3,
+        supplierId: 3,
+        name: 'Office Desk',
+        stock: 30,
+        reserved: 2,
+        isPublic: false,
+      },
+    ];
+
+    await useDrizzle().insert(tables.products).values(products);
+
+    const services = [
+      {
+        categoryId: 4,
+        name: 'Hardware Consulting',
         isPublic: true,
       },
       {
         categoryId: 2,
-        type: 'service' as const,
         name: 'Office Cleaning',
-        // unitPrice: '150.00',
-        category: 'Cleaning Services',
-        isPublic: false,
-      },
-      {
-        categoryId: 3,
-        type: 'product' as const,
-        name: 'Office Desk',
-        // unitPrice: '299.50',
-        category: 'Furniture',
-        isPublic: false,
+        isPublic: true,
       },
       {
         categoryId: 4,
-        type: 'service' as const,
-        name: 'IT Consulting',
-        // unitPrice: '100.00',
-        category: 'Consulting',
-        isPublic: true,
+        name: 'Software Consulting',
+        isPublic: false,
       },
     ];
 
-    const productDetails = [
-      {
-        itemId: 1,
-        supplierId: 1,
-        stock: 100,
-        reserved: 10,
-        // purchasePrice: '15.00',
-      },
-      {
-        itemId: 2,
-        supplierId: 1,
-        stock: 50,
-        reserved: 5,
-        // purchasePrice: '700.00',
-      },
-      {
-        itemId: 4,
-        supplierId: 3,
-        stock: 30,
-        reserved: 2,
-        // purchasePrice: '200.00',
-      },
-    ];
+    await useDrizzle().insert(tables.services).values(services);
 
     const demands = [
       {
@@ -168,7 +158,7 @@ export default defineTask({
       {
         clientId: 5,
         status: 'declined' as const,
-        additionalInfo: 'Just a new inquiry additional info.',
+        additionalInfo: 'Just a new demand additional info.',
       },
       {
         clientId: 2,
@@ -177,17 +167,24 @@ export default defineTask({
       },
     ];
 
-    const demandItems = [
-      {demandId: 1, itemId: 1, quantity: 10},
+    await useDrizzle().insert(tables.demands).values(demands);
 
-      {demandId: 2, itemId: 4, quantity: 2},
-
-      {demandId: 2, itemId: 3, quantity: 1},
-
-      {demandId: 3, itemId: 5, quantity: 3},
-
-      {demandId: 4, itemId: 2, quantity: 1},
+    const demandProducts = [
+      {demandId: 1, productId: 1, quantity: 10},
+      {demandId: 2, productId: 2, quantity: 2},
+      {demandId: 2, productId: 3, quantity: 1},
+      {demandId: 4, productId: 1, quantity: 4},
     ];
+
+    await useDrizzle().insert(tables.demandProducts).values(demandProducts);
+
+    const demandServices = [
+      {demandId: 1, serviceId: 1, quantity: 10},
+      {demandId: 3, serviceId: 2, quantity: 2},
+      {demandId: 2, serviceId: 3, quantity: 1},
+    ];
+
+    await useDrizzle().insert(tables.demandServices).values(demandServices);
 
     const quotes = [
       {
@@ -222,70 +219,87 @@ export default defineTask({
       },
     ];
 
-    const quoteItems = [
-      {
-        quoteId: 1,
-        itemId: 4,
-        quantity: 2,
-        // unitPrice: '299.50'
-      },
-      {
-        quoteId: 1,
-        itemId: 3,
-        quantity: 1,
-        //  unitPrice: '150.00'
-      },
-
-      {
-        quoteId: 2,
-        itemId: 2,
-        quantity: 1,
-        //unitPrice: '999.99'
-      },
-      {
-        quoteId: 2,
-        itemId: 1,
-        quantity: 2,
-        // unitPrice: '25.99'
-      },
+    const quoteProducts = [
+      {quoteId: 1, productId: 1, quantity: 10},
+      {quoteId: 2, productId: 2, quantity: 2},
+      {quoteId: 2, productId: 3, quantity: 1},
+      {quoteId: 4, productId: 1, quantity: 4},
     ];
+
+    await useDrizzle().insert(tables.quoteProducts).values(quoteProducts);
+
+    const quoteServices = [
+      {quoteId: 1, serviceId: 1, quantity: 10},
+      {quoteId: 2, serviceId: 2, quantity: 2},
+      {quoteId: 2, serviceId: 3, quantity: 1},
+      {quoteId: 4, serviceId: 1, quantity: 4},
+    ];
+
+    await useDrizzle().insert(tables.quoteServices).values(quoteServices);
+
+    const offers = [
+      {demandId: 1, additionalInfo: 'Install next week'},
+      {demandId: 3, additionalInfo: 'This is additional info'},
+      {demandId: 4, additionalInfo: 'This is offer from us'},
+    ];
+
+    await useDrizzle().insert(tables.offers).values(offers);
+
+    const offerServices = [
+      {offerId: 1, serviceId: 1, quantity: 10},
+      {offerId: 2, serviceId: 2, quantity: 2},
+      {offerId: 2, serviceId: 3, quantity: 1},
+      {offerId: 3, serviceId: 2, quantity: 1},
+    ];
+
+    await useDrizzle().insert(tables.offerServices).values(offerServices);
+
+    const offerProducts = [
+      {offerId: 1, offerServiceId: 1, productId: 1, quantity: 10},
+      {offerId: 1, offerServiceId: 1, productId: 2, quantity: 2},
+      {offerId: 2, offerServiceId: 2, productId: 3, quantity: 1},
+    ];
+
+    await useDrizzle().insert(tables.offerProducts).values(offerProducts);
 
     const jobs = [
       {demandId: 1, additionalInfo: 'Install next week'},
-      {demandId: 2, additionalInfo: 'This is additional info'},
+      {demandId: 3, additionalInfo: 'This is additional info'},
     ];
 
-    const jobItems = [
-      {jobId: 1, itemId: 1, quantity: 2, status: 'pending' as const},
-      {jobId: 1, itemId: 2, quantity: 1, status: 'in_progress' as const},
-      {jobId: 2, itemId: 3, quantity: 1, status: 'blocked' as const},
+    await useDrizzle().insert(tables.jobs).values(jobs);
+
+    const jobServices = [
+      {jobId: 1, serviceId: 1, quantity: 10},
+      {jobId: 2, serviceId: 2, quantity: 2},
+      {jobId: 2, serviceId: 3, quantity: 1},
     ];
+
+    await useDrizzle().insert(tables.jobServices).values(jobServices);
+
+    const jobProducts = [
+      {jobId: 1, jobServiceId: 1, productId: 1, quantity: 10},
+      {jobId: 1, jobServiceId: 1, productId: 2, quantity: 2},
+    ];
+
+    await useDrizzle().insert(tables.jobProducts).values(jobProducts);
 
     const orders = [
       {
-        itemId: 3,
+        productId: 3,
         status: 'sent' as const,
         quantity: 10,
         delivery: '2025-07-08',
       },
+      {
+        productId: 1,
+        status: 'delivered' as const,
+        quantity: 2,
+        delivery: '2025-08-05',
+      },
     ];
 
-    const jobItemsToOrders = [{jobItemId: 3, orderId: 1}];
-
-    await useDrizzle().insert(tables.users).values(users);
-    await useDrizzle().insert(tables.clients).values(clients);
-    await useDrizzle().insert(tables.categories).values(categories);
-    await useDrizzle().insert(tables.suppliers).values(suppliers);
-    await useDrizzle().insert(tables.items).values(items);
-    await useDrizzle().insert(tables.productDetails).values(productDetails);
-    await useDrizzle().insert(tables.demands).values(demands);
-    await useDrizzle().insert(tables.demandItems).values(demandItems);
-    await useDrizzle().insert(tables.quotes).values(quotes);
-    await useDrizzle().insert(tables.quoteItems).values(quoteItems);
-    await useDrizzle().insert(tables.jobs).values(jobs);
-    await useDrizzle().insert(tables.jobItems).values(jobItems);
     await useDrizzle().insert(tables.orders).values(orders);
-    await useDrizzle().insert(tables.jobItemsToOrders).values(jobItemsToOrders);
 
     return {result: 'success'};
   },

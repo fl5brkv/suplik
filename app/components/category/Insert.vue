@@ -1,7 +1,7 @@
 <template>
   <UModal
     v-model:open="open"
-    :title="`Create a ${props.type} category`"
+    title="Create a category"
     :ui="{footer: 'justify-end'}">
     <UButton label="New category" color="neutral" variant="subtle" />
 
@@ -21,10 +21,6 @@ import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {type CategoryInsert} from '~~/server/database/schema';
 
-const props = defineProps<{
-  type: 'product' | 'service';
-}>();
-
 const toast = useToast();
 
 const open = ref(false);
@@ -38,7 +34,6 @@ const submit = async (payload: FormSubmitEvent<CategoryInsert>) => {
     await $fetch('/api/categories', {
       method: 'POST',
       body: payload.data,
-      query: {type: props.type},
     });
 
     open.value = false;
@@ -49,7 +44,7 @@ const submit = async (payload: FormSubmitEvent<CategoryInsert>) => {
       color: 'success',
     });
 
-    await refreshNuxtData(`${props.type}Categories`);
+    await refreshNuxtData('category');
   } catch (err) {
     const error = err as NuxtError;
 

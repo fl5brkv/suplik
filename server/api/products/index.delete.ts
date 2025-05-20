@@ -1,10 +1,10 @@
-import {categoryInsertSchema} from '~~/server/database/schema';
+import {productDeleteSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
 
   const result = await readValidatedBody(event, (body) =>
-    categoryInsertSchema.safeParse(body)
+    productDeleteSchema.safeParse(body)
   );
 
   if (!result.success)
@@ -13,16 +13,14 @@ export default eventHandler(async (event) => {
       statusMessage: 'The provided data is invalid.',
     });
 
-  const inserted = await useDrizzle()
-    .insert(tables.categories)
-    .values(result.data)
-    .returning()
-    .get();
+  const deleted = await useDrizzle()
+    .delete(tables.products)
+    .where(eq(tables.products.id, result.data.id));
 
-  if (!inserted)
+  if (!deleted)
     throw createError({
       statusCode: 400,
-      statusMessage: 'There was an error inserting category!',
+      statusMessage: 'There was an error when deleting!',
     });
 
   return sendNoContent(event);

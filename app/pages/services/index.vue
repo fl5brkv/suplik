@@ -8,7 +8,7 @@
 
         <template #right>
           <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert type="service" />
+            <MyCategoryInsert />
             <MyServiceInsert />
           </UButtonGroup>
         </template>
@@ -74,9 +74,8 @@
 <script setup lang="ts">
 import {MyServiceUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
-// @ts-ignore
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import {type ItemSelect} from '~~/server/database/schema';
+import {type ServiceSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -85,14 +84,14 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<ItemSelect[]>('/api/items', {
+const {data, status} = await useFetch<ServiceSelect[]>('/api/services', {
   key: 'services',
   method: 'get',
   query: {type: 'service'},
   lazy: true,
 });
 
-const getRowItems = (row: Row<ItemSelect>) => {
+const getRowItems = (row: Row<ServiceSelect>) => {
   return [
     {
       type: 'label',
@@ -118,13 +117,13 @@ const getRowItems = (row: Row<ItemSelect>) => {
       color: 'error',
       async onSelect() {
         try {
-          await $fetch(`/api/items`, {
+          await $fetch(`/api/services`, {
             method: 'DELETE',
             body: {id: row.original.id},
           });
 
           data.value = data.value?.filter(
-            (item) => item.id !== row.original.id
+            (service) => service.id !== row.original.id
           );
 
           toast.add({
@@ -144,7 +143,7 @@ const getRowItems = (row: Row<ItemSelect>) => {
   ];
 };
 
-const columns: TableColumn<ItemSelect>[] = [
+const columns: TableColumn<ServiceSelect>[] = [
   {
     id: 'expand',
     header: 'More',

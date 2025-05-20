@@ -1,5 +1,5 @@
 <template>
-  <UModal :title="`New service`" :ui="{footer: 'justify-end'}">
+  <UModal title="New service" :ui="{footer: 'justify-end'}">
     <UButton label="New service" color="neutral" variant="subtle" />
 
     <template #body>
@@ -19,7 +19,6 @@
 
         <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
       </UForm>
-      {{ state }}
     </template>
   </UModal>
 </template>
@@ -29,20 +28,19 @@ import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {
   type CategorySelect,
-  type ItemSelect,
-  type ItemUpdate,
+  type ServiceSelect,
+  type ServiceUpdate,
 } from '~~/server/database/schema';
 
 const toast = useToast();
 
 const props = defineProps<{
-  service: ItemSelect;
+  service: ServiceSelect;
 }>();
 
 const emit = defineEmits<{close: [boolean]}>();
 
 const {data, status} = await useFetch('/api/categories', {
-  query: {type: 'service'},
   transform: (data: CategorySelect[]) => {
     return data?.map((category) => ({
       label: category.name,
@@ -56,12 +54,11 @@ const state = reactive({
   ...props.service,
 });
 
-const submit = async (payload: FormSubmitEvent<ItemUpdate>) => {
+const submit = async (payload: FormSubmitEvent<ServiceUpdate>) => {
   try {
-    await $fetch('/api/items', {
+    await $fetch('/api/services', {
       method: 'PATCH',
-      body: (({productDetail, ...rest}) => rest)(payload.data),
-      query: {type: 'service'},
+      body: payload.data,
     });
 
     await refreshNuxtData('services');

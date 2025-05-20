@@ -1,7 +1,7 @@
 <template>
   <UModal
     v-model:open="open"
-    :title="`New product`"
+    title="New product"
     :ui="{footer: 'justify-end'}">
     <UButton label="New product" color="neutral" variant="subtle" />
 
@@ -23,14 +23,14 @@
           :loading="suppliersStatus === 'pending'"
           placeholder="Select supplier"
           class="w-48"
-          v-model="state.productDetail.supplierId" />
+          v-model="state.supplierId" />
 
-        <UFormField label="Stock" name="productDetail.stock">
-          <UInputNumber v-model="state.productDetail.stock" />
+        <UFormField label="Stock" name="stock">
+          <UInputNumber v-model="state.stock" />
         </UFormField>
 
-        <UFormField label="Reserved" name="productDetail.reserved">
-          <UInputNumber v-model="state.productDetail.reserved" />
+        <UFormField label="Reserved" name="reserved">
+          <UInputNumber v-model="state.reserved" />
         </UFormField>
 
         <UCheckbox required label="Is public" v-model="state.isPublic" />
@@ -46,7 +46,7 @@ import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {
   type CategorySelect,
-  type ItemInsert,
+  type ProductInsert,
   type SupplierSelect,
 } from '~~/server/database/schema';
 
@@ -57,8 +57,7 @@ const open = ref(false);
 const {data: categoriesData, status: categoriesStatus} = await useFetch(
   '/api/categories',
   {
-    key: 'productCategories',
-    query: {type: 'product'},
+    key: 'categories',
     transform: (data: CategorySelect[]) => {
       return data?.map((category) => ({
         label: category.name,
@@ -85,17 +84,15 @@ const {data: suppliersData, status: suppliersStatus} = await useFetch(
 const state = reactive({
   name: '',
   categoryId: 0,
+  supplierId: 0,
+  stock: 0,
+  reserved: 0,
   isPublic: false,
-  productDetail: {
-    supplierId: 0,
-    stock: 0,
-    reserved: 0,
-  },
 });
 
-const submit = async (payload: FormSubmitEvent<ItemInsert>) => {
+const submit = async (payload: FormSubmitEvent<ProductInsert>) => {
   try {
-    await $fetch('/api/items', {
+    await $fetch('/api/products', {
       method: 'POST',
       body: payload.data,
       query: {type: 'product'},

@@ -1,7 +1,7 @@
 <template>
   <UModal
     v-model:open="open"
-    :title="`New service`"
+    title="New service"
     :ui="{footer: 'justify-end'}">
     <UButton label="New service" color="neutral" variant="subtle" />
 
@@ -28,15 +28,14 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type CategorySelect, type ItemInsert} from '~~/server/database/schema';
+import {type CategorySelect, type ServiceInsert} from '~~/server/database/schema';
 
 const toast = useToast();
 
 const open = ref(false);
 
 const {data, status} = await useFetch('/api/categories', {
-  key: 'serviceCategories',
-  query: {type: 'service'},
+  key: 'categories',
   transform: (data: CategorySelect[]) => {
     return data?.map((category) => ({
       label: category.name,
@@ -52,12 +51,11 @@ const state = reactive({
   isPublic: false,
 });
 
-const submit = async (payload: FormSubmitEvent<ItemInsert>) => {
+const submit = async (payload: FormSubmitEvent<ServiceInsert>) => {
   try {
-    await $fetch('/api/items', {
+    await $fetch('/api/services', {
       method: 'POST',
       body: payload.data,
-      query: {type: 'service'},
     });
 
     await refreshNuxtData('services');

@@ -1,20 +1,20 @@
-import {categoryInsertSchema} from '~~/server/database/schema';
+import {productInsertSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
   await requireAdminSession(event);
 
   const result = await readValidatedBody(event, (body) =>
-    categoryInsertSchema.safeParse(body)
+    productInsertSchema.safeParse(body)
   );
 
   if (!result.success)
     throw createError({
       statusCode: 400,
-      statusMessage: 'The provided data is invalid.',
+      statusMessage: 'The provided data is invalid',
     });
 
   const inserted = await useDrizzle()
-    .insert(tables.categories)
+    .insert(tables.products)
     .values(result.data)
     .returning()
     .get();
@@ -22,7 +22,7 @@ export default eventHandler(async (event) => {
   if (!inserted)
     throw createError({
       statusCode: 400,
-      statusMessage: 'There was an error inserting category!',
+      statusMessage: 'There was an error when inserting!',
     });
 
   return sendNoContent(event);

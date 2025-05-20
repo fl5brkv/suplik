@@ -1,5 +1,5 @@
 <template>
-  <UModal :title="`Update product`" :ui="{footer: 'justify-end'}">
+  <UModal title="Update product" :ui="{footer: 'justify-end'}">
     <UButton label="Update product" color="neutral" variant="subtle" />
 
     <template #body>
@@ -20,14 +20,14 @@
           :loading="suppliersStatus === 'pending'"
           placeholder="Select supplier"
           class="w-48"
-          v-model="state.productDetail.supplierId" />
+          v-model="state.supplierId" />
 
-        <UFormField label="Stock" name="productDetail.stock">
-          <UInputNumber v-model="state.productDetail.stock" />
+        <UFormField label="Stock" name="stock">
+          <UInputNumber v-model="state.stock" />
         </UFormField>
 
-        <UFormField label="Reserved" name="productDetail.reserved">
-          <UInputNumber v-model="state.productDetail.reserved" />
+        <UFormField label="Reserved" name="reserved">
+          <UInputNumber v-model="state.reserved" />
         </UFormField>
 
         <UCheckbox required label="Is public" v-model="state.isPublic" />
@@ -43,15 +43,15 @@ import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import {
   type CategorySelect,
-  type ItemSelect,
-  type ItemUpdate,
+  type ProductSelect,
+  type ProductUpdate,
   type SupplierSelect,
 } from '~~/server/database/schema';
 
 const toast = useToast();
 
 const props = defineProps<{
-  product: ItemSelect;
+  product: ProductSelect;
 }>();
 
 const emit = defineEmits<{close: [boolean]}>();
@@ -59,7 +59,6 @@ const emit = defineEmits<{close: [boolean]}>();
 const {data: categoriesData, status: categoriesStatus} = await useFetch(
   '/api/categories',
   {
-    query: {type: 'product'},
     transform: (data: CategorySelect[]) => {
       return data?.map((category) => ({
         label: category.name,
@@ -85,19 +84,13 @@ const {data: suppliersData, status: suppliersStatus} = await useFetch(
 
 const state = reactive({
   ...props.product,
-  productDetail: props.product.productDetail ?? {
-    supplierId: 0,
-    stock: 0,
-    reserved: 0,
-  },
 });
 
-const submit = async (payload: FormSubmitEvent<ItemUpdate>) => {
+const submit = async (payload: FormSubmitEvent<ProductUpdate>) => {
   try {
-    await $fetch('/api/items', {
+    await $fetch('/api/products', {
       method: 'PATCH',
       body: payload.data,
-      query: {type: 'product'},
     });
 
     await refreshNuxtData('products');

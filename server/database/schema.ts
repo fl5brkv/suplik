@@ -115,7 +115,6 @@ export const clientDeleteSchema = createSelectSchema(clients).pick({
 export const categories = sqliteTable('categories', {
   id: integer('id').primaryKey({autoIncrement: true}),
   name: text('name').notNull(),
-  type: text('type', {enum: ['product', 'service']}).notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -139,7 +138,8 @@ export const categoryInsertSchema = createInsertSchema(categories).pick({
 export type CategoryInsert = z.infer<typeof categoryInsertSchema>;
 
 export const categoriesRelations = relations(categories, ({many}) => ({
-  items: many(items),
+  products: many(products),
+  services: many(services),
 }));
 // #endregion
 
@@ -193,79 +193,24 @@ export const supplierDeleteSchema = createSelectSchema(suppliers).pick({
 export type SupplierDelete = z.infer<typeof supplierDeleteSchema>;
 
 export const suppliersRelations = relations(suppliers, ({many}) => ({
-  productDetails: many(productDetails),
+  products: many(products),
 }));
 // #endregion
 
-// #region productDetails
-export const productDetails = sqliteTable('product_details', {
-  id: integer('id').primaryKey({autoIncrement: true}),
-  itemId: integer('item_id')
-    .references(() => items.id, {onDelete: 'cascade'})
-    .notNull(),
-  supplierId: integer('supplier_id')
-    .references(() => suppliers.id)
-    .notNull(),
-  stock: integer('stock').notNull(),
-  reserved: integer('reserved').notNull(),
-  // purchasePrice: text('purchase_price'),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
-});
-
-export const productDetailSelectSchema = createSelectSchema(productDetails)
-  .pick({
-    supplierId: true,
-    stock: true,
-    reserved: true,
-  })
-  .extend({
-    supplier: supplierSelectSchema.pick({name: true}),
-  });
-
-export const productDetailInsertSchema = createInsertSchema(
-  productDetails
-).pick({
-  supplierId: true,
-  stock: true,
-  reserved: true,
-});
-
-export const productDetailUpdateSchema = createInsertSchema(
-  productDetails
-).pick({
-  supplierId: true,
-  stock: true,
-  reserved: true,
-});
-
-export const productDetailsRelations = relations(productDetails, ({one}) => ({
-  item: one(items, {
-    fields: [productDetails.itemId],
-    references: [items.id],
-  }),
-  supplier: one(suppliers, {
-    fields: [productDetails.supplierId],
-    references: [suppliers.id],
-  }),
-}));
-// #endregion
-
-// #region items
-export const items = sqliteTable('items', {
+// #region products
+export const products = sqliteTable('products', {
   id: integer('id').primaryKey({autoIncrement: true}),
   categoryId: integer('category_id')
     .references(() => categories.id)
     .notNull(),
-  type: text('type', {enum: ['product', 'service']}).notNull(),
+  supplierId: integer('supplier_id')
+    .references(() => suppliers.id)
+    .notNull(),
   name: text('name').notNull(),
   // unitPrice: text('unit_price'),
-  // details: text('details', {mode: 'json'}).$type<{group: string}>().notNull(),
+  stock: integer('stock').notNull(),
+  reserved: integer('reserved').notNull(),
+  // purchasePrice: text('purchase_price'),
   isPublic: integer('is_public', {mode: 'boolean'}).notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
@@ -276,7 +221,81 @@ export const items = sqliteTable('items', {
     .notNull(),
 });
 
-export const itemSelectSchema = createSelectSchema(items)
+export const productSelectSchema = createSelectSchema(products)
+  .pick({
+    id: true,
+    categoryId: true,
+    supplierId: true,
+    name: true,
+    stock: true,
+    reserved: true,
+    isPublic: true,
+  })
+  .extend({
+    category: categorySelectSchema.pick({name: true}),
+  });
+
+export type ProductSelect = z.infer<typeof productSelectSchema>;
+
+export const productInsertSchema = createInsertSchema(products).pick({
+  categoryId: true,
+  supplierId: true,
+  name: true,
+  stock: true,
+  reserved: true,
+  isPublic: true,
+});
+export type ProductInsert = z.infer<typeof productInsertSchema>;
+
+export const productUpdateSchema = createSelectSchema(products).pick({
+  id: true,
+  categoryId: true,
+  supplierId: true,
+  name: true,
+  stock: true,
+  reserved: true,
+  isPublic: true,
+});
+
+export type ProductUpdate = z.infer<typeof productUpdateSchema>;
+
+export const productDeleteSchema = createSelectSchema(products).pick({
+  id: true,
+});
+
+export const productsRelations = relations(products, ({one}) => ({
+  category: one(categories, {
+    fields: [products.categoryId],
+    references: [categories.id],
+  }),
+  supplier: one(suppliers, {
+    fields: [products.supplierId],
+    references: [suppliers.id],
+  }),
+}));
+
+// #endregion
+
+// #region services
+export const services = sqliteTable('services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  categoryId: integer('category_id')
+    .references(() => categories.id)
+    .notNull(),
+  name: text('name').notNull(),
+  // unitPrice: text('unit_price'),
+  // purchasePrice: text('purchase_price'),
+  isPublic: integer('is_public', {mode: 'boolean'}).notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const serviceSelectSchema = createSelectSchema(services)
   .pick({
     id: true,
     categoryId: true,
@@ -285,60 +304,46 @@ export const itemSelectSchema = createSelectSchema(items)
   })
   .extend({
     category: categorySelectSchema.pick({name: true}),
-    productDetail: productDetailSelectSchema.optional(),
   });
 
-export type ItemSelect = z.infer<typeof itemSelectSchema>;
+export type ServiceSelect = z.infer<typeof serviceSelectSchema>;
 
-export const itemInsertSchema = createInsertSchema(items)
-  .pick({
-    categoryId: true,
-    name: true,
-    isPublic: true,
-  })
-  .extend({
-    productDetail: productDetailInsertSchema.optional(),
-  });
+export const serviceInsertSchema = createInsertSchema(services).pick({
+  categoryId: true,
+  name: true,
+  isPublic: true,
+});
+export type ServiceInsert = z.infer<typeof serviceInsertSchema>;
 
-export type ItemInsert = z.infer<typeof itemInsertSchema>;
+export const serviceUpdateSchema = createSelectSchema(services).pick({
+  id: true,
+  categoryId: true,
+  name: true,
+  isPublic: true,
+});
 
-export const itemUpdateSchema = createSelectSchema(items)
-  .pick({
-    id: true,
-    categoryId: true,
-    name: true,
-    isPublic: true,
-  })
-  .extend({
-    productDetail: productDetailUpdateSchema.optional(),
-  });
+export type ServiceUpdate = z.infer<typeof serviceUpdateSchema>;
 
-export type ItemUpdate = z.infer<typeof itemUpdateSchema>;
-
-export const itemDeleteSchema = createSelectSchema(items).pick({
+export const serviceDeleteSchema = createSelectSchema(services).pick({
   id: true,
 });
 
-export const itemsRelations = relations(items, ({one}) => ({
+export const servicesRelations = relations(services, ({one}) => ({
   category: one(categories, {
-    fields: [items.categoryId],
+    fields: [services.categoryId],
     references: [categories.id],
-  }),
-  productDetail: one(productDetails, {
-    fields: [items.id],
-    references: [productDetails.itemId],
   }),
 }));
 // #endregion
 
-// #region demandItems
-export const demandItems = sqliteTable('demand_items', {
+// #region demandProducts
+export const demandProducts = sqliteTable('demand_products', {
   id: integer('id').primaryKey({autoIncrement: true}),
   demandId: integer('demand_id')
     .references(() => demands.id, {onDelete: 'cascade'})
     .notNull(),
-  itemId: integer('item_id')
-    .references(() => items.id)
+  productId: integer('product_id')
+    .references(() => products.id)
     .notNull(),
   quantity: integer('quantity').notNull(),
   updatedAt: integer('updated_at', {mode: 'number'})
@@ -350,22 +355,74 @@ export const demandItems = sqliteTable('demand_items', {
     .notNull(),
 });
 
-export const demandItemSelectSchema = createSelectSchema(demandItems).pick({
-  itemId: true,
+export const demandProductSelectSchema = createSelectSchema(
+  demandProducts
+).pick({
+  productId: true,
   quantity: true,
 });
 
-export const demandItemInsertSchema = createInsertSchema(demandItems).pick({
-  itemId: true,
+export const demandProductInsertSchema = createInsertSchema(
+  demandProducts
+).pick({
+  productId: true,
   quantity: true,
 });
 
-export const demandItemsRelations = relations(demandItems, ({one}) => ({
+export const demandProductsRelations = relations(demandProducts, ({one}) => ({
   demand: one(demands, {
-    fields: [demandItems.demandId],
+    fields: [demandProducts.demandId],
     references: [demands.id],
   }),
-  item: one(items, {fields: [demandItems.itemId], references: [items.id]}),
+  product: one(products, {
+    fields: [demandProducts.productId],
+    references: [products.id],
+  }),
+}));
+// #endregion
+
+// #region demandServices
+export const demandServices = sqliteTable('demand_services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  demandId: integer('demand_id')
+    .references(() => demands.id, {onDelete: 'cascade'})
+    .notNull(),
+  serviceId: integer('service_id')
+    .references(() => services.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const demandServiceSelectSchema = createSelectSchema(
+  demandServices
+).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const demandServiceInsertSchema = createInsertSchema(
+  demandServices
+).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const demandServicesRelations = relations(demandServices, ({one}) => ({
+  demand: one(demands, {
+    fields: [demandServices.demandId],
+    references: [demands.id],
+  }),
+  service: one(services, {
+    fields: [demandServices.serviceId],
+    references: [services.id],
+  }),
 }));
 // #endregion
 
@@ -404,19 +461,26 @@ export const demandSelectSchema = createSelectSchema(demands)
       lastName: true,
       email: true,
     }),
-    demandItems: z.array(
-      demandItemSelectSchema.extend({
-        item: itemSelectSchema,
+    demandProducts: z.array(
+      demandProductSelectSchema.extend({
+        product: productSelectSchema,
+      })
+    ),
+    demandServices: z.array(
+      demandServiceSelectSchema.extend({
+        service: serviceSelectSchema,
       })
     ),
   });
+
 export type DemandSelect = z.infer<typeof demandSelectSchema>;
 
 export const demandInsertSchema = createInsertSchema(demands)
   .pick({additionalInfo: true})
   .extend({
     client: clientInsertSchema,
-    demandItems: z.array(demandItemInsertSchema),
+    demandProducts: z.array(demandProductInsertSchema).optional(),
+    demandServices: z.array(demandServiceInsertSchema).optional(),
   });
 
 export type DemandInsert = z.infer<typeof demandInsertSchema>;
@@ -426,19 +490,20 @@ export const demandsRelations = relations(demands, ({one, many}) => ({
     fields: [demands.clientId],
     references: [clients.id],
   }),
-  demandItems: many(demandItems),
+  demandProducts: many(demandProducts),
+  demandServices: many(demandServices),
   quotes: many(quotes),
 }));
 // #endregion
 
-// #region quoteItems
-export const quoteItems = sqliteTable('quote_items', {
+// #region quoteProducts
+export const quoteProducts = sqliteTable('quote_products', {
   id: integer('id').primaryKey({autoIncrement: true}),
   quoteId: integer('quote_id')
     .references(() => quotes.id, {onDelete: 'cascade'})
     .notNull(),
-  itemId: integer('item_id')
-    .references(() => items.id)
+  productId: integer('product_id')
+    .references(() => products.id)
     .notNull(),
   quantity: integer('quantity').notNull(),
   // unitPrice: text('unit_price').notNull(),
@@ -451,23 +516,65 @@ export const quoteItems = sqliteTable('quote_items', {
     .notNull(),
 });
 
-export const quoteItemSelectSchema = createSelectSchema(quoteItems).pick({
-  itemId: true,
+export const quoteProductSelectSchema = createSelectSchema(quoteProducts).pick({
+  productId: true,
   quantity: true,
 });
 
-export const quoteItemInsertSchema = createInsertSchema(quoteItems).pick({
-  itemId: true,
+export const quoteProductInsertSchema = createInsertSchema(quoteProducts).pick({
+  productId: true,
   quantity: true,
 });
 
-export const quoteItemsRelations = relations(quoteItems, ({one}) => ({
-  item: one(items, {
-    fields: [quoteItems.itemId],
-    references: [items.id],
+export const quoteProductsRelations = relations(quoteProducts, ({one}) => ({
+  product: one(products, {
+    fields: [quoteProducts.productId],
+    references: [products.id],
   }),
   quote: one(quotes, {
-    fields: [quoteItems.quoteId],
+    fields: [quoteProducts.quoteId],
+    references: [quotes.id],
+  }),
+}));
+// #endregion
+
+// #region quoteServices
+export const quoteServices = sqliteTable('quote_services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  quoteId: integer('quote_id')
+    .references(() => quotes.id, {onDelete: 'cascade'})
+    .notNull(),
+  serviceId: integer('service_id')
+    .references(() => services.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  // unitPrice: text('unit_price').notNull(),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const quoteServiceSelectSchema = createSelectSchema(quoteServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const quoteServiceInsertSchema = createInsertSchema(quoteServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const quoteServicesRelations = relations(quoteServices, ({one}) => ({
+  service: one(services, {
+    fields: [quoteServices.serviceId],
+    references: [services.id],
+  }),
+  quote: one(quotes, {
+    fields: [quoteServices.quoteId],
     references: [quotes.id],
   }),
 }));
@@ -505,9 +612,14 @@ export const quoteSelectSchema = createSelectSchema(quotes)
     additionalInfo: true,
   })
   .extend({
-    quoteItems: z.array(
-      quoteItemSelectSchema.extend({
-        item: itemSelectSchema,
+    quoteProducts: z.array(
+      quoteProductSelectSchema.extend({
+        product: productSelectSchema,
+      })
+    ),
+    quoteServices: z.array(
+      quoteServiceSelectSchema.extend({
+        product: productSelectSchema,
       })
     ),
   });
@@ -518,7 +630,8 @@ export const quoteInsertSchema = createInsertSchema(quotes)
   .pick({demandId: true, additionalInfo: true})
   .extend({
     client: clientInsertSchema.pick({email: true}),
-    quoteItems: z.array(quoteItemInsertSchema),
+    quoteProducts: z.array(quoteProductInsertSchema).optional(),
+    quoteServices: z.array(quoteServiceInsertSchema).optional(),
   });
 
 export type QuoteInsert = z.infer<typeof quoteInsertSchema>;
@@ -535,8 +648,106 @@ export const quotesRelations = relations(quotes, ({one, many}) => ({
     fields: [quotes.demandId],
     references: [demands.id],
   }),
-  quoteItems: many(quoteItems),
+  quoteProducts: many(quoteProducts),
+  quoteServices: many(quoteServices),
 }));
+// #endregion
+
+// #region offerProducts
+export const offerProducts = sqliteTable('offer_products', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  offerId: integer('offer_id')
+    .references(() => offers.id, {onDelete: 'cascade'})
+    .notNull(),
+  productId: integer('product_id')
+    .references(() => products.id)
+    .notNull(),
+  offerServiceId: integer('offer_service_id')
+    .references(() => offerServices.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const offerProductSelectSchema = createSelectSchema(offerProducts).pick({
+  productId: true,
+  quantity: true,
+});
+
+export const offerProductInsertSchema = createInsertSchema(offerProducts).pick({
+  productId: true,
+  quantity: true,
+});
+
+export const offerProductsRelations = relations(offerProducts, ({one}) => ({
+  product: one(products, {
+    fields: [offerProducts.productId],
+    references: [products.id],
+  }),
+  offer: one(offers, {
+    fields: [offerProducts.offerId],
+    references: [offers.id],
+  }),
+  offerService: one(offerServices, {
+    fields: [offerProducts.offerServiceId],
+    references: [offerServices.id],
+  }),
+}));
+// #endregion
+
+// #region offerServices
+export const offerServices = sqliteTable('offer_services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  offerId: integer('offer_id')
+    .references(() => offers.id, {onDelete: 'cascade'})
+    .notNull(),
+  serviceId: integer('service_id')
+    .references(() => services.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(), // Quantity of the service needed
+  // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const offerServiceSelectSchema = createSelectSchema(offerServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const offerServiceInsertSchema = createInsertSchema(offerServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const offerServicesRelations = relations(
+  offerServices,
+  ({one, many}) => ({
+    service: one(services, {
+      fields: [offerServices.serviceId],
+      references: [services.id],
+    }),
+    offer: one(offers, {
+      fields: [offerServices.offerId],
+      references: [offers.id],
+    }),
+    offerProducts: many(offerProducts),
+  })
+);
+
 // #endregion
 
 // #region offers
@@ -550,8 +761,8 @@ export const offers = sqliteTable('offers', {
   })
     .default('sent')
     .notNull(),
-  // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
   // attachment: blob(),
+  version: integer('version').default(1).notNull(),
   additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
@@ -561,44 +772,81 @@ export const offers = sqliteTable('offers', {
     .default(sql`(unixepoch())`)
     .notNull(),
 });
-// #endregion
 
-// #region jobItemServices
-export const jobItemServices = sqliteTable('job_item_services', {
-  id: integer('id').primaryKey({autoIncrement: true}),
-  jobItemId: integer('job_item_id')
-    .references(() => jobItems.id, {onDelete: 'cascade'})
-    .notNull(),
-  date: text('date'),
-  additionalInfo: text('additional_info'),
-  // attachment: blob(),
-  updatedAt: integer('updated_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`)
-    .notNull(),
-  createdAt: integer('created_at', {mode: 'number'})
-    .default(sql`(unixepoch())`)
-    .notNull(),
+export const offerSelectSchema = createSelectSchema(offers)
+  .pick({
+    id: true,
+    demandId: true,
+    status: true,
+    version: true,
+    additionalInfo: true,
+  })
+  .extend({
+    offerServices: z.array(
+      offerServiceSelectSchema.extend({
+        service: serviceSelectSchema,
+        offerProducts: z.array(
+          offerProductSelectSchema.extend({
+            product: productSelectSchema,
+          })
+        ),
+      })
+    ),
+  });
+
+export type OfferSelect = z.infer<typeof offerSelectSchema>;
+
+export const offerInsertSchema = createInsertSchema(offers)
+  .pick({
+    demandId: true,
+    additionalInfo: true,
+  })
+  .extend({
+    client: clientInsertSchema.pick({email: true}),
+    offerServices: z.array(
+      offerServiceInsertSchema.extend({
+        additionalInfo: z.string().optional(),
+        offerProducts: z.array(
+          offerProductInsertSchema.extend({
+            additionalInfo: z.string().optional(),
+          })
+        ),
+      })
+    ),
+  });
+
+export type OfferInsert = z.infer<typeof offerInsertSchema>;
+
+export const offerResponseInsertSchema = createSelectSchema(offers).pick({
+  status: true,
+  additionalInfo: true,
 });
 
-// export const jobItemDetailsRelations = relations(jobItemDetails, ({one}) => ({
-//   jobItems: one(jobItems, {
-//     fields: [jobItemDetails.jobItemId],
-//     references: [jobItems.id],
-//   }),
-// }));
+export type OfferResponseInsert = z.infer<typeof offerResponseInsertSchema>;
+
+export const offersRelations = relations(offers, ({one, many}) => ({
+  demand: one(demands, {
+    fields: [offers.demandId],
+    references: [demands.id],
+  }),
+  offerProducts: many(offerProducts),
+  offerServices: many(offerServices),
+}));
 // #endregion
 
-// #region jobItems
-export const jobItems = sqliteTable('job_items', {
+// #region jobProducts
+export const jobProducts = sqliteTable('job_products', {
   id: integer('id').primaryKey({autoIncrement: true}),
   jobId: integer('job_id')
     .references(() => jobs.id, {onDelete: 'cascade'})
     .notNull(),
-  itemId: integer('item_id')
-    .references(() => items.id)
+  productId: integer('product_id')
+    .references(() => products.id)
     .notNull(),
-  quantity: integer('quantity').notNull(), // Quantity of the item used
+  jobServiceId: integer('job_service_id')
+    .references(() => jobServices.id)
+    .notNull(),
+  quantity: integer('quantity').notNull(),
   additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
@@ -609,10 +857,79 @@ export const jobItems = sqliteTable('job_items', {
     .notNull(),
 });
 
-// export const jobItemsRelations = relations(jobItems, ({many, one}) => ({
-//   jobs: one(jobs, {fields: [jobItems.jobId], references: [jobs.id]}),
-//   jobItemDetails: many(jobItemDetails),
-// }));
+export const jobProductSelectSchema = createSelectSchema(jobProducts).pick({
+  productId: true,
+  quantity: true,
+});
+
+export const jobProductInsertSchema = createInsertSchema(jobProducts).pick({
+  productId: true,
+  quantity: true,
+});
+
+export const jobProductsRelations = relations(jobProducts, ({one}) => ({
+  product: one(products, {
+    fields: [jobProducts.productId],
+    references: [products.id],
+  }),
+  job: one(jobs, {
+    fields: [jobProducts.jobId],
+    references: [jobs.id],
+  }),
+  jobService: one(jobServices, {
+    fields: [jobProducts.jobServiceId],
+    references: [jobServices.id],
+  }),
+}));
+// #endregion
+
+// #region jobServices
+export const jobServices = sqliteTable('job_services', {
+  id: integer('id').primaryKey({autoIncrement: true}),
+  jobId: integer('job_id')
+    .references(() => jobs.id, {onDelete: 'cascade'})
+    .notNull(),
+  serviceId: integer('service_id')
+    .references(() => services.id)
+    .notNull(),
+  status: text('status', {
+    enum: ['pending', 'in_progress', 'completed', 'blocked'],
+  }),
+  // signed: integer({mode: 'boolean'}),
+  // signedAt: integer({mode: 'timestamp'}),
+  // date: integer('scheduled_at', {mode: 'timestamp'}), // when the job was done
+  quantity: integer('quantity').notNull(),
+  additionalInfo: text('additional_info'),
+  updatedAt: integer('updated_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .$onUpdate(() => sql`(unixepoch())`)
+    .notNull(),
+  createdAt: integer('created_at', {mode: 'number'})
+    .default(sql`(unixepoch())`)
+    .notNull(),
+});
+
+export const jobServiceSelectSchema = createSelectSchema(jobServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const jobServiceInsertSchema = createInsertSchema(jobServices).pick({
+  serviceId: true,
+  quantity: true,
+});
+
+export const jobServicesRelations = relations(jobServices, ({one, many}) => ({
+  service: one(services, {
+    fields: [jobServices.serviceId],
+    references: [services.id],
+  }),
+  job: one(jobs, {
+    fields: [jobServices.jobId],
+    references: [jobs.id],
+  }),
+  jobProducts: many(jobProducts),
+}));
 // #endregion
 
 // #region jobs
@@ -621,23 +938,7 @@ export const jobs = sqliteTable('jobs', {
   demandId: integer('demand_id')
     .references(() => demands.id, {onDelete: 'cascade'})
     .notNull(),
-  status: text('status', {
-    enum: [
-      'sent',
-      'accepted',
-      'declined',
-      'pending',
-      'in_progress',
-      'completed',
-      'blocked',
-    ],
-  })
-    .default('sent')
-    .notNull(),
-  // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
   // attachment: blob(),
-  // signed: integer({mode: 'boolean'}),
-  // signedAt: integer({mode: 'timestamp'}),
   // clientSigned: integer({mode: 'boolean'}),
   // clientSignedAt: integer({mode: 'timestamp'}),
   additionalInfo: text('additional_info'),
@@ -650,32 +951,69 @@ export const jobs = sqliteTable('jobs', {
     .notNull(),
 });
 
-// const draftJobSelectSchema = createSelectSchema(jobs)
-//   .pick({demandId: true})
-//   .extend({
-//     demand: demandSelectSchema,
-//   });
+export const jobSelectSchema = createSelectSchema(jobs)
+  .pick({
+    id: true,
+    demandId: true,
+    additionalInfo: true,
+  })
+  .extend({
+    jobServices: z.array(
+      jobServiceSelectSchema.extend({
+        service: serviceSelectSchema,
+        jobProducts: z.array(
+          jobProductSelectSchema.extend({
+            product: productSelectSchema,
+          })
+        ),
+      })
+    ),
+  });
+
+export type JobSelect = z.infer<typeof jobSelectSchema>;
 
 export const jobInsertSchema = createInsertSchema(jobs)
-  .pick({demandId: true, additionalInfo: true})
+  .pick({
+    demandId: true,
+    additionalInfo: true,
+  })
   .extend({
     client: clientInsertSchema.pick({email: true}),
-    quoteItems: z.array(quoteItemInsertSchema),
+    jobServices: z.array(
+      jobServiceInsertSchema.extend({
+        additionalInfo: z.string().optional(),
+        jobProducts: z.array(
+          jobProductInsertSchema.extend({
+            additionalInfo: z.string().optional(),
+          })
+        ),
+      })
+    ),
   });
 
 export type JobInsert = z.infer<typeof jobInsertSchema>;
 
+export const jobResponseInsertSchema = createSelectSchema(jobs).pick({
+  additionalInfo: true,
+});
+
+export type JobResponseInsert = z.infer<typeof jobResponseInsertSchema>;
+
 export const jobsRelations = relations(jobs, ({one, many}) => ({
-  demands: one(demands, {fields: [jobs.demandId], references: [demands.id]}),
-  jobItems: many(jobItems),
+  demand: one(demands, {
+    fields: [jobs.demandId],
+    references: [demands.id],
+  }),
+  jobProducts: many(jobProducts),
+  jobServices: many(jobServices),
 }));
 // #endregion
 
 // #region orders
 export const orders = sqliteTable('orders', {
   id: integer('id').primaryKey({autoIncrement: true}),
-  itemId: integer('item_id')
-    .references(() => items.id)
+  productId: integer('product_id')
+    .references(() => products.id)
     .notNull(),
   status: text('status', {
     enum: ['sent', 'accepted', 'declined', 'delivered'],
@@ -696,13 +1034,13 @@ export const orders = sqliteTable('orders', {
 export const orderSelectSchema = createSelectSchema(orders)
   .pick({
     id: true,
-    itemId: true,
+    productId: true,
     status: true,
     quantity: true,
     delivery: true,
   })
   .extend({
-    item: itemSelectSchema.pick({
+    product: productSelectSchema.pick({
       name: true,
     }),
   });
@@ -710,7 +1048,7 @@ export const orderSelectSchema = createSelectSchema(orders)
 export type OrderSelect = z.infer<typeof orderSelectSchema>;
 
 export const orderInsertSchema = createInsertSchema(orders).pick({
-  itemId: true,
+  productId: true,
   quantity: true,
 });
 
@@ -738,20 +1076,20 @@ export const orderDeleteSchema = createSelectSchema(orders).pick({
 export type OrderDelete = z.infer<typeof orderDeleteSchema>;
 
 export const ordersRelations = relations(orders, ({one}) => ({
-  item: one(items, {
-    fields: [orders.itemId],
-    references: [items.id],
+  product: one(products, {
+    fields: [orders.productId],
+    references: [products.id],
   }),
 }));
 // #endregion
 
-// #region jobItemsToOrders
-export const jobItemsToOrders = sqliteTable('job_items_to_orders', {
-  jobItemId: integer('job_item_id')
-    .notNull()
-    .references(() => jobItems.id),
-  orderId: integer('order_id')
-    .notNull()
-    .references(() => orders.id),
-});
+// #region jobProductsToOrders
+// export const jobProductsToOrders = sqliteTable('job_products_to_orders', {
+//   jobProductId: integer('job_product_id')
+//     .notNull()
+//     .references(() => jobProducts.id),
+//   orderId: integer('order_id')
+//     .notNull()
+//     .references(() => orders.id),
+// });
 // #endregion
