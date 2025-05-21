@@ -1,13 +1,13 @@
 <template>
-  <UDashboardPanel id="quotes">
+  <UDashboardPanel id="offers">
     <template #header>
-      <UDashboardNavbar title="Quotes">
+      <UDashboardNavbar title="Offers">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
 
         <template #right>
-          <!-- <MyQuoteInsert /> -->
+          <!-- <MyOfferInsert /> -->
         </template>
       </UDashboardNavbar>
     </template>
@@ -83,7 +83,7 @@ import {
   getGroupedRowModel,
   type GroupingOptions,
 } from '@tanstack/table-core';
-import {type QuoteSelect} from '~~/server/database/schema';
+import {type OfferSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UBadge = resolveComponent('UBadge');
@@ -92,12 +92,12 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<QuoteSelect[]>('/api/quotes', {
+const {data, status} = await useFetch<OfferSelect[]>('/api/offers', {
   method: 'get',
   lazy: true,
 });
 
-const getRowItems = (row: Row<QuoteSelect>): DropdownMenuItem[] => {
+const getRowItems = (row: Row<OfferSelect>): DropdownMenuItem[] => {
   const items: DropdownMenuItem[] = [
     {
       type: 'label',
@@ -111,24 +111,24 @@ const getRowItems = (row: Row<QuoteSelect>): DropdownMenuItem[] => {
       icon: 'lucide:file-pen',
       onSelect() {
         const overlay = useOverlay();
-        overlay.create(MyOfferInsert, {
-          props: {
-            quote: row.original,
-          },
-          defaultOpen: true,
-        });
+        // overlay.create(MyJobInsert, {
+        //   props: {
+        //     offer: row.original,
+        //   },
+        //   defaultOpen: true,
+        // });
       },
     });
   }
 
   items.push({
-    label: 'Delete quote',
+    label: 'Delete offer',
     icon: 'i-lucide-trash',
     color: 'error',
     onSelect() {
       toast.add({
-        title: 'Quote deleted',
-        description: 'The quote has been deleted.',
+        title: 'Offer deleted',
+        description: 'The offer has been deleted.',
       });
     },
   });
@@ -136,7 +136,7 @@ const getRowItems = (row: Row<QuoteSelect>): DropdownMenuItem[] => {
   return items;
 };
 
-const columns: TableColumn<QuoteSelect>[] = [
+const columns: TableColumn<OfferSelect>[] = [
   {
     id: 'expandable',
   },
@@ -169,18 +169,23 @@ const columns: TableColumn<QuoteSelect>[] = [
   {
     header: 'Products',
     cell: ({row}) => {
-      const products = row.original.quoteProducts ?? [];
+      const offerServices = row.original.offerServices ?? [];
+
+      const products = offerServices
+        .flatMap((service) => service.offerProducts ?? [])
+        .map((p) => p.product?.name)
+        .filter(Boolean);
 
       if (products.length === 0) return '—';
 
-      const first = products[0]?.product.name ?? '';
-      const second = products[1]?.product.name.slice(0, 5) ?? '';
+      const first = products[0] ?? '';
+      const second = products[1]?.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: products.map((i) => i.product.name).join(', '),
+          title: products.join(', '),
         },
         preview
       );
@@ -189,18 +194,22 @@ const columns: TableColumn<QuoteSelect>[] = [
   {
     header: 'Services',
     cell: ({row}) => {
-      const services = row.original.quoteServices ?? [];
+      const offerServices = row.original.offerServices ?? [];
+
+      const services = offerServices
+        .map((s) => s.service?.name)
+        .filter(Boolean);
 
       if (services.length === 0) return '—';
 
-      const first = services[0]?.service.name ?? '';
-      const second = services[1]?.service.name.slice(0, 5) ?? '';
+      const first = services[0] ?? '';
+      const second = services[1]?.slice(0, 5) ?? '';
       const preview = second ? `${first}, ${second}...` : first;
 
       return h(
         'span',
         {
-          title: services.map((i) => i.service.name).join(', '),
+          title: services.join(', '),
         },
         preview
       );

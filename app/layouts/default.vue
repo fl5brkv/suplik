@@ -62,8 +62,16 @@ const links = [
     },
     {
       label: 'Quotes',
-      icon: 'lucide:file-pen-line',
+      icon: 'lucide:file-digit',
       to: '/quotes',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: 'Offers',
+      icon: 'lucide:file-code-2',
+      to: '/offers',
       onSelect: () => {
         open.value = false;
       },

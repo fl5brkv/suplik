@@ -666,7 +666,6 @@ export const offerProducts = sqliteTable('offer_products', {
     .references(() => offerServices.id)
     .notNull(),
   quantity: integer('quantity').notNull(),
-  additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -713,7 +712,6 @@ export const offerServices = sqliteTable('offer_services', {
     .notNull(),
   quantity: integer('quantity').notNull(), // Quantity of the service needed
   // scheduledAt: integer('scheduled_at', {mode: 'timestamp'}),
-  additionalInfo: text('additional_info'),
   updatedAt: integer('updated_at', {mode: 'number'})
     .default(sql`(unixepoch())`)
     .$onUpdate(() => sql`(unixepoch())`)
@@ -784,17 +782,56 @@ export const offerSelectSchema = createSelectSchema(offers)
   .extend({
     offerServices: z.array(
       offerServiceSelectSchema.extend({
-        service: serviceSelectSchema,
-        offerProducts: z.array(
-          offerProductSelectSchema.extend({
-            product: productSelectSchema,
-          })
-        ),
+        service: serviceSelectSchema.pick({
+          name: true,
+        }),
+        offerProducts: z
+          .array(
+            offerProductSelectSchema.extend({
+              product: productSelectSchema.pick({
+                name: true,
+              }),
+            })
+          )
+          .optional(),
       })
     ),
   });
 
 export type OfferSelect = z.infer<typeof offerSelectSchema>;
+
+export const offerEmailSelectSchema = createSelectSchema(offers)
+  .pick({
+    additionalInfo: true,
+  })
+  .extend({
+    offerServices: z.array(
+      offerServiceSelectSchema
+        .pick({
+          quantity: true,
+        })
+        .extend({
+          service: serviceSelectSchema.pick({
+            name: true,
+          }),
+          offerProducts: z
+            .array(
+              offerProductSelectSchema
+                .pick({
+                  quantity: true,
+                })
+                .extend({
+                  product: productSelectSchema.pick({
+                    name: true,
+                  }),
+                })
+            )
+            .optional(),
+        })
+    ),
+  });
+
+export type OfferEmailSelect = z.infer<typeof offerEmailSelectSchema>;
 
 export const offerInsertSchema = createInsertSchema(offers)
   .pick({
@@ -805,12 +842,7 @@ export const offerInsertSchema = createInsertSchema(offers)
     client: clientInsertSchema.pick({email: true}),
     offerServices: z.array(
       offerServiceInsertSchema.extend({
-        additionalInfo: z.string().optional(),
-        offerProducts: z.array(
-          offerProductInsertSchema.extend({
-            additionalInfo: z.string().optional(),
-          })
-        ),
+        offerProducts: z.array(offerProductInsertSchema),
       })
     ),
   });
