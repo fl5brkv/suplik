@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@internationalized/date": "^3.8.1",
-    "@nuxt/ui": "^3.1.2",
     "@nuxt/ui-pro": "^3.1.2",
     "@nuxthub/core": "0.8.24",
     "@tanstack/table-core": "^8.21.3",

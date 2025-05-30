@@ -100,7 +100,7 @@
 
 <script setup lang="ts">
 import type {NuxtError} from '#app';
-import { MyOfferUpdate } from '#components';
+import {MyOfferUpdate} from '#components';
 import type {DropdownMenuItem, TableColumn} from '@nuxt/ui';
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
 import {type OfferSelect} from '~~/server/database/schema';

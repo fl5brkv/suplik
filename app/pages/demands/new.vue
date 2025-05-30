@@ -115,7 +115,6 @@ definePageMeta({
 });
 
 const {data: productData, status: productStatus} = useFetch('/api/products', {
-  key: 'products',
   method: 'get',
   lazy: true,
   transform: (data) =>
@@ -126,7 +125,6 @@ const {data: productData, status: productStatus} = useFetch('/api/products', {
 });
 
 const {data: serviceData, status: serviceStatus} = useFetch('/api/services', {
-  key: 'services',
   method: 'get',
   lazy: true,
   transform: (data) =>

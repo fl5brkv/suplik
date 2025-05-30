@@ -21,7 +21,7 @@
 
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: any; 
+  modelValue: any;
 }>();
 
 const emit = defineEmits<{
@@ -41,8 +41,8 @@ const {data, status} = await useFetch('/api/clients', {
   transform: (data) =>
     data?.map((client) => ({
       label: `${client.firstName} ${client.lastName}`,
-      value: client.id, 
-      ...client, 
+      value: client.id,
+      ...client,
     })),
 });
 </script>

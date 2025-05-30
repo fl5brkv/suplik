@@ -5,6 +5,10 @@
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+
+        <template #right>
+          <MyClientInsert />
+        </template>
       </UDashboardNavbar>
     </template>
 
@@ -60,6 +64,7 @@
 
 <script setup lang="ts">
 import type {NuxtError} from '#app';
+import {MyClientUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
 import type {z} from 'zod';
@@ -74,6 +79,7 @@ const table = useTemplateRef('table');
 type Client = z.infer<typeof clientSelectSchema>;
 
 const {data, status, refresh} = await useFetch<Client[]>('/api/clients', {
+  key: 'clients',
   method: 'get',
   lazy: true,
 });
@@ -83,6 +89,20 @@ function getRowItems(row: Row<Client>) {
     {
       type: 'label',
       label: 'Actions',
+    },
+    {
+      label: 'Update client',
+      icon: 'lucide:file-pen',
+      onSelect() {
+        const overlay = useOverlay();
+
+        overlay.create(MyClientUpdate, {
+          props: {
+            client: row.original,
+          },
+          defaultOpen: true,
+        });
+      },
     },
     {
       label: 'Delete client',

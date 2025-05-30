@@ -169,38 +169,6 @@ CREATE TABLE `products` (
 	FOREIGN KEY (`supplier_id`) REFERENCES `suppliers`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `proposed_offer_products` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`offer_id` integer NOT NULL,
-	`offer_service_id` integer NOT NULL,
-	`product_id` integer NOT NULL,
-	`quantity` integer NOT NULL,
-	`proposed_by_id` integer NOT NULL,
-	`status` text DEFAULT 'pending' NOT NULL,
-	`comment` text,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`offer_id`) REFERENCES `offers`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`offer_service_id`) REFERENCES `offer_services`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`proposed_by_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
-CREATE TABLE `proposed_offer_services` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`offer_id` integer NOT NULL,
-	`service_id` integer NOT NULL,
-	`quantity` integer NOT NULL,
-	`proposed_by_id` integer NOT NULL,
-	`status` text DEFAULT 'pending' NOT NULL,
-	`comment` text,
-	`updated_at` integer DEFAULT (unixepoch()) NOT NULL,
-	`created_at` integer DEFAULT (unixepoch()) NOT NULL,
-	FOREIGN KEY (`offer_id`) REFERENCES `offers`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`service_id`) REFERENCES `services`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`proposed_by_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
-);
---> statement-breakpoint
 CREATE TABLE `quote_audits` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`quote_id` integer NOT NULL,

@@ -7,10 +7,8 @@
         </template>
 
         <template #right>
-          <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert />
-            <MyServiceInsert />
-          </UButtonGroup>
+          <MyCategoryInsert />
+          <MyServiceInsert />
         </template>
       </UDashboardNavbar>
     </template>
@@ -64,7 +62,7 @@
 </template>
 
 <script setup lang="ts">
-import type { NuxtError } from '#app';
+import type {NuxtError} from '#app';
 import {MyServiceUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
@@ -77,10 +75,14 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status, refresh} = await useFetch<ServiceSelect[]>('/api/services', {
-  method: 'get',
-  lazy: true,
-});
+const {data, status, refresh} = await useFetch<ServiceSelect[]>(
+  '/api/services',
+  {
+    key: 'services',
+    method: 'get',
+    lazy: true,
+  }
+);
 
 const getRowItems = (row: Row<ServiceSelect>) => {
   return [

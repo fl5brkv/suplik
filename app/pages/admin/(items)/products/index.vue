@@ -7,10 +7,8 @@
         </template>
 
         <template #right>
-          <UButtonGroup orientation="horizontal">
-            <MyCategoryInsert />
-            <MyProductInsert />
-          </UButtonGroup>
+          <MyCategoryInsert />
+          <MyProductInsert />
         </template>
       </UDashboardNavbar>
     </template>
@@ -80,6 +78,7 @@ const table = useTemplateRef('table');
 const {data, status, refresh} = await useFetch<ProductSelect[]>(
   '/api/products',
   {
+    key: 'products',
     method: 'get',
     lazy: true,
   }

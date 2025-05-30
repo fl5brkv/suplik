@@ -1,24 +1,51 @@
 <template>
-  <UModal title="Update order" :ui="{footer: 'justify-end'}">
+  <UModal
+    title="Update order"
+    :ui="{footer: 'justify-end'}"
+    description="Edit the order details below.">
     <template #body>
-      name:
-      <p>{{ props.order.product.name }}</p>
-      quantity:
-      <p>{{ props.order.quantity }}</p>
+      <div class="mb-4">
+        <div>
+          <span class="font-semibold">Name:</span>
+          {{ props.order.product.name }}
+        </div>
+        <div>
+          <span class="font-semibold">Quantity:</span>
+          {{ props.order.quantity }}
+        </div>
+      </div>
 
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <USelect
-          v-model="state.status"
-          :items="statusOptions"
-          class="w-48"
-          placeholder="Select status" />
+      <UForm
+        id="form"
+        :state="state"
+        class="flex flex-col gap-4"
+        @submit="submit">
+        <UFormField label="Status" name="status">
+          <USelect
+            v-model="state.status"
+            :items="statusOptions"
+            class="w-48"
+            placeholder="Select status" />
+        </UFormField>
 
         <UFormField label="Delivery" name="delivery">
           <UInput v-model="state.delivery" />
         </UFormField>
-
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="emit('close', false)" />
+      <UButton
+        label="Submit"
+        form="form"
+        color="neutral"
+        type="submit"
+        class="ml-2" />
     </template>
   </UModal>
 </template>

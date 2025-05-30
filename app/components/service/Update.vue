@@ -1,22 +1,39 @@
 <template>
-  <UModal title="New service" :ui="{footer: 'justify-end'}">
+  <UModal title="Update service" :ui="{footer: 'justify-end'}"
+  description="Edit the service details below."">
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <USelect
-          :items="data"
-          :loading="status === 'pending'"
-          placeholder="Select category"
-          class="w-48"
-          v-model="state.categoryId" />
+      <UForm id="form" :state="state" class="flex flex-col gap-4" @submit="submit">
+        <UFormField label="Category" name="categoryId" required>
+          <USelect
+            v-model="state.categoryId"
+            :items="data"
+            :loading="status === 'pending'"
+            placeholder="Select category"
+            class="w-48" />
+        </UFormField>
 
-        <UFormField label="Name" name="name">
+        <UFormField label="Name" name="name" required>
           <UInput v-model="state.name" />
         </UFormField>
 
-        <UCheckbox required label="Is public" v-model="state.isPublic" />
-
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
+        <UFormField name="isPublic">
+          <UCheckbox label="Is public" v-model="state.isPublic" />
+        </UFormField>
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="emit('close', false)" />
+      <UButton
+        label="Submit"
+        color="neutral"
+        type="submit"
+        form="form"
+        class="ml-2" />
     </template>
   </UModal>
 </template>

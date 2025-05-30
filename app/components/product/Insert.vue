@@ -2,41 +2,66 @@
   <UModal
     v-model:open="open"
     title="New product"
-    :ui="{footer: 'justify-end'}">
+    :ui="{footer: 'justify-end'}"
+    description="Fill in the product details below.">
     <UButton label="New product" />
 
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <USelect
-          :items="categoriesData"
-          :loading="categoriesStatus === 'pending'"
-          placeholder="Select category"
-          class="w-48"
-          v-model="state.categoryId" />
-
-        <UFormField label="Name" name="name">
-          <UInput v-model="state.name" />
+      <UForm
+        id="form"
+        :state="state"
+        class="flex flex-col gap-4"
+        @submit="submit">
+        <UFormField label="Category" name="categoryId" required>
+          <USelect
+            v-model="state.categoryId"
+            :items="categoriesData"
+            :loading="categoriesStatus === 'pending'"
+            placeholder="Select category"
+            class="w-48" />
         </UFormField>
 
-        <USelect
-          :items="suppliersData"
-          :loading="suppliersStatus === 'pending'"
-          placeholder="Select supplier"
-          class="w-48"
-          v-model="state.supplierId" />
+        <UFormField label="Name" name="name" required>
+          <UInput v-model="state.name" placeholder="Product name" />
+        </UFormField>
 
-        <UFormField label="Stock" name="stock">
-          <UInputNumber v-model="state.stock" />
+        <UFormField label="Supplier" name="supplierId" required>
+          <USelect
+            v-model="state.supplierId"
+            :items="suppliersData"
+            :loading="suppliersStatus === 'pending'"
+            placeholder="Select supplier"
+            class="w-48" />
+        </UFormField>
+
+        <UFormField label="Stock" name="stock" required>
+          <UInputNumber v-model="state.stock" placeholder="Stock quantity" />
         </UFormField>
 
         <UFormField label="Reserved" name="reserved">
-          <UInputNumber v-model="state.reserved" />
+          <UInputNumber
+            v-model="state.reserved"
+            placeholder="Reserved quantity" />
         </UFormField>
 
-        <UCheckbox required label="Is public" v-model="state.isPublic" />
-
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
+        <UFormField name="isPublic">
+          <UCheckbox v-model="state.isPublic" label="Is public" />
+        </UFormField>
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="open = false" />
+      <UButton
+        label="Submit"
+        color="neutral"
+        type="submit"
+        form="form"
+        class="ml-2" />
     </template>
   </UModal>
 </template>

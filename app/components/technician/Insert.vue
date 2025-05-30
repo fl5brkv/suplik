@@ -1,32 +1,47 @@
 <template>
-  <UModal title="Add Technician" v-model:open="open">
+  <UModal
+    title="Add Technician"
+    v-model:open="open"
+    description="Fill in the details to add a new technician.">
     <UButton label="New technician" />
 
     <template #body>
       <UForm
+        id="form"
         :schema="technicianInsertSchema"
         :state="state"
         @submit="submit"
         class="space-y-4">
-        <UFormField label="Email" name="user.email">
+        <UFormField label="Email" name="user.email" required>
           <UInput v-model="state.user.email" type="email" />
         </UFormField>
-        <UFormField label="Password" name="user.password">
+        <UFormField label="Password" name="user.password" required>
           <UInput v-model="state.user.password" type="password" />
         </UFormField>
-        <UFormField label="First Name" name="firstName">
+        <UFormField label="First Name" name="firstName" required>
           <UInput v-model="state.firstName" />
         </UFormField>
-        <UFormField label="Last Name" name="lastName">
+        <UFormField label="Last Name" name="lastName" required>
           <UInput v-model="state.lastName" />
         </UFormField>
-        <UButton type="submit">Submit</UButton>
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="open = false" />
+      <UButton label="Submit" form="form" color="primary" type="submit" />
     </template>
   </UModal>
 </template>
 <script setup lang="ts">
-import {technicianInsertSchema, type TechnicianInsert} from '~~/server/database/schema'; // Adjust path as needed
+import {
+  technicianInsertSchema,
+  type TechnicianInsert,
+} from '~~/server/database/schema'; // Adjust path as needed
 import type {FormSubmitEvent} from '@nuxt/ui';
 import type {NuxtError} from '#app';
 

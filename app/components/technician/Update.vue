@@ -1,22 +1,34 @@
 <template>
-  <UModal title="Update Technician">
+  <UModal
+    title="Update Technician"
+    :ui="{footer: 'justify-end'}"
+    description="Edit the technician details below.">
     <template #body>
       <UForm
+        id="form"
         :schema="technicianUpdateSchema"
         :state="state"
         @submit="submit"
         class="space-y-4">
-        <UFormField label="Email" name="user.email">
+        <UFormField label="Email" name="user.email" required>
           <UInput v-model="state.user.email" type="email" />
         </UFormField>
-        <UFormField label="First Name" name="firstName">
+        <UFormField label="First Name" name="firstName" required>
           <UInput v-model="state.firstName" />
         </UFormField>
-        <UFormField label="Last Name" name="lastName">
+        <UFormField label="Last Name" name="lastName" required>
           <UInput v-model="state.lastName" />
         </UFormField>
-        <UButton type="submit">Submit</UButton>
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="emit('close', false)" />
+      <UButton label="Save" form="form" color="primary" type="submit" />
     </template>
   </UModal>
 </template>

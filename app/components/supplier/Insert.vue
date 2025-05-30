@@ -1,23 +1,36 @@
 <template>
   <UModal
     v-model:open="open"
-    title="Create a supplier"
-    :ui="{footer: 'justify-end'}">
+    title="New supplier"
+    :ui="{footer: 'justify-end'}"
+    description="Fill in the details to add a new supplier.">
     <UButton label="New supplier" />
 
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <UFormField label="Name" name="name">
+      <UForm
+        id="form"
+        :state="state"
+        class="flex flex-col gap-4"
+        @submit="submit">
+        <UFormField label="Name" name="name" required>
           <UInput v-model="state.name" />
         </UFormField>
-        <UFormField label="Email" name="email">
+        <UFormField label="Email" name="email" required>
           <UInput v-model="state.email" type="email" />
         </UFormField>
         <UFormField label="Phone Number" name="phoneNumber">
           <UInput v-model="state.phoneNumber" />
         </UFormField>
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="open = false" />
+      <UButton label="Submit" form="form" color="primary" type="submit" />
     </template>
   </UModal>
 </template>
@@ -25,7 +38,7 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import type { SupplierInsert } from '~~/server/database/schema';
+import type {SupplierInsert} from '~~/server/database/schema';
 
 const toast = useToast();
 const open = ref(false);

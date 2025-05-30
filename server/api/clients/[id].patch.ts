@@ -1,3 +1,4 @@
+import z from 'zod';
 import {clientUpdateSchema} from '~~/server/database/schema';
 
 export default eventHandler(async (event) => {
@@ -13,10 +14,24 @@ export default eventHandler(async (event) => {
       statusMessage: 'The provided data is invalid.',
     });
 
+  const params = await getValidatedRouterParams(event, (params) =>
+    z
+      .object({
+        id: z.coerce.number().int().positive(),
+      })
+      .safeParse(params)
+  );
+
+  if (!params.success)
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'The provided param is invalid',
+    });
+
   const updated = await useDrizzle()
     .update(tables.clients)
     .set(result.data)
-    .where(eq(tables.clients.id, result.data.id));
+    .where(eq(tables.clients.id, params.data.id));
 
   if (!updated)
     throw createError({

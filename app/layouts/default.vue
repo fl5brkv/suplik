@@ -143,8 +143,6 @@ const links = [
     {
       label: 'Nahlásiť chybu',
       icon: 'lucide:message-circle-warning',
-      to: 'https://github.com/nuxt/ui-pro',
-      target: '_blank',
     },
   ],
 ];

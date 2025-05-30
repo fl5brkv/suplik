@@ -2,16 +2,29 @@
   <UModal
     v-model:open="open"
     title="Create a category"
-    :ui="{footer: 'justify-end'}">
+    :ui="{footer: 'justify-end'}"
+    description="Enter the name for the new category.">
     <UButton label="New category" />
 
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <UFormField label="Name" name="name">
+      <UForm
+        id="form"
+        :state="state"
+        class="flex flex-col gap-4"
+        @submit="submit">
+        <UFormField label="Name" name="name" required>
           <UInput v-model="state.name" />
         </UFormField>
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="open = false" />
+      <UButton label="Submit" form="form" color="primary" type="submit" />
     </template>
   </UModal>
 </template>
@@ -25,7 +38,7 @@ const toast = useToast();
 
 const open = ref(false);
 
-const state = reactive({
+const state = reactive<CategoryInsert>({
   name: '',
 });
 
@@ -44,7 +57,7 @@ const submit = async (payload: FormSubmitEvent<CategoryInsert>) => {
       color: 'success',
     });
 
-    await refreshNuxtData('category');
+    await refreshNuxtData('categories');
   } catch (err) {
     const error = err as NuxtError;
 

@@ -2,25 +2,48 @@
   <UModal
     v-model:open="open"
     title="New service"
-    :ui="{footer: 'justify-end'}">
+    :ui="{footer: 'justify-end'}"
+    description="Fill in the product details below.">
     <UButton label="New service" />
 
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <USelect
-          :items="data"
-          :loading="status === 'pending'"
-          placeholder="Select category"
-          class="w-48"
-          v-model="state.categoryId" />
+      <UForm
+        id="form"
+        :state="state"
+        class="flex flex-col gap-4"
+        @submit="submit">
+        <UFormField label="Category" name="categoryId" required>
+          <USelect
+            v-model="state.categoryId"
+            :items="data"
+            :loading="status === 'pending'"
+            placeholder="Select category"
+            class="w-48" />
+        </UFormField>
 
-        <UFormField label="Name" name="name">
+        <UFormField label="Name" name="name" required>
           <UInput v-model="state.name" />
         </UFormField>
 
-        <UCheckbox required label="Is public" v-model="state.isPublic" />
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
+        <UFormField name="isPublic">
+          <UCheckbox label="Is public" v-model="state.isPublic" />
+        </UFormField>
       </UForm>
+    </template>
+
+    <template #footer>
+      <UButton
+        label="Cancel"
+        color="neutral"
+        variant="outline"
+        @click="open = false" />
+      <UButton
+        label="Submit"
+        color="neutral"
+        type="submit"
+        form="form"
+        class="ml-2"
+        loading-auto />
     </template>
   </UModal>
 </template>
@@ -28,7 +51,10 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type CategorySelect, type ServiceInsert} from '~~/server/database/schema';
+import {
+  type CategorySelect,
+  type ServiceInsert,
+} from '~~/server/database/schema';
 
 const toast = useToast();
 

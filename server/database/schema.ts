@@ -151,6 +151,8 @@ export const clientSelectSchema = createSelectSchema(clients).pick({
   companyNumber: true,
 });
 
+export type ClientSelect = z.infer<typeof clientSelectSchema>;
+
 export const clientInsertSchema = createInsertSchema(clients)
   .pick({
     firstName: true,
@@ -183,15 +185,11 @@ export const clientInsertSchema = createInsertSchema(clients)
     phoneNumber: z.string().min(1, {message: 'Phone number is required'}),
   });
 
-export const clientUpdateSchema = createSelectSchema(clients).pick({
-  id: true,
-  firstName: true,
-  lastName: true,
-  email: true,
-  phoneNumber: true,
-  company: true,
-  companyNumber: true,
-});
+export type ClientInsert = z.infer<typeof clientInsertSchema>;
+
+export const clientUpdateSchema = createUpdateSchema(clients);
+
+export type ClientUpdate = z.infer<typeof clientUpdateSchema>;
 
 // #endregion
 

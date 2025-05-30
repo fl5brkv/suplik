@@ -158,7 +158,6 @@ const emit = defineEmits<{close: [boolean]}>();
 const {data: productData, status: productStatus} = await useFetch(
   '/api/products',
   {
-    key: 'products',
     method: 'get',
     lazy: true,
     transform: (data) =>
@@ -171,7 +170,6 @@ const {data: productData, status: productStatus} = await useFetch(
 );
 
 const {data: serviceData, status: serviceStatus} = useFetch('/api/services', {
-  key: 'services',
   method: 'get',
   lazy: true,
   transform: (data) =>

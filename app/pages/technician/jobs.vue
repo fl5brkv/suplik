@@ -59,10 +59,9 @@
                 <div class="mt-4 font-medium">Products:</div>
                 <ul class="list-disc list-inside">
                   <li v-for="(jp, j) in jobService.jobProducts" :key="j">
-                    {{ jp.product.name }}
-                    <UBadge color="primary" variant="subtle"
-                      >x{{ jp.quantity }}</UBadge
-                    >
+                    <span class="truncate">
+                      {{ jp.product.name }} (x{{ jp.quantity}})
+                    </span>
                   </li>
                 </ul>
               </div>
