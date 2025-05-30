@@ -147,11 +147,24 @@ export default eventHandler(async (event) => {
     `${insertedQuote.id}:${insertedQuote.additionalInfo}:${config.salt}`
   );
 
-  const html = await render(
+  // const html = await render(
+  //   MyEmailQuote,
+  //   {
+  //     quote: selected,
+  //     response: `${config.public.baseURL}/quotes/${encodeURIComponent(
+  //       btoa(`${insertedQuote.id}:${token}:${expiresAt}`)
+  //     )}`,
+  //   },
+  //   {
+  //     pretty: true,
+  //   }
+  // );
+
+    const html = await render(
     MyEmailQuote,
     {
       quote: selected,
-      response: `${config.public.baseURL}/quotes/${encodeURIComponent(
+      response: `https://stodo.nuxt.dev/quotes/${encodeURIComponent(
         btoa(`${insertedQuote.id}:${token}:${expiresAt}`)
       )}`,
     },

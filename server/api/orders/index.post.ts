@@ -49,6 +49,24 @@ export default eventHandler(async (event) => {
 
   const token = digest(`${inserted.id}:${config.salt}`);
 
+  // const html = await render(
+  //   MyEmailOrder,
+  //   {
+  //     order: {
+  //       quantity: inserted.quantity,
+  //     },
+  //     product: {
+  //       name: selected.name,
+  //     },
+  //     response: `${config.public.baseURL}/orders/${encodeURIComponent(
+  //       btoa(`${inserted.id}:${token}`)
+  //     )}`,
+  //   },
+  //   {
+  //     pretty: true,
+  //   }
+  // );
+
   const html = await render(
     MyEmailOrder,
     {
@@ -58,7 +76,7 @@ export default eventHandler(async (event) => {
       product: {
         name: selected.name,
       },
-      response: `${config.public.baseURL}/orders/${encodeURIComponent(
+      response: `https://stodo.nuxt.dev/orders/${encodeURIComponent(
         btoa(`${inserted.id}:${token}`)
       )}`,
     },

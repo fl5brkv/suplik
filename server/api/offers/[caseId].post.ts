@@ -134,11 +134,24 @@ export default eventHandler(async (event) => {
     `${insertedOffer.id}:${insertedOffer.additionalInfo}:${config.salt}`
   );
 
-  const html = await render(
+  // const html = await render(
+  //   MyEmailOffer,
+  //   {
+  //     offer: selected,
+  //     response: `${config.public.baseURL}/offers/${encodeURIComponent(
+  //       btoa(`${insertedOffer.id}:${token}:${expiresAt}`)
+  //     )}`,
+  //   },
+  //   {
+  //     pretty: true,
+  //   }
+  // );
+
+    const html = await render(
     MyEmailOffer,
     {
       offer: selected,
-      response: `${config.public.baseURL}/offers/${encodeURIComponent(
+      response: `https://stodo.nuxt.dev/offers/${encodeURIComponent(
         btoa(`${insertedOffer.id}:${token}:${expiresAt}`)
       )}`,
     },
@@ -146,6 +159,7 @@ export default eventHandler(async (event) => {
       pretty: true,
     }
   );
+
 
   // const {sendMail} = useNodeMailer();
 
