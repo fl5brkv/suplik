@@ -8,11 +8,18 @@ export default eventHandler(async (event) => {
       additionalInfo: true,
     },
     with: {
-      client: {
+      case: {
         columns: {
-          firstName: true,
-          lastName: true,
-          email: true,
+          code: true,
+        },
+        with: {
+          client: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              company: true,
+            },
+          },
         },
       },
       demandProducts: {
@@ -21,8 +28,6 @@ export default eventHandler(async (event) => {
           product: {
             columns: {
               name: true,
-              stock: true,
-              reserved: true,
             },
           },
         },

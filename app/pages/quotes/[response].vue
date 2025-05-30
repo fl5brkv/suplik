@@ -1,13 +1,28 @@
 <template>
   <div v-if="data">
     <h1>Quote info:</h1>
+
     <p v-if="data.additionalInfo">
       <strong>Additional Info:</strong> {{ data.additionalInfo }}
     </p>
-    <ul>
-      <li v-for="(quoteItem, idx) in data.quoteItems" :key="idx">
-        <strong>Item:</strong> {{ quoteItem.item.name }},
-        <strong>Quantity:</strong> {{ quoteItem.quantity }}
+
+    <h2>Products</h2>
+    <ul v-if="data.quoteProducts && data.quoteProducts.length">
+      <li
+        v-for="(productItem, idx) in data.quoteProducts"
+        :key="'product-' + idx">
+        <strong>Product:</strong> {{ productItem.product.name }},
+        <strong>Quantity:</strong> {{ productItem.quantity }}
+      </li>
+    </ul>
+
+    <h2>Services</h2>
+    <ul v-if="data.quoteServices && data.quoteServices.length">
+      <li
+        v-for="(serviceItem, idx) in data.quoteServices"
+        :key="'service-' + idx">
+        <strong>Service:</strong> {{ serviceItem.service.name }},
+        <strong>Quantity:</strong> {{ serviceItem.quantity }}
       </li>
     </ul>
 
@@ -39,7 +54,10 @@
 <script setup lang="ts">
 import type {NuxtError} from '#app';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {type QuoteResponseInsert} from '~~/server/database/schema';
+import {
+  type QuoteResponseSelect,
+  type QuoteResponseInsert,
+} from '~~/server/database/schema';
 
 definePageMeta({
   layout: false,
@@ -49,7 +67,12 @@ const route = useRoute();
 
 const toast = useToast();
 
-const {data} = await useFetch(`/api/quotes/${route.params.response}`);
+const {data, error, status} = await useLazyFetch<QuoteResponseSelect>(
+  `/api/quotes/response/${route.params.response}`,
+  {
+    method: 'get',
+  }
+);
 
 const state = reactive({
   status: '' as 'accepted' | 'declined' | 'commented',
@@ -69,7 +92,7 @@ const buttonStatus = async (status: 'accepted' | 'declined') => {
 
 const submit = async (payload: FormSubmitEvent<QuoteResponseInsert>) => {
   try {
-    await $fetch(`/api/quotes/${route.params.response}`, {
+    await $fetch(`/api/quotes/response/${route.params.response}`, {
       method: 'POST',
       body: payload.data,
     });

@@ -16,11 +16,17 @@ export default eventHandler(async (event) => {
   const selected = await useDrizzle()
     .select({
       id: tables.users.id,
-      role: tables.users.role,
       email: tables.users.email,
       password: tables.users.password,
+      technician: {
+        id: tables.technicians.id,
+      },
     })
     .from(tables.users)
+    .leftJoin(
+      tables.technicians,
+      eq(tables.users.id, tables.technicians.userId)
+    )
     .where(eq(tables.users.email, email))
     .get();
 
@@ -33,10 +39,10 @@ export default eventHandler(async (event) => {
   await replaceUserSession(event, {
     user: {
       id: selected.id,
-      role: selected.role,
       email: selected.email,
+      technician: selected.technician ? {id: selected.technician.id} : null,
     },
   });
 
-  return 'Succesfull';
+  return sendNoContent(event);
 });

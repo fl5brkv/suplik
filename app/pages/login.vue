@@ -1,26 +1,26 @@
 <template>
   <div class="flex flex-col items-center justify-center gap-4 p-4">
     <UPageCard class="w-full max-w-md">
-      lyvyzex@mailinator.com
-      <hr />
-      Pa$$w0rd!
       <UAuthForm
-        :schema="signupSchema"
+        :schema="loginSchema"
         title="Login"
         description="Enter your credentials to access your account."
         icon="i-lucide-user"
         :fields="fields"
-        @submit="onSubmit" />
+        @submit="submit" />
     </UPageCard>
   </div>
 </template>
 
 <script setup lang="ts">
-import * as z from 'zod';
 import type {FormSubmitEvent} from '@nuxt/ui';
-import {signupSchema} from '~~/server/database/schema';
+import {loginSchema, type Login} from '~~/server/database/schema';
 import type {NuxtError} from '#app';
 const {fetch} = useUserSession();
+
+definePageMeta({
+  layout: false,
+});
 
 const toast = useToast();
 
@@ -39,9 +39,7 @@ const fields = ref([
   },
 ]);
 
-type Schema = z.output<typeof signupSchema>;
-
-const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
+const submit = async (payload: FormSubmitEvent<Login>) => {
   try {
     await $fetch('/api/users/login', {
       method: 'POST',
@@ -49,7 +47,14 @@ const onSubmit = async (payload: FormSubmitEvent<Schema>) => {
     });
 
     await fetch();
-    await navigateTo('/clients');
+
+    const {user} = useUserSession();
+
+    if (user.value && user.value.technician) {
+      await navigateTo('/technician/jobs');
+    } else {
+      await navigateTo('/admin/demands');
+    }
   } catch (err: any) {
     const error = err as NuxtError;
 

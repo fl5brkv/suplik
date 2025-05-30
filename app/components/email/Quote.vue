@@ -14,7 +14,12 @@
       </Text>
 
       <Text style="margin-bottom: 8px">
-        <span style="font-weight: 500">Client Email:</span> {{ client.email }}
+        <span style="font-weight: 500">Case Code:</span> {{ quote.case.code }}
+      </Text>
+
+      <Text style="margin-bottom: 8px">
+        <span style="font-weight: 500">Client Email:</span>
+        {{ quote.case.client.email }}
       </Text>
 
       <Hr style="margin: 16px 0; border-color: #e5e7eb" />
@@ -26,7 +31,7 @@
       <ul style="margin-bottom: 24px; padding-left: 0; list-style: none">
         <p>Products</p>
         <li
-          v-for="(product, idx) in quoteProducts"
+          v-for="(product, idx) in quote.quoteProducts"
           :key="idx"
           style="
             padding: 12px;
@@ -36,7 +41,7 @@
             border-radius: 4px;
           ">
           <Text style="font-size: 14px; font-weight: 500">
-            Item: {{ product.product.name }}
+            Product: {{ product.product.name }}
           </Text>
           <Text style="font-size: 14px">Quantity: {{ product.quantity }}</Text>
         </li>
@@ -45,7 +50,7 @@
       <ul style="margin-bottom: 24px; padding-left: 0; list-style: none">
         <p>Services</p>
         <li
-          v-for="(service, idx) in quoteServices"
+          v-for="(service, idx) in quote.quoteServices"
           :key="idx"
           style="
             padding: 12px;
@@ -55,7 +60,7 @@
             border-radius: 4px;
           ">
           <Text style="font-size: 14px; font-weight: 500">
-            Item: {{ service.service.name }}
+            Service: {{ service.service.name }}
           </Text>
           <Text style="font-size: 14px">Quantity: {{ service.quantity }}</Text>
         </li>
@@ -66,7 +71,7 @@
       <Text style="font-style: italic; margin-bottom: 24px">
         Message from us:
         <span style="font-style: normal; font-weight: normal">
-          {{ additionalInfo || '—' }}
+          {{ quote.additionalInfo || '—' }}
         </span>
       </Text>
 
@@ -122,24 +127,10 @@
 
 <script setup lang="ts">
 import {Html, Text, Hr, Button} from '@vue-email/components';
+import type {QuoteEmailSelect} from '~~/server/database/schema';
 
 defineProps<{
-  additionalInfo: string | null;
-  client: {
-    email: string;
-  };
-  quoteProducts: {
-    product: {
-      name: string;
-    };
-    quantity: number;
-  }[];
-  quoteServices: {
-    service: {
-      name: string;
-    };
-    quantity: number;
-  }[];
+  quote: QuoteEmailSelect;
   response: string;
 }>();
 </script>

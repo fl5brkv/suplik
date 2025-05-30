@@ -51,7 +51,7 @@
           :label="idx === 0 ? 'Quantity' : undefined"
           :name="`demandProducts.${idx}.quantity`"
           required>
-          <UInputNumber v-model="product.quantity"  :min="1" />
+          <UInputNumber v-model="product.quantity" :min="1" />
         </UFormField>
         <UButton
           size="xs"
@@ -88,7 +88,7 @@
           :label="idx === 0 ? 'Quantity' : undefined"
           :name="`demandServices.${idx}.quantity`"
           required>
-          <UInputNumber v-model="service.quantity"  :min="1" />
+          <UInputNumber v-model="service.quantity" :min="1" />
         </UFormField>
         <UButton
           size="xs"
@@ -154,8 +154,7 @@ const toast = useToast();
 
 function addProduct() {
   state.demandProducts?.push({
-    // @ts-ignore
-    productId: null,
+    productId: 0,
     quantity: 1,
   });
 }
@@ -166,8 +165,7 @@ function removeProduct(idx: number) {
 
 function addService() {
   state.demandServices?.push({
-    // @ts-ignore
-    serviceId: null, //
+    serviceId: 0, 
     quantity: 1,
   });
 }

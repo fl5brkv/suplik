@@ -1,9 +1,78 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1a2d7814-963c-4a43-9d3c-a615590e6421",
+  "id": "2f0c159c-e030-4458-8b87-d1b733d10104",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "cases": {
+      "name": "cases",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "client_id": {
+          "name": "client_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "code": {
+          "name": "code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "cases_code_unique": {
+          "name": "cases_code_unique",
+          "columns": [
+            "code"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "cases_client_id_clients_id_fk": {
+          "name": "cases_client_id_clients_id_fk",
+          "tableFrom": "cases",
+          "tableTo": "clients",
+          "columnsFrom": [
+            "client_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "categories": {
       "name": "categories",
       "columns": {
@@ -291,8 +360,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "client_id": {
-          "name": "client_id",
+        "case_id": {
+          "name": "case_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -330,14 +399,22 @@
           "default": "(unixepoch())"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "demands_case_id_unique": {
+          "name": "demands_case_id_unique",
+          "columns": [
+            "case_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "demands_client_id_clients_id_fk": {
-          "name": "demands_client_id_clients_id_fk",
+        "demands_case_id_cases_id_fk": {
+          "name": "demands_case_id_cases_id_fk",
           "tableFrom": "demands",
-          "tableTo": "clients",
+          "tableTo": "cases",
           "columnsFrom": [
-            "client_id"
+            "case_id"
           ],
           "columnsTo": [
             "id"
@@ -482,12 +559,20 @@
           "notNull": true,
           "autoincrement": false
         },
+        "technician_id": {
+          "name": "technician_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
         },
         "quantity": {
           "name": "quantity",
@@ -547,6 +632,19 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "job_services_technician_id_technicians_id_fk": {
+          "name": "job_services_technician_id_technicians_id_fk",
+          "tableFrom": "job_services",
+          "tableTo": "technicians",
+          "columnsFrom": [
+            "technician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -563,8 +661,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "demand_id": {
-          "name": "demand_id",
+        "case_id": {
+          "name": "case_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -594,14 +692,75 @@
           "default": "(unixepoch())"
         }
       },
+      "indexes": {
+        "jobs_case_id_unique": {
+          "name": "jobs_case_id_unique",
+          "columns": [
+            "case_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "jobs_case_id_cases_id_fk": {
+          "name": "jobs_case_id_cases_id_fk",
+          "tableFrom": "jobs",
+          "tableTo": "cases",
+          "columnsFrom": [
+            "case_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "offer_audits": {
+      "name": "offer_audits",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "offer_id": {
+          "name": "offer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
       "indexes": {},
       "foreignKeys": {
-        "jobs_demand_id_demands_id_fk": {
-          "name": "jobs_demand_id_demands_id_fk",
-          "tableFrom": "jobs",
-          "tableTo": "demands",
+        "offer_audits_offer_id_offers_id_fk": {
+          "name": "offer_audits_offer_id_offers_id_fk",
+          "tableFrom": "offer_audits",
+          "tableTo": "offers",
           "columnsFrom": [
-            "demand_id"
+            "offer_id"
           ],
           "columnsTo": [
             "id"
@@ -650,13 +809,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false
-        },
-        "additional_info": {
-          "name": "additional_info",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
           "autoincrement": false
         },
         "updated_at": {
@@ -746,18 +898,18 @@
           "notNull": true,
           "autoincrement": false
         },
-        "quantity": {
-          "name": "quantity",
+        "technician_id": {
+          "name": "technician_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "additional_info": {
-          "name": "additional_info",
-          "type": "text",
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "updated_at": {
@@ -804,6 +956,19 @@
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
+        },
+        "offer_services_technician_id_technicians_id_fk": {
+          "name": "offer_services_technician_id_technicians_id_fk",
+          "tableFrom": "offer_services",
+          "tableTo": "technicians",
+          "columnsFrom": [
+            "technician_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -820,8 +985,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "demand_id": {
-          "name": "demand_id",
+        "case_id": {
+          "name": "case_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -834,14 +999,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'sent'"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
         },
         "additional_info": {
           "name": "additional_info",
@@ -867,14 +1024,22 @@
           "default": "(unixepoch())"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "offers_case_id_unique": {
+          "name": "offers_case_id_unique",
+          "columns": [
+            "case_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "offers_demand_id_demands_id_fk": {
-          "name": "offers_demand_id_demands_id_fk",
+        "offers_case_id_cases_id_fk": {
+          "name": "offers_case_id_cases_id_fk",
           "tableFrom": "offers",
-          "tableTo": "demands",
+          "tableTo": "cases",
           "columnsFrom": [
-            "demand_id"
+            "case_id"
           ],
           "columnsTo": [
             "id"
@@ -1065,6 +1230,311 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "proposed_offer_products": {
+      "name": "proposed_offer_products",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "offer_id": {
+          "name": "offer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "offer_service_id": {
+          "name": "offer_service_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "product_id": {
+          "name": "product_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposed_by_id": {
+          "name": "proposed_by_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "proposed_offer_products_offer_id_offers_id_fk": {
+          "name": "proposed_offer_products_offer_id_offers_id_fk",
+          "tableFrom": "proposed_offer_products",
+          "tableTo": "offers",
+          "columnsFrom": [
+            "offer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "proposed_offer_products_offer_service_id_offer_services_id_fk": {
+          "name": "proposed_offer_products_offer_service_id_offer_services_id_fk",
+          "tableFrom": "proposed_offer_products",
+          "tableTo": "offer_services",
+          "columnsFrom": [
+            "offer_service_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "proposed_offer_products_product_id_products_id_fk": {
+          "name": "proposed_offer_products_product_id_products_id_fk",
+          "tableFrom": "proposed_offer_products",
+          "tableTo": "products",
+          "columnsFrom": [
+            "product_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "proposed_offer_products_proposed_by_id_users_id_fk": {
+          "name": "proposed_offer_products_proposed_by_id_users_id_fk",
+          "tableFrom": "proposed_offer_products",
+          "tableTo": "users",
+          "columnsFrom": [
+            "proposed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "proposed_offer_services": {
+      "name": "proposed_offer_services",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "offer_id": {
+          "name": "offer_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "service_id": {
+          "name": "service_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "proposed_by_id": {
+          "name": "proposed_by_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "comment": {
+          "name": "comment",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "proposed_offer_services_offer_id_offers_id_fk": {
+          "name": "proposed_offer_services_offer_id_offers_id_fk",
+          "tableFrom": "proposed_offer_services",
+          "tableTo": "offers",
+          "columnsFrom": [
+            "offer_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "proposed_offer_services_service_id_services_id_fk": {
+          "name": "proposed_offer_services_service_id_services_id_fk",
+          "tableFrom": "proposed_offer_services",
+          "tableTo": "services",
+          "columnsFrom": [
+            "service_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "proposed_offer_services_proposed_by_id_users_id_fk": {
+          "name": "proposed_offer_services_proposed_by_id_users_id_fk",
+          "tableFrom": "proposed_offer_services",
+          "tableTo": "users",
+          "columnsFrom": [
+            "proposed_by_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "quote_audits": {
+      "name": "quote_audits",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "quote_id": {
+          "name": "quote_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "snapshot": {
+          "name": "snapshot",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "quote_audits_quote_id_quotes_id_fk": {
+          "name": "quote_audits_quote_id_quotes_id_fk",
+          "tableFrom": "quote_audits",
+          "tableTo": "quotes",
+          "columnsFrom": [
+            "quote_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "quote_products": {
       "name": "quote_products",
       "columns": {
@@ -1237,8 +1707,8 @@
           "notNull": true,
           "autoincrement": true
         },
-        "demand_id": {
-          "name": "demand_id",
+        "case_id": {
+          "name": "case_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -1251,14 +1721,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'sent'"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 1
         },
         "additional_info": {
           "name": "additional_info",
@@ -1284,19 +1746,27 @@
           "default": "(unixepoch())"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "quotes_case_id_unique": {
+          "name": "quotes_case_id_unique",
+          "columns": [
+            "case_id"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {
-        "quotes_demand_id_demands_id_fk": {
-          "name": "quotes_demand_id_demands_id_fk",
+        "quotes_case_id_cases_id_fk": {
+          "name": "quotes_case_id_cases_id_fk",
           "tableFrom": "quotes",
-          "tableTo": "demands",
+          "tableTo": "cases",
           "columnsFrom": [
-            "demand_id"
+            "case_id"
           ],
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -1426,6 +1896,82 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "technicians": {
+      "name": "technicians",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "first_name": {
+          "name": "first_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_name": {
+          "name": "last_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "technicians_user_id_unique": {
+          "name": "technicians_user_id_unique",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "technicians_user_id_users_id_fk": {
+          "name": "technicians_user_id_users_id_fk",
+          "tableFrom": "technicians",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "users": {
       "name": "users",
       "columns": {
@@ -1435,14 +1981,6 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'technician'"
         },
         "email": {
           "name": "email",

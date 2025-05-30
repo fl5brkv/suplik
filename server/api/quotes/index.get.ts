@@ -4,12 +4,24 @@ export default eventHandler(async (event) => {
   const selected = await useDrizzle().query.quotes.findMany({
     columns: {
       id: true,
-      demandId: true,
       status: true,
-      version: true,
       additionalInfo: true,
     },
     with: {
+      case: {
+        columns: {
+          code: true,
+        },
+        with: {
+          client: {
+            columns: {
+              firstName: true,
+              lastName: true,
+              company: true,
+            },
+          },
+        },
+      },
       quoteProducts: {
         columns: {
           productId: true,
@@ -18,7 +30,6 @@ export default eventHandler(async (event) => {
         with: {
           product: {
             columns: {
-              id: true,
               name: true,
             },
           },
@@ -32,7 +43,6 @@ export default eventHandler(async (event) => {
         with: {
           service: {
             columns: {
-              id: true,
               name: true,
             },
           },

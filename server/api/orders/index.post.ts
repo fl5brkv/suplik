@@ -2,6 +2,7 @@ import {orderInsertSchema} from '~~/server/database/schema';
 import {render} from '@vue-email/render';
 import MyEmailOrder from '~~/app/components/email/Order.vue';
 import {digest} from 'ohash';
+import {WorkerMailer} from 'worker-mailer';
 
 export default eventHandler(async (event) => {
   const result = await readValidatedBody(event, (body) =>
@@ -66,11 +67,29 @@ export default eventHandler(async (event) => {
     }
   );
 
-  const {sendMail} = useNodeMailer();
+  // const {sendMail} = useNodeMailer();
 
-  await sendMail({
-    to: selected.supplier.email,
+  // await sendMail({
+  //   to: selected.supplier.email,
+  //   subject: 'New order',
+  //   html,
+  // });
+
+  const mailer = await WorkerMailer.connect({
+    credentials: {
+      username: config.mailerUsername,
+      password: config.mailerPassword,
+    },
+    host: 'smtp.eu.mailgun.org',
+    port: 587,
+    secure: false,
+    authType: 'plain',
+  });
+
+  await mailer.send({
+    from: {email: 'info@stuchlik.sk'},
     subject: 'New order',
+    to: selected.supplier.email,
     html,
   });
 

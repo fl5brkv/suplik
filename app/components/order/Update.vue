@@ -1,5 +1,5 @@
 <template>
-  <UModal :title="`Update order`" :ui="{footer: 'justify-end'}">
+  <UModal title="Update order" :ui="{footer: 'justify-end'}">
     <template #body>
       name:
       <p>{{ props.order.product.name }}</p>
@@ -38,15 +38,16 @@ const emit = defineEmits<{close: [boolean]}>();
 
 const statusOptions = ['sent', 'accepted', 'delivered', 'declined'];
 
-const state = reactive({
-  id: props.order.id,
+const state = reactive<OrderUpdate>({
+  productId: props.order.productId,
   status: props.order.status,
+  quantity: props.order.quantity,
   delivery: props.order.delivery,
 });
 
 const submit = async (payload: FormSubmitEvent<OrderUpdate>) => {
   try {
-    await $fetch('/api/orders', {
+    await $fetch(`/api/orders/${props.order.id}`, {
       method: 'PATCH',
       body: payload.data,
     });

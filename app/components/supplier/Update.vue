@@ -1,7 +1,5 @@
 <template>
-  <UModal title="Create a supplier" :ui="{footer: 'justify-end'}">
-    <UButton label="New supplier" color="neutral" variant="subtle" />
-
+  <UModal title="Update supplier" :ui="{footer: 'justify-end'}">
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
         <UFormField label="Name" name="name">
@@ -26,21 +24,21 @@ import type {SupplierSelect, SupplierUpdate} from '~~/server/database/schema';
 
 const toast = useToast();
 
-const open = ref(false);
-
 const props = defineProps<{
   supplier: SupplierSelect;
 }>();
 
 const emit = defineEmits<{close: [boolean]}>();
 
-const state = reactive({
-  ...props.supplier,
+const state = reactive<SupplierUpdate>({
+  name: props.supplier.name,
+  email: props.supplier.email,
+  phoneNumber: props.supplier.phoneNumber,
 });
 
 const submit = async (payload: FormSubmitEvent<SupplierUpdate>) => {
   try {
-    await $fetch('/api/suppliers', {
+    await $fetch(`/api/suppliers/${props.supplier.id}`, {
       method: 'PATCH',
       body: payload.data,
     });

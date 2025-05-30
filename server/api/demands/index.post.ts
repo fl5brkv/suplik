@@ -17,10 +17,21 @@ export default eventHandler(async (event) => {
     .returning({id: tables.clients.id})
     .get();
 
+  const insertedCase = await useDrizzle()
+    .insert(tables.cases)
+    .values({
+      clientId: insertedClient.id,
+      code: nanoid(),
+    })
+    .returning({
+      id: tables.cases.id,
+    })
+    .get();
+
   const insertedDemand = await useDrizzle()
     .insert(tables.demands)
     .values({
-      clientId: insertedClient.id,
+      caseId: insertedCase.id,
       additionalInfo: result.data.additionalInfo,
     })
     .returning({id: tables.demands.id})

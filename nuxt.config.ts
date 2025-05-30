@@ -1,4 +1,3 @@
-import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 
 export default defineNuxtConfig({
@@ -10,10 +9,6 @@ export default defineNuxtConfig({
   ],
 
   css: ['~/assets/css/main.css'],
-
-  vite: {
-    plugins: [tailwindcss()],
-  },
 
   hub: {
     database: true,
@@ -51,6 +46,11 @@ export default defineNuxtConfig({
     public: {
       baseURL: process.env.NUXT_PUBLIC_BASE_URL || 'http://localhost:3000',
     },
+    mailerHost: import.meta.env.NUXT_MAILER_HOST,
+    mailerPort: import.meta.env.NUXT_MAILER_PORT,
+    mailerUsername: import.meta.env.NUXT_MAILER_USERNAME,
+    mailerPassword: import.meta.env.NUXT_MAILER_PASSWORD,
+    mailerAuthType: import.meta.env.NUXT_MAILER_AUTHTYPE,
   },
 
   compatibilityDate: '2024-11-01',

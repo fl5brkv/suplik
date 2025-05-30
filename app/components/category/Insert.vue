@@ -3,7 +3,7 @@
     v-model:open="open"
     title="Create a category"
     :ui="{footer: 'justify-end'}">
-    <UButton label="New category" color="neutral" variant="subtle" />
+    <UButton label="New category" />
 
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">

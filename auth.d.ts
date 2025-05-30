@@ -3,7 +3,9 @@ declare module '#auth-utils' {
   interface User {
     id: number;
     email: string;
-    role: string;
+    technician: {
+      id: number;
+    } | null;
   }
 
   interface UserSession {

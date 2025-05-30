@@ -45,17 +45,9 @@ const open = ref(false);
 const links = [
   [
     {
-      label: 'Clients',
-      icon: 'lucide:users',
-      to: '/clients',
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
       label: 'Demands',
       icon: 'lucide:hand-helping',
-      to: '/demands',
+      to: '/admin/demands',
       onSelect: () => {
         open.value = false;
       },
@@ -63,7 +55,7 @@ const links = [
     {
       label: 'Quotes',
       icon: 'lucide:file-digit',
-      to: '/quotes',
+      to: '/admin/quotes',
       onSelect: () => {
         open.value = false;
       },
@@ -71,7 +63,7 @@ const links = [
     {
       label: 'Offers',
       icon: 'lucide:file-code-2',
-      to: '/offers',
+      to: '/admin/offers',
       onSelect: () => {
         open.value = false;
       },
@@ -79,7 +71,7 @@ const links = [
     {
       label: 'Jobs',
       icon: 'lucide:hammer',
-      to: '/jobs',
+      to: '/admin/jobs',
       onSelect: () => {
         open.value = false;
       },
@@ -90,7 +82,7 @@ const links = [
       children: [
         {
           label: 'Products',
-          to: '/products',
+          to: '/admin/products',
           icon: 'lucide:boxes',
           onSelect: () => {
             open.value = false;
@@ -98,7 +90,7 @@ const links = [
         },
         {
           label: 'Suppliers',
-          to: '/suppliers',
+          to: '/admin/suppliers',
           icon: 'lucide:file-user',
           onSelect: () => {
             open.value = false;
@@ -106,7 +98,7 @@ const links = [
         },
         {
           label: 'Orders',
-          to: '/orders',
+          to: '/admin/orders',
           icon: 'lucide:ship',
           onSelect: () => {
             open.value = false;
@@ -114,7 +106,7 @@ const links = [
         },
         {
           label: 'Complaints',
-          to: '/complaints',
+          to: '/admin/complaints',
           icon: 'lucide:package-x',
           onSelect: () => {
             open.value = false;
@@ -122,7 +114,7 @@ const links = [
         },
         {
           label: 'Services',
-          to: '/services',
+          to: '/admin/services',
           icon: 'lucide:life-buoy',
           onSelect: () => {
             open.value = false;
@@ -130,43 +122,22 @@ const links = [
         },
       ],
     },
-    // {
-    //   label: 'Settings',
-    //   to: '/settings',
-    //   icon: 'i-lucide-settings',
-    //   defaultOpen: true,
-    //   children: [
-    //     {
-    //       label: 'General',
-    //       to: '/settings',
-    //       exact: true,
-    //       onSelect: () => {
-    //         open.value = false;
-    //       },
-    //     },
-    //     {
-    //       label: 'Members',
-    //       to: '/settings/members',
-    //       onSelect: () => {
-    //         open.value = false;
-    //       },
-    //     },
-    //     {
-    //       label: 'Notifications',
-    //       to: '/settings/notifications',
-    //       onSelect: () => {
-    //         open.value = false;
-    //       },
-    //     },
-    //     {
-    //       label: 'Security',
-    //       to: '/settings/security',
-    //       onSelect: () => {
-    //         open.value = false;
-    //       },
-    //     },
-    //   ],
-    // },
+    {
+      label: 'Clients',
+      icon: 'lucide:user',
+      to: '/admin/clients',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: 'Technicians',
+      icon: 'lucide:user-cog',
+      to: '/admin/technicians',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
   ],
   [
     {

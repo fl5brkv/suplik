@@ -3,7 +3,7 @@
     v-model:open="open"
     title="New service"
     :ui="{footer: 'justify-end'}">
-    <UButton label="New service" color="neutral" variant="subtle" />
+    <UButton label="New service" />
 
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">

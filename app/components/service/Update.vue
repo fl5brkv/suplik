@@ -1,7 +1,5 @@
 <template>
   <UModal title="New service" :ui="{footer: 'justify-end'}">
-    <UButton label="New service" color="neutral" variant="subtle" />
-
     <template #body>
       <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
         <USelect
@@ -50,13 +48,15 @@ const {data, status} = await useFetch('/api/categories', {
   lazy: true,
 });
 
-const state = reactive({
-  ...props.service,
+const state = reactive<ServiceUpdate>({
+  categoryId: props.service.categoryId,
+  name: props.service.name,
+  isPublic: props.service.isPublic,
 });
 
 const submit = async (payload: FormSubmitEvent<ServiceUpdate>) => {
   try {
-    await $fetch('/api/services', {
+    await $fetch(`/api/services/${props.service.id}`, {
       method: 'PATCH',
       body: payload.data,
     });

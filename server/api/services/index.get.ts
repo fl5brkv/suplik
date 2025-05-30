@@ -1,8 +1,7 @@
 export default eventHandler(async (event) => {
-  // const { role } = await getUserSession(event);
-  const role = 'admin';
+  const {user} = await getUserSession(event);
 
-  if (role === 'admin') {
+  if (!user?.technician) {
     await requireAdminSession(event);
 
     const selected = await useDrizzle().query.services.findMany({
@@ -24,6 +23,7 @@ export default eventHandler(async (event) => {
     return selected;
   } else {
     const selected = await useDrizzle().query.services.findMany({
+      where: (services, {eq}) => eq(tables.services.isPublic, true),
       columns: {
         id: true,
         categoryId: true,

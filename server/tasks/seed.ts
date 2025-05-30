@@ -8,18 +8,55 @@ export default defineTask({
 
     const users = [
       {
-        email: 'admin@example.com',
-        password: 'hashedpassword1',
-        role: 'admin' as const,
+        email: 'adm@adm.sk',
+        password:
+          '$scrypt$n=16384,r=8,p=1$CLxQA1X18Wj9peLV9LO2VA$eHz5uWSC1p/UvL6aBAVtJ+fUHe0ckTf22N7O5U4Cm7PjCKy6vFR5qNeV1lXVuv8nm095HJneo1AY3nqYfW4xyA',
       },
       {
-        email: 'tech@example.com',
+        email: 'tech2@example.com',
         password: 'hashedpassword2',
-        role: 'technician' as const,
+      },
+      {
+        email: 'tech3@example.com',
+        password: 'hashedpassword2',
+      },
+      {
+        email: 'tech4@example.com',
+        password: 'hashedpassword2',
+      },
+      {
+        email: 'tech@tech.sk',
+        password:
+          '$scrypt$n=16384,r=8,p=1$CLxQA1X18Wj9peLV9LO2VA$eHz5uWSC1p/UvL6aBAVtJ+fUHe0ckTf22N7O5U4Cm7PjCKy6vFR5qNeV1lXVuv8nm095HJneo1AY3nqYfW4xyA',
       },
     ];
 
     await useDrizzle().insert(tables.users).values(users);
+
+    const technicians = [
+      {
+        userId: 2,
+        firstName: 'Michael',
+        lastName: 'Reynolds',
+      },
+      {
+        userId: 3,
+        firstName: 'Peter',
+        lastName: 'Doe',
+      },
+      {
+        userId: 4,
+        firstName: 'Daniel',
+        lastName: 'Parkson',
+      },
+      {
+        userId: 5,
+        firstName: 'James',
+        lastName: 'Bennett',
+      },
+    ];
+
+    await useDrizzle().insert(tables.technicians).values(technicians);
 
     const clients = [
       {
@@ -144,24 +181,49 @@ export default defineTask({
 
     await useDrizzle().insert(tables.services).values(services);
 
-    const demands = [
+    const cases = [
       {
         clientId: 1,
+        code: 'K4J8M2QX',
+      },
+      {
+        clientId: 3,
+        code: 'RXV81D7B',
+      },
+      {
+        clientId: 5,
+        code: 'A9S3QPLZ',
+      },
+      {
+        clientId: 2,
+        code: 'M7N2L8KW',
+      },
+      {
+        clientId: 2,
+        code: 'X3ND7RVT',
+      },
+    ];
+
+    await useDrizzle().insert(tables.cases).values(cases);
+
+    const demands = [
+      {
+        caseId: 1,
         status: 'new' as const,
         additionalInfo: 'Please process ASAP.',
       },
       {
-        clientId: 3,
+        caseId: 3,
         status: 'quoted' as const,
         additionalInfo: 'Let us know if this fits your needs.',
       },
       {
-        clientId: 5,
+        caseId: 5,
         status: 'declined' as const,
         additionalInfo: 'Just a new demand additional info.',
       },
       {
-        clientId: 2,
+        caseId: 2,
         status: 'quoted' as const,
         additionalInfo: 'Still confirming budget.',
       },
@@ -188,34 +250,28 @@ export default defineTask({
 
     const quotes = [
       {
-        demandId: 1,
+        caseId: 2,
         status: 'accepted' as const,
         additionalInfo: 'Sending you quote',
         version: 1,
       },
       {
-        demandId: 2,
+        caseId: 1,
         status: 'sent' as const,
         additionalInfo: 'Sent for review. Expiry date in 5 days.',
         version: 1,
       },
       {
-        demandId: 4,
+        caseId: 4,
         status: 'sent' as const,
         additionalInfo: 'This is the 1st version of our quote',
         version: 1,
       },
       {
-        demandId: 4,
+        caseId: 3,
         status: 'declined' as const,
         additionalInfo: 'I dont like the price.',
         version: 2,
-      },
-      {
-        demandId: 4,
-        status: 'sent' as const,
-        additionalInfo: 'This is the new price for your quote.',
-        version: 3,
       },
     ];
 
@@ -240,18 +296,18 @@ export default defineTask({
     await useDrizzle().insert(tables.quoteServices).values(quoteServices);
 
     const offers = [
-      {demandId: 1, additionalInfo: 'Install next week'},
-      {demandId: 3, additionalInfo: 'This is additional info'},
-      {demandId: 4, additionalInfo: 'This is offer from us'},
+      {caseId: 1, additionalInfo: 'Install next week'},
+      {caseId: 3, additionalInfo: 'This is additional info'},
+      {caseId: 4, additionalInfo: 'This is offer from us'},
     ];
 
     await useDrizzle().insert(tables.offers).values(offers);
 
     const offerServices = [
-      {offerId: 1, serviceId: 1, quantity: 10},
-      {offerId: 2, serviceId: 2, quantity: 2},
-      {offerId: 2, serviceId: 3, quantity: 1},
-      {offerId: 3, serviceId: 2, quantity: 1},
+      {offerId: 1, serviceId: 1, technicianId: 2, quantity: 10},
+      {offerId: 2, serviceId: 2, technicianId: 1, quantity: 2},
+      {offerId: 2, serviceId: 3, technicianId: 3, quantity: 1},
+      {offerId: 3, serviceId: 2, technicianId: 2, quantity: 1},
     ];
 
     await useDrizzle().insert(tables.offerServices).values(offerServices);
@@ -265,16 +321,16 @@ export default defineTask({
     await useDrizzle().insert(tables.offerProducts).values(offerProducts);
 
     const jobs = [
-      {demandId: 1, additionalInfo: 'Install next week'},
-      {demandId: 3, additionalInfo: 'This is additional info'},
+      {caseId: 1, additionalInfo: 'Install next week'},
+      {caseId: 3, additionalInfo: 'This is additional info'},
     ];
 
     await useDrizzle().insert(tables.jobs).values(jobs);
 
     const jobServices = [
-      {jobId: 1, serviceId: 1, quantity: 10},
-      {jobId: 2, serviceId: 2, quantity: 2},
-      {jobId: 2, serviceId: 3, quantity: 1},
+      {jobId: 1, serviceId: 1, technicianId: 1, quantity: 10},
+      {jobId: 2, serviceId: 2, technicianId: 3, quantity: 2},
+      {jobId: 2, serviceId: 3, technicianId: 2, quantity: 1},
     ];
 
     await useDrizzle().insert(tables.jobServices).values(jobServices);

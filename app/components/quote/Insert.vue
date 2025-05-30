@@ -1,140 +1,267 @@
 <template>
-  <UModal
-    title="Provide a Quote"
-    description="This is a description."
-    :ui="{footer: 'justify-end'}">
+  <UModal title="Provide a Quote" v-model:open="open">
+    <UButton label="New quote" />
+
     <template #body>
-      <UForm :state="state" class="flex flex-col gap-4" @submit="submit">
-        <UFormField
-          label="Additional Info"
-          name="additionalInfo"
-          :help="props.demand.additionalInfo ?? undefined">
-          <UInput v-model="state.additionalInfo" />
-        </UFormField>
-        <UFormField
-          label="Client"
-          name="client"
-          :help="`${props.demand.client.firstName} ${props.demand.client.lastName} `">
-          <UInput v-model="state.client.email" />
-        </UFormField>
+      <UStepper disabled ref="stepper" :items="items" class="w-full">
+        <template #case>
+          <div class="flex flex-col items-center gap-4 mt-8">
+            <UButton
+              label="Paste ID"
+              @click="pasteCode"
+              color="primary"
+              block
+              size="lg" />
+            <USeparator label="or" />
+            <UButton
+              label="New case (coming soon)"
+              @click="stepper?.next()"
+              color="neutral"
+              variant="outline"
+              block
+              disabled
+              size="lg" />
+          </div>
+        </template>
 
-        <div class="flex items-center justify-between">
-          <span class="font-medium">Products</span>
-          <UButton
-            size="xs"
-            @click="addProduct"
-            color="primary"
-            variant="subtle"
-            >Add Product</UButton
-          >
-        </div>
+        <template #client>
+          <div class="mt-8">
+            <div v-if="data" class="grid grid-cols-2 gap-4">
+              <UFormField label="First Name">
+                <UInput :model-value="data.client.firstName" disabled />
+              </UFormField>
+              <UFormField label="Last Name">
+                <UInput :model-value="data.client.lastName" disabled />
+              </UFormField>
 
-        <div
-          v-for="(quoteProduct, idx) in state.quoteProducts"
-          :key="idx"
-          class="flex gap-2 items-end mt-2">
-          <UFormField
-            :label="idx === 0 ? 'Product' : undefined"
-            :name="`demandProducts.${idx}.productId`"
-            required>
-            <USelect
-              v-model="quoteProduct.productId"
-              :items="productOptions"
-              :loading="productStatus === 'pending'"
-              placeholder="Select product" />
-          </UFormField>
-          <UFormField
-            :label="idx === 0 ? 'Quantity' : undefined"
-            :name="`demandProducts.${idx}.quantity`"
-            required>
-            <UInputNumber v-model="quoteProduct.quantity" :min="1" />
-          </UFormField>
+              <UFormField label="Email">
+                <UInput :model-value="data.client.email" disabled />
+              </UFormField>
+              <UFormField label="Company">
+                <UInput :model-value="data.client.company" disabled />
+              </UFormField>
+            </div>
 
-          <UButton
-            label="Remove"
-            size="xs"
-            color="error"
-            variant="ghost"
-            @click="removeProduct(idx)" />
-        </div>
+            <div class="flex justify-between mt-6">
+              <UButton
+                label="Cancel"
+                color="error"
+                variant="outline"
+                icon="lucide:x"
+                @click="open = false" />
 
-        <div class="flex items-center justify-between mt-6">
-          <span class="font-medium">Services</span>
-          <UButton
-            size="xs"
-            @click="addService"
-            color="primary"
-            variant="subtle"
-            >Add Service</UButton
-          >
-        </div>
+              <UButton
+                label="Confirm"
+                trailing-icon="i-lucide-arrow-right"
+                @click="stepper?.next()" />
+            </div>
+          </div>
+        </template>
 
-        <div
-          v-for="(quoteService, idx) in state.quoteServices"
-          :key="idx"
-          class="flex gap-2 items-end">
-          <UFormField
-            :label="idx === 0 ? 'Service' : undefined"
-            :name="`demandServices.${idx}.serviceId`"
-            required>
-            <USelect
-              v-model="quoteService.serviceId"
-              :items="serviceData"
-              :loading="serviceStatus === 'pending'"
-              placeholder="Select service" />
-          </UFormField>
-          <UFormField
-            :label="idx === 0 ? 'Quantity' : undefined"
-            :name="`demandServices.${idx}.quantity`"
-            required>
-            <UInputNumber v-model="quoteService.quantity" :min="1" />
-          </UFormField>
+        <template #quote>
+          <div class="mt-8">
+            <UForm :state="state" class="flex flex-col gap-5" @submit="submit">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-semibold text-lg text-gray-800"
+                    >Products</span
+                  >
+                  <UButton
+                    label="Add Product"
+                    icon="i-lucide-plus"
+                    color="primary"
+                    @click="addProduct"
+                    size="sm" />
+                </div>
+                <div class="space-y-4">
+                  <div
+                    v-for="(quoteProduct, idx) in state.quoteProducts"
+                    :key="idx"
+                    class="flex gap-4 p-4 bg-gray-50 rounded-lg shadow border border-gray-200 w-full mt-3">
+                    <UFormField
+                      :label="idx === 0 ? 'Product' : undefined"
+                      :name="`demandProducts.${idx}.productId`"
+                      required
+                      class="flex-1">
+                      <USelectMenu
+                        v-model="quoteProduct.productId"
+                        :items="productData"
+                        :loading="productStatus === 'pending'"
+                        placeholder="Select product"
+                        value-key="value"
+                        class="w-full" />
+                    </UFormField>
+                    <UFormField
+                      :label="idx === 0 ? 'Quantity' : undefined"
+                      :name="`demandProducts.${idx}.quantity`"
+                      required
+                      class="w-32">
+                      <UInputNumber
+                        v-model="quoteProduct.quantity"
+                        :min="1"
+                        class="w-full" />
+                    </UFormField>
+                    <UButton
+                      icon="i-lucide-trash"
+                      size="xs"
+                      color="error"
+                      variant="ghost"
+                      @click="removeProduct(idx)"
+                      class="ml-2 self-center"
+                      aria-label="Remove product" />
+                  </div>
+                </div>
+              </div>
 
-          <UButton
-            label="Remove"
-            size="xs"
-            color="error"
-            variant="ghost"
-            @click="removeService(idx)" />
-        </div>
-
-        <UButton label="Submit" color="neutral" type="submit" class="mt-2" />
-      </UForm>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-semibold text-lg text-gray-800"
+                    >Services</span
+                  >
+                  <UButton
+                    label="Add Service"
+                    icon="i-lucide-plus"
+                    color="primary"
+                    @click="addService"
+                    size="sm" />
+                </div>
+                <div class="space-y-4">
+                  <div
+                    v-for="(quoteService, idx) in state.quoteServices"
+                    :key="idx"
+                    class="flex gap-4 p-4 bg-gray-50 rounded-lg shadow border border-gray-200 w-full mt-3">
+                    <UFormField
+                      :label="idx === 0 ? 'Service' : undefined"
+                      :name="`demandServices.${idx}.productId`"
+                      required
+                      class="flex-1">
+                      <USelectMenu
+                        v-model="quoteService.serviceId"
+                        :items="serviceData"
+                        :loading="serviceStatus === 'pending'"
+                        placeholder="Select service"
+                        value-key="value"
+                        class="w-full" />
+                    </UFormField>
+                    <UFormField
+                      :label="idx === 0 ? 'Quantity' : undefined"
+                      :name="`demandServices.${idx}.quantity`"
+                      required
+                      class="w-32">
+                      <UInputNumber
+                        v-model="quoteService.quantity"
+                        :min="1"
+                        class="w-full" />
+                    </UFormField>
+                    <UButton
+                      icon="i-lucide-trash"
+                      size="xs"
+                      color="error"
+                      variant="ghost"
+                      @click="removeService(idx)"
+                      class="ml-2 self-center"
+                      aria-label="Remove service" />
+                  </div>
+                </div>
+              </div>
+              <UFormField
+                label="Additional Info"
+                name="additionalInfo"
+                class="mt-2">
+                <UInput v-model="state.additionalInfo" />
+              </UFormField>
+              <div class="flex justify-between mt-8">
+                <UButton
+                  label="Cancel"
+                  color="error"
+                  variant="outline"
+                  icon="lucide:x"
+                  @click="open = false" />
+                <UButton
+                  label="Send quote"
+                  trailing-icon="i-lucide-arrow-right"
+                  type="submit" />
+              </div>
+            </UForm>
+          </div>
+        </template>
+      </UStepper>
     </template>
   </UModal>
 </template>
 
 <script setup lang="ts">
 import type {NuxtError} from '#app';
-import type {FormSubmitEvent} from '@nuxt/ui';
-import {
-  type DemandSelect,
-  type ProductSelect,
-  type QuoteInsert,
-} from '~~/server/database/schema';
+import type {FormSubmitEvent, StepperItem} from '@nuxt/ui';
+import type {QuoteInsert} from '~~/server/database/schema';
+
+const stepper = useTemplateRef('stepper');
+
+const open = ref(false);
 
 const toast = useToast();
 
-const props = defineProps<{
-  demand: DemandSelect;
-}>();
+const items = [
+  {
+    slot: 'case' as const,
+    title: 'Case',
+    description: 'Create a new case or paste ID',
+  },
+  {
+    slot: 'client' as const,
+    title: 'Client',
+    description: 'Select or confirm client information',
+  },
+  {
+    slot: 'quote' as const,
+    title: 'Quote',
+    description: 'Fill in the quote details',
+  },
+] satisfies StepperItem[];
 
-const emit = defineEmits<{close: [boolean]}>();
+const clipboardText = ref('');
 
-const {data: productData, status: productStatus} = await useFetch<
-  ProductSelect[]
->('/api/products', {
-  key: 'products',
-  method: 'get',
-  lazy: true,
-});
-
-const productOptions = computed(() =>
-  productData.value?.map((product) => ({
-    label: product.name,
-    value: product.id,
-  }))
+const {data, execute} = await useFetch(
+  () => `/api/cases/${clipboardText.value}/client`,
+  {
+    key: 'cases',
+    method: 'get',
+    immediate: false,
+    lazy: true,
+  }
 );
+
+const pasteCode = async () => {
+  const text = await navigator.clipboard.readText();
+  if (text.length === 8) {
+    clipboardText.value = text;
+    await execute();
+    stepper.value?.next();
+  } else {
+    toast.add({
+      title: 'Invalid Code',
+      description: 'Clipboard does not contain a valid 8-character code.',
+      color: 'error',
+      icon: 'i-lucide-alert-triangle',
+    });
+  }
+};
+
+const {data: productData, status: productStatus} = await useFetch(
+  '/api/products',
+  {
+    key: 'products',
+    method: 'get',
+    lazy: true,
+    transform: (data) =>
+      data?.map((product) => ({
+        label: product.name,
+        value: product.id,
+        available: product.stock - product.reserved,
+      })),
+  }
+);
+
 const {data: serviceData, status: serviceStatus} = useFetch('/api/services', {
   key: 'services',
   method: 'get',
@@ -146,67 +273,55 @@ const {data: serviceData, status: serviceStatus} = useFetch('/api/services', {
     })),
 });
 
-const state = reactive({
-  demandId: props.demand.id,
+const state = reactive<QuoteInsert>({
   additionalInfo: '',
-  client: {
-    email: props.demand.client.email,
-  },
-  quoteProducts: props.demand.demandProducts.map((demandProduct) => ({
-    productId: demandProduct.productId,
-    quantity: demandProduct.quantity,
-  })),
-  quoteServices: props.demand.demandServices.map((demandService) => ({
-    serviceId: demandService.serviceId,
-    quantity: demandService.quantity,
-  })),
+  quoteProducts: [],
+  quoteServices: [],
 });
 
-function addProduct() {
-  state.quoteProducts?.push({
-    // @ts-ignore
-    productId: null,
-    quantity: 1,
-  });
-}
+const addProduct = () => {
+  if (!state.quoteProducts) state.quoteProducts = [];
+  state.quoteProducts.push({productId: 0, quantity: 1});
+};
 
-function removeProduct(idx: number) {
-  state.quoteProducts?.splice(idx, 1);
-}
+const removeProduct = (idx: number) => {
+  if (!state.quoteProducts) state.quoteProducts = [];
+  state.quoteProducts.splice(idx, 1);
+};
 
-function addService() {
-  state.quoteServices?.push({
-    // @ts-ignore
-    serviceId: null, //
-    quantity: 1,
-  });
-}
+const addService = () => {
+  if (!state.quoteServices) state.quoteServices = [];
+  state.quoteServices.push({serviceId: 0, quantity: 1});
+};
 
-function removeService(idx: number) {
-  state.quoteServices?.splice(idx, 1);
-}
+const removeService = (idx: number) => {
+  if (!state.quoteServices) state.quoteServices = [];
+  state.quoteServices.splice(idx, 1);
+};
 
 const submit = async (payload: FormSubmitEvent<QuoteInsert>) => {
-  for (const quoteProduct of state.quoteProducts) {
-    const product = productData.value?.find(
-      (p) => p.id === quoteProduct.productId
-    );
+  if (state.quoteProducts && productData.value) {
+    for (const quoteProduct of state.quoteProducts) {
+      const product = productData.value.find(
+        (p) => p.value === quoteProduct.productId
+      );
 
-    if (product) {
-      const availableStock = product.stock - product.reserved;
-
-      if (quoteProduct.quantity > availableStock) {
+      if (!product || quoteProduct.quantity > product?.available) {
         toast.add({
           title: 'Insufficient Stock',
-          description: `Requested quantity (${quoteProduct.quantity}) exceeds available stock (${availableStock}) for product "${product.name}".`,
+          description: `Requested quantity (${
+            quoteProduct.quantity
+          }) exceeds available stock (${product?.available}) for product "${
+            product?.label ?? 'Unknown'
+          }".`,
           color: 'error',
           actions: [
             {
               label: 'View Items',
               icon: 'i-lucide-box',
               onClick: () => {
-                emit('close', true);
-                navigateTo('/items');
+                open.value = false;
+                navigateTo('/admin/products');
               },
             },
           ],
@@ -217,12 +332,12 @@ const submit = async (payload: FormSubmitEvent<QuoteInsert>) => {
   }
 
   try {
-    await $fetch('/api/quotes', {
+    await $fetch(`/api/quotes/${data.value?.id}`, {
       method: 'POST',
       body: payload.data,
     });
 
-    emit('close', true);
+    open.value = false;
   } catch (err) {
     const error = err as NuxtError;
 

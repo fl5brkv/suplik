@@ -11,33 +11,32 @@
     "db:generate": "drizzle-kit generate"
   },
   "dependencies": {
-    "@internationalized/date": "^3.8.0",
-    "@nuxt/ui-pro": "^3.0.2",
+    "@internationalized/date": "^3.8.1",
+    "@nuxt/ui": "^3.1.2",
+    "@nuxt/ui-pro": "^3.1.2",
     "@nuxthub/core": "0.8.24",
-    "@tailwindcss/vite": "^4.1.4",
     "@tanstack/table-core": "^8.21.3",
     "@tanstack/vue-table": "^8.21.3",
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue-email/components": "^0.0.21",
     "@vue-email/render": "^0.0.9",
     "drizzle-orm": "^0.42.0",
     "drizzle-zod": "^0.7.1",
-    "nuxt": "^3.16.2",
+    "nanoid": "^5.1.5",
+    "nuxt": "^3.17.4",
     "nuxt-auth-utils": "0.5.20",
     "ohash": "^2.0.11",
-    "tailwindcss": "^4.1.4",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0",
+    "vue": "^3.5.14",
+    "vue-router": "^4.5.1",
     "worker-mailer": "^1.1.4",
-    "zod": "^3.24.3"
+    "zod": "^3.25.20"
   },
   "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677",
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.38",
-    "@nuxt/ui": "^3.0.2",
-    "drizzle-kit": "^0.31.0",
-    "nodemailer": "^7.0.2",
+    "@iconify-json/lucide": "^1.2.44",
+    "drizzle-kit": "^0.31.1",
+    "nodemailer": "^7.0.3",
     "nuxt-nodemailer": "^1.1.2",
-    "wrangler": "^4.12.0"
+    "wrangler": "^4.16.1"
   }
 }

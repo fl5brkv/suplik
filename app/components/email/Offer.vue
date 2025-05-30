@@ -10,69 +10,59 @@
         line-height: 1.5;
       ">
       <Text style="font-size: 24px; font-weight: bold; margin-bottom: 16px">
-        Offer Update
-      </Text>
-
-      <Text style="margin-bottom: 8px">
-        <span style="font-weight: 500">Client Email:</span> {{ client.email }}
+        Offer Details
       </Text>
 
       <Hr style="margin: 16px 0; border-color: #e5e7eb" />
 
       <Text style="font-size: 18px; font-weight: 600; margin-bottom: 12px">
-        Offer Details
+        Offer Items
       </Text>
 
       <ul style="margin-bottom: 24px; padding-left: 0; list-style: none">
+        <p>Services</p>
         <li
-          v-for="(serviceItem, idx) in offer.offerServices"
-          :key="idx"
+          v-for="(service, idx) in offer.offerServices"
+          :key="'service-' + idx"
           style="
-            margin-bottom: 20px;
             padding: 12px;
             background-color: #f9fafb;
             border-left: 4px solid #3b82f6;
+            margin-bottom: 12px;
             border-radius: 4px;
           ">
-          <Text style="font-size: 16px; font-weight: 600">
-            Service: {{ serviceItem.service.name }}
+          <Text style="font-size: 14px; font-weight: 500">
+            Service: {{ service.service.name }}
           </Text>
-          <Text style="font-size: 14px; margin-bottom: 8px">
-            Quantity: {{ serviceItem.quantity }}
-          </Text>
+          <Text style="font-size: 14px">Quantity: {{ service.quantity }}</Text>
 
-          <ul
-            v-if="serviceItem.offerProducts?.length"
-            style="padding-left: 0; list-style: none; margin-top: 12px">
-            <li
-              v-for="(productItem, pidx) in serviceItem.offerProducts"
-              :key="pidx"
-              style="
-                padding: 10px;
-                background-color: #f3f4f6;
-                border-left: 3px solid #10b981;
-                margin-bottom: 8px;
-                border-radius: 4px;
-              ">
-              <Text style="font-size: 14px; font-weight: 500">
-                Product: {{ productItem.product.name }}
-              </Text>
-              <Text style="font-size: 14px">
-                Quantity: {{ productItem.quantity }}
-              </Text>
-            </li>
-          </ul>
+          <div
+            v-if="service.offerProducts && service.offerProducts.length"
+            style="margin-top: 12px">
+            <p style="font-weight: 500; margin-bottom: 4px">
+              Related Products:
+            </p>
+            <ul style="padding-left: 16px; list-style: disc">
+              <li
+                v-for="(product, pIdx) in service.offerProducts"
+                :key="'product-' + idx + '-' + pIdx"
+                style="margin-bottom: 4px">
+                <Text style="font-size: 14px">
+                  Product: {{ product.product.name }} — Quantity:
+                  {{ product.quantity }}
+                </Text>
+              </li>
+            </ul>
+          </div>
         </li>
       </ul>
 
       <Hr style="margin: 16px 0; border-color: #e5e7eb" />
 
-      <Text
-        v-if="offer.additionalInfo"
-        style="font-style: italic; margin-bottom: 24px">
+      <Text style="font-style: italic; margin-bottom: 24px">
         Message from us:
         <span style="font-style: normal; font-weight: normal">
-          {{ offer.additionalInfo }}
+          {{ offer.additionalInfo || '—' }}
         </span>
       </Text>
 
@@ -131,9 +121,6 @@ import {Html, Text, Hr, Button} from '@vue-email/components';
 import type {OfferEmailSelect} from '~~/server/database/schema';
 
 defineProps<{
-  client: {
-    email: string;
-  };
   offer: OfferEmailSelect;
   response: string;
 }>();

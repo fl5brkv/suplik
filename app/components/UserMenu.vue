@@ -14,7 +14,7 @@
       color="neutral"
       variant="ghost"
       block
-      icon='lucide:user'
+      icon="lucide:user"
       :square="collapsed"
       class="data-[state=open]:bg-(--ui-bg-elevated)"
       :ui="{
@@ -32,7 +32,7 @@
 <script setup lang="ts">
 import type {DropdownMenuItem} from '@nuxt/ui';
 const {user, clear} = useUserSession();
-const toast = useToast()
+const toast = useToast();
 
 defineProps<{
   collapsed?: boolean;
@@ -45,7 +45,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       type: 'label',
       label: user.value?.email,
-      icon: 'lucide:user'
+      icon: 'lucide:user',
     },
   ],
   [
@@ -85,8 +85,9 @@ const items = computed<DropdownMenuItem[][]>(() => [
     {
       label: 'Log out',
       icon: 'lucide:log-out',
-      onSelect() {
-        clear();
+      async onSelect() {
+        await clear();
+        await navigateTo('/login');
         toast.add({
           title: 'Success',
           description: 'Succesfully logged out!',
