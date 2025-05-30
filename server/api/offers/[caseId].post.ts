@@ -167,7 +167,7 @@ export default eventHandler(async (event) => {
   });
 
   await mailer.send({
-    from: {email: 'info@stuchlik.sk'},
+    from: {email: 'info@fpvdemo.fun'},
     subject: 'New offer',
     to: selected.case.client.email,
     html,
