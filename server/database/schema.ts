@@ -1295,6 +1295,7 @@ export const jobServices = sqliteTable('job_services', {
 });
 
 export const jobServiceSelectSchema = createSelectSchema(jobServices).pick({
+  id: true,
   serviceId: true,
   status: true,
   quantity: true,
@@ -1304,6 +1305,10 @@ export const jobServiceInsertSchema = createInsertSchema(jobServices).pick({
   serviceId: true,
   quantity: true,
 });
+
+export const jobServiceUpdateSchema = createUpdateSchema(jobServices);
+
+export type JobServiceUpdate = z.infer<typeof jobServiceUpdateSchema>;
 
 export const jobServicesRelations = relations(jobServices, ({one, many}) => ({
   service: one(services, {
@@ -1363,6 +1368,7 @@ export const jobSelectSchema = createSelectSchema(jobs)
     jobServices: z.array(
       jobServiceSelectSchema
         .pick({
+          id: true,
           status: true,
           quantity: true,
         })

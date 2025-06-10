@@ -35,6 +35,7 @@ export default eventHandler(async (event) => {
         },
         jobServices: {
           columns: {
+            id: true,
             serviceId: true,
             status: true,
             quantity: true,

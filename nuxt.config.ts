@@ -31,7 +31,7 @@ export default defineNuxtConfig({
   },
 
   nodemailer: {
-    from: 'stodo@stodo.sk',
+    from: 'otvoreny@suplik.sk',
     host: 'smtp.mailtrap.io',
     port: 587,
     secure: false,
@@ -55,7 +55,7 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2024-11-01',
 
-  devtools: {enabled: false},
+  devtools: {enabled: true},
 
   future: {
     compatibilityVersion: 4,

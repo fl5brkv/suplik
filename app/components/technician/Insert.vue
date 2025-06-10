@@ -41,7 +41,7 @@
 import {
   technicianInsertSchema,
   type TechnicianInsert,
-} from '~~/server/database/schema'; // Adjust path as needed
+} from '~~/server/database/schema';
 import type {FormSubmitEvent} from '@nuxt/ui';
 import type {NuxtError} from '#app';
 
@@ -65,7 +65,15 @@ const submit = async (payload: FormSubmitEvent<TechnicianInsert>) => {
       body: payload.data,
     });
 
+    await refreshNuxtData('technicians');
+
     open.value = false;
+
+    toast.add({
+      title: 'Success',
+      description: 'The technician was inserted succesfully!',
+      color: 'success',
+    });
   } catch (err) {
     const error = err as NuxtError;
 

@@ -1,5 +1,5 @@
 <template>
-  <h1>Stodo.sk</h1>
+  <h1>Suplik</h1>
 </template>
 
 <script setup lang="ts">

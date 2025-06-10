@@ -77,6 +77,22 @@ const links = [
       },
     },
     {
+      label: 'Clients',
+      icon: 'lucide:user',
+      to: '/admin/clients',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
+      label: 'Technicians',
+      icon: 'lucide:user-cog',
+      to: '/admin/technicians',
+      onSelect: () => {
+        open.value = false;
+      },
+    },
+    {
       label: 'Items',
       icon: 'lucide:archive',
       children: [
@@ -121,22 +137,6 @@ const links = [
           },
         },
       ],
-    },
-    {
-      label: 'Clients',
-      icon: 'lucide:user',
-      to: '/admin/clients',
-      onSelect: () => {
-        open.value = false;
-      },
-    },
-    {
-      label: 'Technicians',
-      icon: 'lucide:user-cog',
-      to: '/admin/technicians',
-      onSelect: () => {
-        open.value = false;
-      },
     },
   ],
   [

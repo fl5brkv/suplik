@@ -51,6 +51,16 @@
                       {{ jobService.status }}
                     </UBadge>
                   </div>
+                  <UDropdownMenu
+                    v-if="jobService.status !== 'completed'"
+                    :items="getJobServiceActions(jobService)"
+                    :ui="{content: 'w-48'}">
+                    <UButton
+                      icon="i-lucide-ellipsis-vertical"
+                      color="neutral"
+                      variant="ghost"
+                      aria-label="Job service actions" />
+                  </UDropdownMenu>
                 </div>
               </template>
 
@@ -60,7 +70,7 @@
                 <ul class="list-disc list-inside">
                   <li v-for="(jp, j) in jobService.jobProducts" :key="j">
                     <span class="truncate">
-                      {{ jp.product.name }} (x{{ jp.quantity}})
+                      {{ jp.product.name }} (x{{ jp.quantity }})
                     </span>
                   </li>
                 </ul>
@@ -71,27 +81,21 @@
       </UTable>
 
       <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="text-sm text-(--ui-text-muted)">
-          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
-          returned.
-        </div>
-
-        <div class="flex items-center gap-1.5">
-          <UPagination
-            :default-page="
-              (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
-            "
-            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-            :total="table?.tableApi?.getFilteredRowModel().rows.length"
-            @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)" />
-        </div>
+        class="flex justify-end gap-1.5 border-t border-default pt-4 mt-auto">
+        <UPagination
+          :default-page="
+            (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+          "
+          :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+          :total="table?.tableApi?.getFilteredRowModel().rows.length"
+          @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)" />
       </div>
     </template>
   </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
+import type {NuxtError} from '#app';
 import type {DropdownMenuItem, TableColumn} from '@nuxt/ui';
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
 import {type JobSelect} from '~~/server/database/schema';
@@ -108,7 +112,7 @@ const UTooltip = resolveComponent('UTooltip');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-const {data, status} = await useFetch<JobSelect[]>('/api/jobs', {
+const {data, status, refresh} = await useFetch<JobSelect[]>('/api/jobs', {
   method: 'get',
   lazy: true,
 });
@@ -269,6 +273,38 @@ const getRowItems = (row: Row<JobSelect>): DropdownMenuItem[] => {
     },
   ];
 };
+
+const getJobServiceActions = (jobService: JobSelect['jobServices'][number]) => [
+  {
+    label: 'Mark as Completed',
+    icon: 'i-lucide-check',
+    async onSelect() {
+      try {
+        await $fetch(`/api/jobs/job-services/${jobService.id}`, {
+          method: 'PATCH',
+          body: {status: 'completed'},
+        });
+        toast.add({
+          title: 'Job service completed',
+          description: 'The job service has been marked as completed.',
+          color: 'success',
+        });
+
+        await refresh();
+      } catch (err) {
+        const error = err as NuxtError;
+
+        toast.add({
+          title: 'Error',
+          description:
+            error.statusMessage ||
+            'Oops! Something went wrong. Please try again later.',
+          color: 'error',
+        });
+      }
+    },
+  },
+];
 
 const globalFilter = ref('');
 

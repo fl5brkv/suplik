@@ -40,23 +40,14 @@
         }" />
 
       <div
-        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
-        <div class="text-sm text-(--ui-text-muted)">
-          {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }}
-          of
-          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
-          selected.
-        </div>
-
-        <div class="flex items-center gap-1.5">
-          <UPagination
-            :default-page="
-              (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
-            "
-            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-            :total="table?.tableApi?.getFilteredRowModel().rows.length"
-            @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)" />
-        </div>
+        class="flex justify-end gap-1.5 border-t border-default pt-4 mt-auto">
+        <UPagination
+          :default-page="
+            (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+          "
+          :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+          :total="table?.tableApi?.getFilteredRowModel().rows.length"
+          @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)" />
       </div>
     </template>
   </UDashboardPanel>
@@ -67,8 +58,7 @@ import type {NuxtError} from '#app';
 import {MyClientUpdate} from '#components';
 import type {TableColumn} from '@nuxt/ui';
 import {getPaginationRowModel, type Row} from '@tanstack/table-core';
-import type {z} from 'zod';
-import type {clientSelectSchema} from '~~/server/database/schema';
+import {type ClientSelect} from '~~/server/database/schema';
 
 const UButton = resolveComponent('UButton');
 const UDropdownMenu = resolveComponent('UDropdownMenu');
@@ -76,15 +66,13 @@ const UDropdownMenu = resolveComponent('UDropdownMenu');
 const toast = useToast();
 const table = useTemplateRef('table');
 
-type Client = z.infer<typeof clientSelectSchema>;
-
-const {data, status, refresh} = await useFetch<Client[]>('/api/clients', {
+const {data, status, refresh} = await useFetch<ClientSelect[]>('/api/clients', {
   key: 'clients',
   method: 'get',
   lazy: true,
 });
 
-function getRowItems(row: Row<Client>) {
+function getRowItems(row: Row<ClientSelect>) {
   return [
     {
       type: 'label',
@@ -136,7 +124,7 @@ function getRowItems(row: Row<Client>) {
   ];
 }
 
-const columns: TableColumn<Client>[] = [
+const columns: TableColumn<ClientSelect>[] = [
   {
     accessorKey: 'id',
     header: 'ID',
@@ -153,7 +141,7 @@ const columns: TableColumn<Client>[] = [
           onClick: () => {
             navigator.clipboard.writeText(id.toString());
             toast.add({
-              title: 'Product ID copied to clipboard!',
+              title: 'Client ID copied to clipboard!',
               color: 'success',
               icon: 'i-lucide-circle-check',
             });

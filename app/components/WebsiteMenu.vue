@@ -7,13 +7,13 @@
     }">
     <UButton
       v-bind="{
-        label: collapsed ? undefined : 'Stodo',
+        label: collapsed ? undefined : 'Šuplík',
         trailingIcon: collapsed ? undefined : 'i-lucide-chevrons-up-down',
       }"
       color="neutral"
       variant="ghost"
       block
-      icon="lucide:ice-cream-cone"
+      icon="fluent-emoji-flat:card-file-box"
       :square="collapsed"
       class="data-[state=open]:bg-(--ui-bg-elevated)"
       :class="[!collapsed && 'py-2']"
@@ -32,14 +32,14 @@ defineProps<{
 
 const items = ref<DropdownMenuItem[]>([
   {
-    label: 'Stodo',
-    icon: 'lucide:ice-cream-cone',
-    to: '/clients'
+    label: 'Šuplík',
+    icon: 'fluent-emoji-flat:card-file-box',
+    to: '/'
   },
   {
-    label: 'Okná Stuchlik',
-    icon: 'lucide:door-closed',
-    to: 'https://www.oknastuchlik.sk/'
+    label: 'Royal Fox',
+    icon: 'fluent-emoji-flat:fox',
+    to: 'https://www.royal-fox.cz/'
   },
 ]);
 </script>

@@ -335,6 +335,14 @@ const submit = async (payload: FormSubmitEvent<QuoteInsert>) => {
       body: payload.data,
     });
 
+    toast.add({
+      title: 'Success',
+      description: 'The quote was inserted succesfully!',
+      color: 'success',
+    });
+
+    await refreshNuxtData('quotes');
+
     open.value = false;
   } catch (err) {
     const error = err as NuxtError;

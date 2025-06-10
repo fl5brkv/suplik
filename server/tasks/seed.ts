@@ -305,7 +305,7 @@ export default defineTask({
 
     const offerServices = [
       {offerId: 1, serviceId: 1, technicianId: 2, quantity: 10},
-      {offerId: 2, serviceId: 2, technicianId: 1, quantity: 2},
+      {offerId: 2, serviceId: 2, technicianId: 4, quantity: 2},
       {offerId: 2, serviceId: 3, technicianId: 3, quantity: 1},
       {offerId: 3, serviceId: 2, technicianId: 2, quantity: 1},
     ];
@@ -329,7 +329,7 @@ export default defineTask({
 
     const jobServices = [
       {jobId: 1, serviceId: 1, technicianId: 1, quantity: 10},
-      {jobId: 2, serviceId: 2, technicianId: 3, quantity: 2},
+      {jobId: 2, serviceId: 2, technicianId: 4, quantity: 2},
       {jobId: 2, serviceId: 3, technicianId: 2, quantity: 1},
     ];
 

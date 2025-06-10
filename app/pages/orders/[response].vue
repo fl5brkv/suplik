@@ -47,7 +47,7 @@ const route = useRoute();
 
 const toast = useToast();
 
-const {data} = await useFetch(`/api/orders/${route.params.response}`);
+const {data} = await useFetch(`/api/orders/response/${route.params.response}`);
 
 const state = reactive({
   status: '' as 'accepted' | 'declined',
@@ -64,7 +64,7 @@ const buttonStatus = async (status: 'accepted' | 'declined') => {
 
 const submit = async (payload: FormSubmitEvent<OrderResponseUpdate>) => {
   try {
-    await $fetch(`/api/orders/${route.params.response}`, {
+    await $fetch(`/api/orders/response/${route.params.response}`, {
       method: 'PATCH',
       body: payload.data,
     });

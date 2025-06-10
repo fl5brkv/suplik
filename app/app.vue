@@ -21,8 +21,8 @@ useHead({
   },
 });
 
-const title = 'Stodo';
-const description = 'Stodo is a CRM system';
+const title = 'Šuplík';
+const description = 'Šuplík je CRM-ko.';
 
 useSeoMeta({
   title,
