@@ -76,7 +76,7 @@ export default eventHandler(async (event) => {
       product: {
         name: selected.name,
       },
-      response: `https://stodo.nuxt.dev/orders/${encodeURIComponent(
+      response: `https://suplik.nuxt.dev/orders/${encodeURIComponent(
         btoa(`${inserted.id}:${token}`)
       )}`,
     },

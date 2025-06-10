@@ -164,7 +164,7 @@ export default eventHandler(async (event) => {
     MyEmailQuote,
     {
       quote: selected,
-      response: `https://stodo.nuxt.dev/quotes/${encodeURIComponent(
+      response: `https://suplik.nuxt.dev/quotes/${encodeURIComponent(
         btoa(`${insertedQuote.id}:${token}:${expiresAt}`)
       )}`,
     },

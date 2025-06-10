@@ -151,7 +151,7 @@ export default eventHandler(async (event) => {
     MyEmailOffer,
     {
       offer: selected,
-      response: `https://stodo.nuxt.dev/offers/${encodeURIComponent(
+      response: `https://suplik.nuxt.dev/offers/${encodeURIComponent(
         btoa(`${insertedOffer.id}:${token}:${expiresAt}`)
       )}`,
     },
